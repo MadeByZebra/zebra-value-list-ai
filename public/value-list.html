@@ -5288,5 +5288,202 @@ console.log('Scanner V10 strict smart OCR loaded.');
 </script>
 <!-- ===== END REAL AI + GEMINI VISION OVERRIDE PATCH v8 ===== -->
 
+
+
+<!-- ===== HARD FIX v9: real AI scan only, no text-scan fallback ===== -->
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function gloves(){try{return Array.isArray(GLOVES)?GLOVES:[]}catch(e){return []}}
+  function getOwnedSet(){try{if(typeof owned!=='undefined'&&owned)return owned}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-owned')||'[]'))}catch(e){return new Set()}}
+  function writeOwnedSet(set){try{if(typeof owned!=='undefined'&&owned){owned.clear(); set.forEach(x=>owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){} try{localStorage.setItem('mbz-owned',JSON.stringify([...set]));}catch(e){} try{if(typeof updateInventoryStat==='function')updateInventoryStat();}catch(e){}}
+  function findName(n){n=String(n||'').trim().toLowerCase(); if(!n)return null; const all=gloves(); return all.find(g=>g.n.toLowerCase()===n)||null}
+  function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result)); r.onerror=rej; r.readAsDataURL(file)})}
+  window.invPreview=function(e){
+    const files=e&&e.target&&e.target.files?Array.from(e.target.files):[];
+    const img=$('inv-preview'); if(img&&files[0]){img.src=URL.createObjectURL(files[0]); img.style.display='block'}
+    const p=$('inv-progress'); if(p)p.textContent=files.length+' picture(s) loaded. Click AI Scan Picture.';
+    const out=$('inv-results'); if(out)out.innerHTML='<div class="ai-answer"><strong>Picture loaded.</strong><br>Now click <strong>AI Scan Picture</strong>. Do not use Scan Pasted Text for images.</div>';
+  };
+  window.aiScanConfirm=function(encoded){
+    const name=decodeURIComponent(encoded); const g=findName(name); if(!g)return;
+    const set=getOwnedSet(); set.add(g.n); writeOwnedSet(set);
+    const p=$('inv-progress'); if(p)p.textContent='Added '+g.n+' to owned.';
+  };
+  function renderScan(data){
+    const conf=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).filter(Boolean);
+    const poss=(data.possible||data.review||[]).filter(Boolean);
+    const cards=conf.map(n=>{const g=findName(n);return '<div class="inv-missing-row"><span class="inv-missing-name">'+esc(g?g.n:n)+'</span>'+(g?'<span class="cpill cls-'+esc(g.cls)+'">'+esc(g.cls)+'</span><span class="td-val" style="font-size:11px">'+esc(g.vs||g.v)+'</span>':'')+'<span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>'}).join('');
+    const rows=poss.map(p=>{const text=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const cands=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(c=>typeof c==='string'?c:(c.name||c.glove||'')).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(text)+'</div><div>'+(cands.length?cands.map(c=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(c)+'\')">✓ '+esc(c)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div><span style="color:#fcd34d;font-family:DM Mono,monospace;font-size:10px">REVIEW</span></div></div>'}).join('');
+    return '<div class="ai-answer"><strong>AI picture scan complete.</strong><br>This used <strong>/api/scan</strong>, not the old text OCR scanner.<div class="inv-counts"><span class="inv-count-pill" style="color:#86efac">Confirmed saved: '+conf.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs review: '+poss.length+'</span></div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3><div class="inv-missing-list">'+(cards||'<div class="wl-empty">No confirmed gloves. Try a closer screenshot where the names under icons are readable.</div>')+'</div><h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review only if true</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(data,null,2))+'</pre></details></div>'
+  }
+  window.scanInventoryImage=async function(){
+    const input=$('inv-img'), files=input&&input.files?Array.from(input.files):[], out=$('inv-results'), p=$('inv-progress');
+    if(!files.length){if(p)p.textContent='Upload an inventory picture first.'; return}
+    if(p)p.textContent='AI scanning picture through /api/scan...';
+    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning picture...</strong><br>Using backend <strong>/api/scan</strong>. This will not run the old text scanner.</div>';
+    try{
+      const images=[]; for(const f of files.slice(0,4)) images.push(await fileToDataURL(f));
+      const payload={images,gloveNames:gloves().map(g=>g.n)};
+      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const data=await res.json().catch(()=>({error:'The /api/scan route did not return JSON.'}));
+      if(!res.ok) throw new Error(JSON.stringify(data.error||data));
+      const replace=!$('inv-add-mode') || !$('inv-add-mode').checked;
+      const set=replace?new Set():getOwnedSet();
+      (data.confirmed||[]).forEach(n=>{const g=findName(typeof n==='string'?n:(n.name||n.glove||'')); if(g)set.add(g.n)});
+      writeOwnedSet(set);
+      const ta=$('inv-ocr-text'); if(ta)ta.value='AI picture scan result:\n'+JSON.stringify(data,null,2);
+      if(out)out.innerHTML=renderScan(data);
+      if(p)p.textContent='AI picture scan done.';
+    }catch(e){
+      if(p)p.textContent='AI picture scan failed.';
+      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre><div class="ai-note">This is a backend/Gemini error, not the old text scanner. Check Command Prompt for <strong>POST /api/scan 500</strong>.</div></div>';
+    }
+  };
+  const oldRender=window.renderAI;
+  window.renderAI=function(){ if(oldRender) oldRender.apply(this,arguments); setTimeout(()=>{const b=[...document.querySelectorAll('button')].find(x=>/Smart Scan Picture|Scan Picture|AI Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;} const p=$('inv-progress'); if(p && !p.textContent)p.textContent='Upload picture, then click AI Scan Picture.';},50); };
+  setTimeout(()=>{try{if(typeof window.renderAI==='function' && document.getElementById('ai-page')?.classList.contains('active')) window.renderAI()}catch(e){}},500);
+  console.log('HARD FIX v9 scanner override loaded: no text fallback.');
+})();
+</script>
+<!-- ===== END HARD FIX v9 ===== -->
+
+
+
+<!-- ===== FINAL FIX v10: multi-image upload + real website actions ===== -->
+<script>
+(function(){
+  const $ = (id)=>document.getElementById(id);
+  const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function gloves(){ try{return Array.isArray(GLOVES)?GLOVES:[]}catch(e){return []} }
+  function ownedSet(){ try{if(typeof owned!=='undefined'&&owned)return new Set([...owned])}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-owned')||'[]'))}catch(e){return new Set()} }
+  function writeOwned(set){ try{if(typeof owned!=='undefined'&&owned){owned.clear(); set.forEach(x=>owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){} localStorage.setItem('mbz-owned',JSON.stringify([...set])); try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){} }
+  function wishSet(){ try{if(typeof wishlist!=='undefined'&&wishlist)return new Set([...wishlist])}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-wl')||'[]'))}catch(e){return new Set()} }
+  function writeWishlist(set){ try{if(typeof wishlist!=='undefined'&&wishlist){wishlist.clear(); set.forEach(x=>wishlist.add(x)); if(typeof saveWL==='function')saveWL();}}catch(e){} localStorage.setItem('mbz-wl',JSON.stringify([...set])); try{if(typeof renderWishlist==='function'&&window.view==='wishlist')renderWishlist()}catch(e){} }
+  function addMsg(kind,html){const log=$('ai-log'); if(!log)return; const div=document.createElement('div'); div.className='ai-msg '+kind; div.innerHTML=html; log.prepend(div);}
+  function gloveKey(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
+  function findGlove(name){const q=gloveKey(name); if(!q)return null; const all=gloves(); return all.find(g=>gloveKey(g.n)===q)||all.find(g=>gloveKey(g.n).includes(q)||q.includes(gloveKey(g.n)))||null;}
+  function fmtNameList(items,max=18){return items.slice(0,max).map(g=>'<strong>'+esc(g.n)+'</strong>').join(', ')+(items.length>max?' and '+(items.length-max)+' more':'');}
+  function parseClassTier(q){
+    let m=q.match(/class\s+(ss|x|s|a|b|c|d|e)\b/i); if(m)return {type:'class',value:m[1].toUpperCase()};
+    m=q.match(/\b(ss|x|s|a|b|c|d|e)\s+class\b/i); if(m)return {type:'class',value:m[1].toUpperCase()};
+    m=q.match(/tier\s+(ss|x|s|a|b|c|d|e)\b/i); if(m)return {type:'tier',value:m[1].toUpperCase()};
+    m=q.match(/\b(ss|x|s|a|b|c|d|e)\s+tier\b/i); if(m)return {type:'tier',value:m[1].toUpperCase()};
+    return null;
+  }
+  function actionWishlist(text){
+    const q=String(text||'').toLowerCase();
+    const wantsWishlist=/wish\s*list|wishlist/.test(q);
+    const addWords=/(add|save|star|put|place)/.test(q);
+    const removeWords=/(remove|delete|unstar)/.test(q);
+    if(!wantsWishlist) return null;
+    const set=wishSet();
+    if((addWords||q.includes('all')) && /\ball\b/.test(q)){
+      const ct=parseClassTier(q);
+      let pool=gloves();
+      if(ct){pool=pool.filter(g=>ct.type==='class'?String(g.cls).toUpperCase()===ct.value:String(g.t).toUpperCase()===ct.value);}
+      if(q.includes('missing')){const os=ownedSet(); pool=pool.filter(g=>!os.has(g.n));}
+      if(q.includes('owned')){const os=ownedSet(); pool=pool.filter(g=>os.has(g.n));}
+      if(q.includes('good demand'))pool=pool.filter(g=>String(g.d).toLowerCase().includes('good'));
+      if(q.includes('rising'))pool=pool.filter(g=>g.trend==='up');
+      if(q.includes('stable'))pool=pool.filter(g=>g.trend==='stable');
+      pool=[...new Map(pool.map(g=>[g.n,g])).values()];
+      if(removeWords){let removed=0; pool.forEach(g=>{if(set.delete(g.n))removed++;}); writeWishlist(set); return `Removed <strong>${removed}</strong> gloves from your wishlist${ct?' for '+ct.type+' '+ct.value:''}. <button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;}
+      let added=0; pool.forEach(g=>{if(!set.has(g.n)){set.add(g.n); added++;}}); writeWishlist(set);
+      return `Done — actually added <strong>${added}</strong> glove${added===1?'':'s'} to your wishlist${ct?' for '+ct.type+' '+ct.value:''}. Wishlist now has <strong>${set.size}</strong> gloves.<br>${fmtNameList(pool,20)}<br><button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;
+    }
+    let m=text.match(/(?:add|save|star|put)\s+(.+?)\s+(?:to|in|into)\s+(?:my\s+)?wish\s*list/i) || text.match(/(?:add|save|star|put)\s+(.+?)\s+(?:to|in|into)\s+(?:my\s+)?wishlist/i);
+    if(m){
+      const g=findGlove(m[1]); if(!g)return `I could not find a glove named <strong>${esc(m[1])}</strong> in the database.`;
+      const before=set.size; set.add(g.n); writeWishlist(set);
+      return `${set.size>before?'Added':'Already had'} <strong>${esc(g.n)}</strong> in your wishlist. <button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;
+    }
+    return null;
+  }
+  async function callReal(text){
+    const os=ownedSet(), ws=wishSet();
+    const ctx=gloves().filter(g=>{
+      const q=gloveKey(text); const hay=gloveKey(g.n+' '+g.cls+' '+g.t+' '+g.d+' '+g.how+' '+g.trend);
+      return q.split(' ').some(t=>t.length>1&&hay.includes(t));
+    }).slice(0,120).map(g=>({name:g.n,value:g.vs,tier:g.t,class:g.cls,demand:g.d,trend:g.trend,obtain:g.how,owned:os.has(g.n),wishlist:ws.has(g.n)}));
+    const message=`User request: ${text}\n\nYou are the real AI helper inside MadeByZebra's Roblox glove value website. Be natural and helpful. Important: You cannot directly change the website unless the frontend already performed an action. If the user asks to save/add/remove wishlist or owned gloves, explain what command to use, do not claim it is done unless the message says it was already done.\n\nOwned count: ${os.size}. Wishlist count: ${ws.size}. Relevant glove data: ${JSON.stringify(ctx).slice(0,50000)}`;
+    const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
+    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/ai'}));
+    if(!res.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
+    return data.answer||data.reply||'No answer returned.';
+  }
+  window.askAI=async function(){
+    const inp=$('ai-input'); const text=(inp&&inp.value||'').trim(); if(!text)return; inp.value='';
+    addMsg('user',esc(text));
+    const action=actionWishlist(text);
+    if(action){addMsg('bot',action); return;}
+    addMsg('bot','<strong>Real AI:</strong> thinking…');
+    try{const ans=await callReal(text); const first=$('ai-log')?.querySelector('.ai-msg.bot'); if(first)first.innerHTML=esc(ans).replace(/\n/g,'<br>');}
+    catch(e){const first=$('ai-log')?.querySelector('.ai-msg.bot'); if(first)first.innerHTML='<strong>AI error:</strong> '+esc(e.message||e);}
+  };
+  window.aiPreset=function(text){const inp=$('ai-input'); if(inp){inp.value=text; window.askAI();}};
+
+  window.mbzScanFiles=window.mbzScanFiles||[];
+  function renderScanFiles(){
+    const files=window.mbzScanFiles||[]; const out=$('inv-results');
+    const thumbs=files.map((f,i)=>'<div style="display:inline-block;margin:4px;text-align:center"><img src="'+esc(f.preview||'')+'" style="width:90px;height:58px;object-fit:cover;border:1px solid var(--border2);border-radius:6px"><br><button class="sbtn" onclick="mbzRemoveScanFile('+i+')">remove</button></div>').join('');
+    if(out)out.innerHTML='<div class="ai-answer"><strong>'+files.length+' picture(s) ready.</strong><br>Click <strong>AI Scan Picture</strong>. '+(files.length>6?'Only the first 6 are sent each scan to avoid size limits.':'')+'<div style="margin-top:8px">'+thumbs+'</div><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>';
+    const p=$('inv-progress'); if(p)p.textContent=files.length+' picture(s) selected. Click AI Scan Picture.';
+  }
+  window.invPreview=function(e){
+    const incoming=e&&e.target&&e.target.files?Array.from(e.target.files):[];
+    const existing=window.mbzScanFiles||[];
+    for(const f of incoming){
+      const key=f.name+'|'+f.size+'|'+f.lastModified; if(existing.some(x=>x.key===key))continue;
+      existing.push({file:f,key,preview:URL.createObjectURL(f)});
+    }
+    window.mbzScanFiles=existing;
+    const img=$('inv-preview'); if(img&&existing[0]){img.src=existing[0].preview; img.style.display='block'}
+    if(e&&e.target)e.target.value='';
+    renderScanFiles();
+  };
+  window.mbzRemoveScanFile=function(i){const files=window.mbzScanFiles||[]; const f=files.splice(i,1)[0]; try{if(f&&f.preview)URL.revokeObjectURL(f.preview)}catch(e){} window.mbzScanFiles=files; renderScanFiles();};
+  window.mbzClearScanFiles=function(){for(const f of (window.mbzScanFiles||[])){try{URL.revokeObjectURL(f.preview)}catch(e){}} window.mbzScanFiles=[]; renderScanFiles();};
+  function compressFile(file,maxSide=1400,quality=.86){
+    return new Promise((resolve,reject)=>{const img=new Image(); const url=URL.createObjectURL(file); img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}}; img.onerror=reject; img.src=url;});
+  }
+  function findName(n){const g=findGlove(n); return g?g.n:null;}
+  window.scanInventoryImage=async function(){
+    const files=(window.mbzScanFiles||[]).map(x=>x.file); const out=$('inv-results'), p=$('inv-progress');
+    if(!files.length){if(p)p.textContent='Upload one or more inventory pictures first.'; if(out)out.innerHTML='<div class="ai-answer">No pictures selected yet.</div>'; return;}
+    if(p)p.textContent='Compressing '+files.length+' picture(s)…';
+    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning '+files.length+' picture(s)…</strong><br>Sending up to 6 compressed screenshots to <strong>/api/scan</strong>.</div>';
+    try{
+      const images=[]; for(const f of files.slice(0,6))images.push(await compressFile(f));
+      if(p)p.textContent='Calling /api/scan with '+images.length+' picture(s)…';
+      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
+      const data=await res.json().catch(()=>({error:'Bad JSON response'})); if(!res.ok)throw new Error(JSON.stringify(data.error||data));
+      const replace=!$('inv-add-mode') || !$('inv-add-mode').checked; const set=replace?new Set():ownedSet();
+      const confirmed=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean);
+      confirmed.forEach(n=>set.add(n)); writeOwned(set);
+      const possible=(data.possible||data.review||[]);
+      const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
+      const rows=possible.map(p=>{const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(read)+'</div><div>'+(c.length?c.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>';}).join('');
+      if($('inv-ocr-text'))$('inv-ocr-text').value=JSON.stringify(data,null,2);
+      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan complete.</strong><br>Scanned <strong>'+images.length+'</strong> picture(s). Confirmed saved: <strong>'+confirmed.length+'</strong>. Review: <strong>'+possible.length+'</strong>.<div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(data,null,2))+'</pre></details></div>';
+      if(p)p.textContent='AI scan done.';
+    }catch(e){if(p)p.textContent='AI scan failed.'; if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre></div>';}
+  };
+  const oldRender=window.renderAI;
+  window.renderAI=function(){
+    if(oldRender)oldRender.apply(this,arguments);
+    setTimeout(()=>{
+      const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;}
+      const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview;}
+      const send=[...document.querySelectorAll('button')].find(x=>/Ask Real AI|Ask AI/i.test(x.textContent)); if(send)send.textContent='Ask / Do Action';
+      const note=$('inv-progress'); if(note&&!note.textContent)note.textContent='Upload one or more pictures, then click AI Scan Picture.';
+    },80);
+  };
+  console.log('FINAL FIX v10 loaded: multi-upload + actionable wishlist AI.');
+})();
+</script>
+<!-- ===== END FINAL FIX v10 ===== -->
+
 </body>
 </html>
