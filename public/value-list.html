@@ -5485,5 +5485,92 @@ console.log('Scanner V10 strict smart OCR loaded.');
 </script>
 <!-- ===== END FINAL FIX v10 ===== -->
 
+
+
+<!-- ===== FINAL FIX v11: scan ALL pictures in batches + keep previous pages by default ===== -->
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function gloves(){return window.GLOVES||GLOVES||[]}
+  function ownedSet(){try{return new Set(JSON.parse(localStorage.getItem('ownedGloves')||'[]'))}catch(e){return new Set()}}
+  function writeOwned(set){localStorage.setItem('ownedGloves',JSON.stringify([...set])); try{renderWishlist&&renderWishlist()}catch(e){} }
+  function findName(n){
+    const q=String(n||'').trim().toLowerCase();
+    if(!q)return null;
+    const list=gloves();
+    let g=list.find(x=>String(x.n).toLowerCase()===q);
+    if(g)return g.n;
+    g=list.find(x=>String(x.n).toLowerCase().replace(/[^a-z0-9]/g,'')===q.replace(/[^a-z0-9]/g,''));
+    return g?g.n:null;
+  }
+  window.aiScanConfirm=function(enc){
+    const name=decodeURIComponent(enc); const real=findName(name)||name;
+    const set=ownedSet(); set.add(real); writeOwned(set);
+    const p=$('inv-progress'); if(p)p.textContent='Confirmed and saved '+real+'. Owned now: '+set.size;
+    try{showOwnedFromScanner&&showOwnedFromScanner()}catch(e){}
+  };
+  function compressFile(file,maxSide=1500,quality=.88){
+    return new Promise((resolve,reject)=>{
+      const img=new Image(); const url=URL.createObjectURL(file);
+      img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}};
+      img.onerror=e=>{try{URL.revokeObjectURL(url)}catch(x){}; reject(e)};
+      img.src=url;
+    });
+  }
+  async function scanBatch(batch,idx,total){
+    const images=[];
+    for(const f of batch)images.push(await compressFile(f));
+    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
+    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/scan'}));
+    if(!res.ok)throw new Error('Batch '+idx+'/'+total+' failed: '+JSON.stringify(data.error||data));
+    return data;
+  }
+  function renderFinal(allData,confirmedSet,possible,filesScanned){
+    const confirmed=[...confirmedSet].sort();
+    const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
+    const rows=possible.map(p=>{const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(read)+'</div><div>'+(c.length?c.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>';}).join('');
+    return '<div class="ai-answer"><strong>AI scan complete.</strong><br>Scanned <strong>'+filesScanned+'</strong> picture(s) in batches. Saved confirmed names into your existing inventory.<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed saved this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span></div><div class="inv-warning"><strong>V11 behavior:</strong> Scanning one page at a time now ADDS to your saved inventory. It will not erase previous pages unless you click Clear owned first.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="clearOwnedFromScanner()">Clear owned and start over</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(allData,null,2))+'</pre></details></div>';
+  }
+  window.scanInventoryImage=async function(){
+    const files=(window.mbzScanFiles||[]).map(x=>x.file); const out=$('inv-results'), p=$('inv-progress');
+    if(!files.length){if(p)p.textContent='Upload one or more inventory pictures first.'; if(out)out.innerHTML='<div class="ai-answer">No pictures selected yet.</div>'; return;}
+    const clearFirst=$('inv-clear-before-scan') && $('inv-clear-before-scan').checked;
+    if(clearFirst){writeOwned(new Set());}
+    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning '+files.length+' picture(s)…</strong><br>V11 scans all pictures in batches and keeps previous owned gloves by default.</div>';
+    try{
+      const batchSize=4; const batches=[]; for(let i=0;i<files.length;i+=batchSize)batches.push(files.slice(i,i+batchSize));
+      const allData=[]; const confirmedSet=new Set(); const possible=[]; const owned=ownedSet();
+      for(let i=0;i<batches.length;i++){
+        if(p)p.textContent='Scanning batch '+(i+1)+'/'+batches.length+' ('+batches[i].length+' picture(s))…';
+        const data=await scanBatch(batches[i],i+1,batches.length); allData.push(data);
+        const confirmed=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean);
+        confirmed.forEach(n=>{confirmedSet.add(n); owned.add(n);});
+        (data.possible||data.review||[]).forEach(x=>possible.push(x));
+        writeOwned(owned);
+      }
+      if($('inv-ocr-text'))$('inv-ocr-text').value='V11 AI scan result:\n'+JSON.stringify(allData,null,2);
+      if(out)out.innerHTML=renderFinal(allData,confirmedSet,possible,files.length);
+      if(p)p.textContent='AI scan done. Total owned now: '+ownedSet().size+'.';
+    }catch(e){if(p)p.textContent='AI scan failed.'; if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre></div>';}
+  };
+  const oldRender=window.renderAI;
+  window.renderAI=function(){
+    if(oldRender)oldRender.apply(this,arguments);
+    setTimeout(()=>{
+      const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;}
+      const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview;}
+      const box=document.querySelector('.inv-scan-row');
+      if(box && !$('inv-clear-before-scan')){
+        const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-clear-before-scan"> Clear owned before scan'; box.appendChild(lab);
+      }
+      const oldAdd=$('inv-add-mode'); if(oldAdd){oldAdd.checked=true; oldAdd.parentElement.style.display='none';}
+      const note=$('inv-progress'); if(note&&!note.textContent)note.textContent='Upload pages. Each scan ADDS to saved inventory. Use Clear owned before scan only when starting over.';
+    },100);
+  };
+  console.log('FINAL FIX v11 loaded: scan all pictures in batches + add-to-existing default.');
+})();
+</script>
+
 </body>
 </html>
