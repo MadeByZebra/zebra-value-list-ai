@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra's Value List - Scanner V12</title>
+<title>MadeByZebra's Value List - Mobile V13</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -458,6 +458,115 @@ tr:hover td{background:var(--surface2)}
 [data-theme="amoled"] #inventory-mode option{
   background:#000000;
   color:#ffffff;
+}
+
+
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile / responsive upgrade V13
+   Makes the value list usable on phones, tablets, and small screens.
+   ───────────────────────────────────────────────────────────── */
+html,body{max-width:100%;overflow-x:hidden;touch-action:manipulation}
+img,canvas,video,iframe{max-width:100%}
+button,input,textarea,select{font:inherit}
+button,.sbtn,.fchip,.ntab,.td-btn,.target-btn,.ai-send{min-height:34px;touch-action:manipulation}
+input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
+.table-wrap,.side-drop,.gsuggest,.modal,.ai-answer,.inv-text,.inv-text-table,pre{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+
+@media(max-width:900px){
+  body{font-size:14px}
+  nav{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 10px;gap:8px;align-items:center}
+  .nav-logo-wrap{min-width:max-content}
+  .nav-tabs{order:3;flex:1 0 100%;width:100%;padding:4px 0;gap:5px;overflow-x:auto;scroll-snap-type:x proximity}
+  .ntab{font-size:12px;padding:7px 10px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--border)}
+  .nav-right{margin-left:auto;min-width:0;flex:1;justify-content:flex-end}
+  .sb{flex:1;min-width:150px;max-width:320px}
+  .sb input,.sb input:focus{width:100%}
+  .gsuggest{left:auto;right:0;min-width:min(92vw,360px);max-height:55vh}
+  .fbar{position:relative;display:flex;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:8px 10px;gap:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+  .fbar>*{flex:0 0 auto;scroll-snap-align:start}
+  .fclear{margin-left:0}
+  main{max-width:100%;padding:14px 10px 92px}
+  .home-top{display:block}
+  .home-title h1{font-size:24px}
+  .stats-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+  .stat-c{min-width:0;padding:10px}
+  .recent-grid,.wl-grid,.ai-cards,.sugg-grid,.mini-res,.inv-match-grid{grid-template-columns:1fr!important}
+  .class-hero,.tier-hero{flex-wrap:wrap;align-items:flex-start}
+  .class-hero-cnt,.tier-cnt{margin-left:0;text-align:left;width:100%}
+  .table-wrap{overflow-x:auto;width:100%}
+  table{min-width:780px}
+  .td-how{max-width:240px}
+  .trade-grid{grid-template-columns:1fr!important;gap:10px}
+  .vs-col{flex-direction:row;padding:0;justify-content:center}
+  .side-top{gap:10px;flex-wrap:wrap}
+  .qs-bar,.ai-row{flex-direction:column;align-items:stretch}
+  .target-sel{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .target-btn,.ai-send{width:100%;justify-content:center}
+  .ai-input{min-width:0;width:100%}
+  .ai-box,.ai-answer,.inv-scan-box,.sugg-section,.trade-side,.verdict,.wl-tools{padding:12px}
+  .inv-scan-row,.inv-tools,.sugg-controls,.ai-api-actions,.cmp-actions{gap:7px;align-items:stretch}
+  .inv-scan-row button,.inv-tools button,.sugg-controls button,.ai-api-actions button{flex:1 1 auto}
+  .inv-preview{max-width:100%;width:auto;height:auto;max-height:240px;display:block}
+  .inv-text{min-height:120px;font-size:12px}
+  .inv-counts{gap:7px}
+  .inv-count-pill{font-size:11px;line-height:1.4}
+  .inv-missing-row{align-items:flex-start;flex-wrap:wrap}
+  .hist-tools{flex-direction:column;align-items:stretch}
+  .hist-tools input{min-width:0;width:100%}
+  .hist-sides{grid-template-columns:1fr!important}
+  .modal-bg{align-items:stretch;padding:8px}
+  .modal{max-width:100%;max-height:96vh;border-radius:10px}
+  .cmp-bar{padding:8px;gap:7px;align-items:stretch}
+  .cmp-items{width:100%;flex:1 0 100%}
+  .cmp-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .trade-fab{left:10px;right:10px;bottom:10px;justify-content:center;border-radius:14px}
+}
+
+@media(max-width:560px){
+  nav{padding:7px 8px}
+  .nav-logo-wrap{width:100%;justify-content:space-between}
+  .nav-title{font-size:13px}
+  .nav-right{order:2;width:100%;flex:1 0 100%;display:grid;grid-template-columns:1fr auto;gap:7px}
+  .sb{max-width:none;width:100%}
+  .td-btn{height:38px}
+  main{padding:10px 8px 86px}
+  .home-title h1,.page-header h1{font-size:20px;line-height:1.25}
+  .home-title p,.page-header p{font-size:12px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stat-n{font-size:15px}
+  .recent-grid{gap:8px}
+  .rc{padding:10px}
+  .tier-hero h1{font-size:18px}
+  .class-hero{padding:12px}
+  .class-hero-badge{font-size:16px}
+  .fbar{padding:7px 8px}
+  .fchip{padding:6px 10px}
+  .frange input{width:72px;min-height:34px}
+  .wl-tools{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
+  .wl-tools .flabel{grid-column:1/-1}
+  .sbtn{padding:7px 9px;min-height:36px}
+  .ai-input,textarea{font-size:16px}
+  .ai-chip{padding:7px 10px}
+  .ai-msg.user,.ai-msg.bot{margin-left:0;margin-right:0}
+  .inv-scan-row,.inv-tools{display:grid;grid-template-columns:1fr 1fr}
+  .inv-scan-row .inv-stat,.inv-tools .inv-stat{grid-column:1/-1}
+  .inv-text-table{overflow-x:auto;border-radius:var(--radius)}
+  .inv-text-row{grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) minmax(70px,.4fr) minmax(100px,.6fr)!important;min-width:560px}
+  .inv-warning{font-size:12px;padding:9px}
+  .ai-api-grid{grid-template-columns:1fr!important}
+  .side-items{min-height:70px}
+  .trade-item{padding:9px}
+  .cmp-chip{max-width:100%}
+  .cmp-chip span,.ti-name,.wl-name,.rc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
+
+@media(max-width:380px){
+  .stats-row{grid-template-columns:1fr}
+  .inv-scan-row,.inv-tools,.wl-tools{grid-template-columns:1fr}
+  .target-sel,.cmp-actions{grid-template-columns:1fr}
+  .home-title h1,.page-header h1{font-size:18px}
+  .ntab{font-size:11px;padding:7px 9px}
 }
 
 </style>
@@ -5577,8 +5686,8 @@ console.log('Scanner V10 strict smart OCR loaded.');
 <!-- ===== FINAL FIX v12: quota-safe multi-image scanner + progress + resume ===== -->
 <script>
 (function(){
-  window.MBZ_SCANNER_VERSION='V12';
-  const VERSION='Scanner V12';
+  window.MBZ_SCANNER_VERSION='V13_MOBILE';
+  const VERSION='Scanner V13';
   const $=(id)=>document.getElementById(id);
   const esc=(s)=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   function gloves(){try{return Array.isArray(window.GLOVES)?window.GLOVES:GLOVES}catch(e){return []}}
@@ -5668,7 +5777,7 @@ console.log('Scanner V10 strict smart OCR loaded.');
     const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
     const rows=state.possible.map(p=>'<div class="inv-text-row"><div>'+esc(p.read)+'</div><div>'+(p.candidates.length?p.candidates.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>').join('');
     const batchInfo=state.batchNotes.map(x=>'<div class="ai-note">'+esc(x)+'</div>').join('');
-    results('<div class="ai-answer"><strong>'+VERSION+' '+(done?'complete':'paused')+'.</strong><br>'+extra+'<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+state.possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span><span class="inv-count-pill">Batches: '+state.doneBatches+'/'+state.totalBatches+'</span></div><div class="inv-warning"><strong>V12:</strong> It adds to your saved inventory. It does not erase previous pages unless <strong>Clear owned before scan</strong> is checked.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>'+batchInfo+'<h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves yet. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(state.raw,null,2))+'</pre></details></div>');
+    results('<div class="ai-answer"><strong>'+VERSION+' '+(done?'complete':'paused')+'.</strong><br>'+extra+'<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+state.possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span><span class="inv-count-pill">Batches: '+state.doneBatches+'/'+state.totalBatches+'</span></div><div class="inv-warning"><strong>V13:</strong> It adds to your saved inventory. It does not erase previous pages unless <strong>Clear owned before scan</strong> is checked.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>'+batchInfo+'<h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves yet. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(state.raw,null,2))+'</pre></details></div>');
   }
   async function resumeQueue(startIndex){
     const state=window.mbzV12ScanState; if(!state)return;
@@ -5712,11 +5821,11 @@ console.log('Scanner V10 strict smart OCR loaded.');
     await resumeQueue(0);
   };
   function patchUI(){
-    try{document.title='MadeByZebra\'s Value List - Scanner V12'}catch(e){}
+    try{document.title='MadeByZebra\'s Value List - Scanner V13'}catch(e){}
     const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview; input.removeAttribute('capture');}
-    const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture (V12)'; b.onclick=window.scanInventoryImage;}
+    const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture (V13)'; b.onclick=window.scanInventoryImage;}
     const row=document.querySelector('.inv-scan-row');
-    if(row && !$('inv-v12-badge')){const span=document.createElement('span'); span.id='inv-v12-badge'; span.className='inv-stat'; span.textContent='Scanner V12 active'; row.appendChild(span)}
+    if(row && !$('inv-v12-badge')){const span=document.createElement('span'); span.id='inv-v12-badge'; span.className='inv-stat'; span.textContent='Scanner V13 active'; row.appendChild(span)}
     if(row && !$('inv-auto-wait-v12')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-auto-wait-v12" checked> auto-wait on quota'; row.appendChild(lab)}
     if(row && !$('inv-clear-before-scan')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-clear-before-scan"> Clear owned before scan'; row.appendChild(lab)}
     const oldAdd=$('inv-add-mode'); if(oldAdd){oldAdd.checked=true; try{oldAdd.parentElement.style.display='none'}catch(e){}}
@@ -5729,6 +5838,30 @@ console.log('Scanner V10 strict smart OCR loaded.');
 })();
 </script>
 <!-- ===== END FINAL FIX v12 ===== -->
+
+
+<script>
+(function(){
+  try{
+    document.documentElement.classList.add('mobile-v13-ready');
+    var meta=document.querySelector('meta[name="viewport"]');
+    if(meta) meta.setAttribute('content','width=device-width, initial-scale=1, viewport-fit=cover');
+    document.title='MadeByZebra\'s Value List - Mobile V13';
+    function addBadge(){
+      var row=document.querySelector('.nav-logo-wrap');
+      if(row && !document.getElementById('mobile-v13-badge')){
+        var b=document.createElement('span');
+        b.id='mobile-v13-badge';
+        b.className='inv-stat';
+        b.style.marginLeft='6px';
+        b.textContent='Mobile V13';
+        row.appendChild(b);
+      }
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addBadge); else addBadge();
+  }catch(e){}
+})();
+</script>
 
 </body>
 </html>
