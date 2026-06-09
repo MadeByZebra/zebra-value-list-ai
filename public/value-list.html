@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra's Value List - Scanner V9</title>
+<title>MadeByZebra's Value List - Scanner V12</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -5571,6 +5571,164 @@ console.log('Scanner V10 strict smart OCR loaded.');
   console.log('FINAL FIX v11 loaded: scan all pictures in batches + add-to-existing default.');
 })();
 </script>
+
+
+
+<!-- ===== FINAL FIX v12: quota-safe multi-image scanner + progress + resume ===== -->
+<script>
+(function(){
+  window.MBZ_SCANNER_VERSION='V12';
+  const VERSION='Scanner V12';
+  const $=(id)=>document.getElementById(id);
+  const esc=(s)=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  function gloves(){try{return Array.isArray(window.GLOVES)?window.GLOVES:GLOVES}catch(e){return []}}
+  function key(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim()}
+  function findGlove(name){
+    const q=key(name); if(!q)return null; const list=gloves();
+    return list.find(g=>key(g.n)===q)||list.find(g=>key(g.n).includes(q)||q.includes(key(g.n)))||null;
+  }
+  function readArray(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(v)?v:[]}catch(e){return []}}
+  function ownedSet(){
+    const s=new Set();
+    try{if(window.owned) for(const x of window.owned) s.add(x)}catch(e){}
+    for(const k of ['ownedGloves','mbz-owned','owned']) for(const x of readArray(k)) s.add(x);
+    return s;
+  }
+  function writeOwned(s){
+    const arr=[...s];
+    localStorage.setItem('ownedGloves',JSON.stringify(arr));
+    localStorage.setItem('mbz-owned',JSON.stringify(arr));
+    try{if(window.owned){window.owned.clear(); arr.forEach(x=>window.owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){}
+    try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){}
+  }
+  function status(msg){const p=$('inv-progress'); if(p)p.textContent=msg;}
+  function results(html){const out=$('inv-results'); if(out)out.innerHTML=html;}
+  function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+  function quotaErrorText(err){
+    const msg=String(err&&err.message||err||'');
+    if(/RESOURCE_EXHAUSTED|quota|rate|429/i.test(msg))return true;
+    return false;
+  }
+  function parseRetrySeconds(msg){
+    const s=String(msg||'');
+    let m=s.match(/retry(?:Delay| in)?[^0-9]{0,20}(\d+(?:\.\d+)?)/i) || s.match(/Please retry in\s*(\d+(?:\.\d+)?)/i);
+    return m?Math.ceil(Number(m[1])):65;
+  }
+  window.mbzScanFiles=window.mbzScanFiles||[];
+  function renderSelected(){
+    const files=window.mbzScanFiles||[];
+    const thumbs=files.map((f,i)=>'<div style="display:inline-block;margin:4px;text-align:center;vertical-align:top"><img src="'+esc(f.preview||'')+'" style="width:92px;height:60px;object-fit:cover;border:1px solid var(--border2);border-radius:6px"><br><span style="font-size:10px;color:var(--text-dim)">#'+(i+1)+'</span> <button class="sbtn" onclick="mbzRemoveScanFile('+i+')">remove</button></div>').join('');
+    results('<div class="ai-answer"><strong>'+VERSION+': '+files.length+' picture(s) selected.</strong><br>Click <strong>AI Scan Picture</strong>. Images stay in the queue until you clear them.<div class="inv-counts" style="margin-top:8px"><span class="inv-count-pill">multi-upload fixed</span><span class="inv-count-pill">keeps previous owned</span><span class="inv-count-pill">quota retry support</span></div><div style="margin-top:8px">'+(thumbs||'<div class="wl-empty">No pictures selected.</div>')+'</div><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>');
+    status(VERSION+': '+files.length+' picture(s) ready. It will add to saved inventory unless Clear owned before scan is checked.');
+  }
+  window.invPreview=function(e){
+    const incoming=e&&e.target&&e.target.files?Array.from(e.target.files):[];
+    const existing=window.mbzScanFiles||[];
+    for(const f of incoming){
+      const k=f.name+'|'+f.size+'|'+f.lastModified;
+      if(existing.some(x=>x.key===k))continue;
+      existing.push({file:f,key:k,preview:URL.createObjectURL(f)});
+    }
+    window.mbzScanFiles=existing;
+    const img=$('inv-preview'); if(img&&existing[0]){img.src=existing[0].preview; img.style.display='block';}
+    if(e&&e.target)e.target.value='';
+    renderSelected();
+  };
+  window.mbzRemoveScanFile=function(i){const files=window.mbzScanFiles||[]; const f=files.splice(i,1)[0]; try{if(f&&f.preview)URL.revokeObjectURL(f.preview)}catch(e){} window.mbzScanFiles=files; renderSelected();};
+  window.mbzClearScanFiles=function(){for(const f of (window.mbzScanFiles||[])){try{URL.revokeObjectURL(f.preview)}catch(e){}} window.mbzScanFiles=[]; renderSelected();};
+  async function compressFile(file,maxSide=1150,quality=.74){
+    return new Promise((resolve,reject)=>{
+      const img=new Image(); const url=URL.createObjectURL(file);
+      img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}};
+      img.onerror=e=>{try{URL.revokeObjectURL(url)}catch(x){} reject(e)}; img.src=url;
+    });
+  }
+  function makeBatches(files){
+    const batchSize=6; const batches=[];
+    for(let i=0;i<files.length;i+=batchSize)batches.push(files.slice(i,i+batchSize));
+    return batches;
+  }
+  async function scanBatch(batch,idx,total){
+    const images=[];
+    for(let i=0;i<batch.length;i++){status(VERSION+': compressing image '+(i+1)+'/'+batch.length+' for batch '+idx+'/'+total+'…'); images.push(await compressFile(batch[i]));}
+    status(VERSION+': sending batch '+idx+'/'+total+' ('+images.length+' picture(s)) to /api/scan…');
+    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
+    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/scan'}));
+    if(!res.ok){const err=new Error(JSON.stringify(data.error||data)); err.data=data; throw err;}
+    return data;
+  }
+  function normalizeConfirmed(data){return (data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(x=>{const g=findGlove(x); return g?g.n:null}).filter(Boolean)}
+  function normalizePossible(data){return (data.possible||data.review||[]).map(p=>{
+    const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain');
+    const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(x=>{const g=findGlove(x);return g?g.n:null}).filter(Boolean).slice(0,8);
+    return {read,candidates:c};
+  });}
+  function renderSummary(state,done=false,extra=''){
+    const confirmed=[...state.confirmedThisRun].sort();
+    const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
+    const rows=state.possible.map(p=>'<div class="inv-text-row"><div>'+esc(p.read)+'</div><div>'+(p.candidates.length?p.candidates.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>').join('');
+    const batchInfo=state.batchNotes.map(x=>'<div class="ai-note">'+esc(x)+'</div>').join('');
+    results('<div class="ai-answer"><strong>'+VERSION+' '+(done?'complete':'paused')+'.</strong><br>'+extra+'<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+state.possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span><span class="inv-count-pill">Batches: '+state.doneBatches+'/'+state.totalBatches+'</span></div><div class="inv-warning"><strong>V12:</strong> It adds to your saved inventory. It does not erase previous pages unless <strong>Clear owned before scan</strong> is checked.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>'+batchInfo+'<h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves yet. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(state.raw,null,2))+'</pre></details></div>');
+  }
+  async function resumeQueue(startIndex){
+    const state=window.mbzV12ScanState; if(!state)return;
+    const autoWait=$('inv-auto-wait-v12')?$('inv-auto-wait-v12').checked:true;
+    const owned=ownedSet();
+    for(let i=startIndex;i<state.batches.length;i++){
+      if(i>startIndex && autoWait){
+        for(let sec=65;sec>0;sec--){status(VERSION+': waiting '+sec+'s before next batch to avoid Gemini free quota…'); await sleep(1000);}
+      }
+      try{
+        const data=await scanBatch(state.batches[i],i+1,state.batches.length); state.raw.push(data); state.doneBatches=i+1;
+        const conf=normalizeConfirmed(data); conf.forEach(n=>{state.confirmedThisRun.add(n); owned.add(n)}); writeOwned(owned);
+        state.possible.push(...normalizePossible(data));
+        state.batchNotes.push('Batch '+(i+1)+'/'+state.batches.length+': saved '+conf.length+' confirmed, review '+normalizePossible(data).length+'.');
+        renderSummary(state,false,'Saved progress after batch '+(i+1)+'.');
+      }catch(e){
+        const msg=e.message||String(e); const retry=parseRetrySeconds(msg);
+        if(quotaErrorText(e)){
+          state.nextIndex=i; window.mbzV12ScanState=state; renderSummary(state,false,'<strong style="color:#fca5a5">Gemini quota hit.</strong> Confirmed results so far were saved. Wait about '+retry+' seconds, then click Resume. <br><button class="sbtn" onclick="mbzV12Resume()">Resume remaining batches</button>');
+          status(VERSION+': quota hit. Saved progress. Retry after '+retry+' seconds.');
+          if(autoWait){
+            for(let sec=retry;sec>0;sec--){status(VERSION+': quota wait '+sec+'s then auto-resume…'); await sleep(1000);}
+            return resumeQueue(i);
+          }
+          return;
+        }
+        renderSummary(state,false,'<strong style="color:#fca5a5">Batch '+(i+1)+' failed:</strong><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(msg)+'</pre>');
+        status(VERSION+': failed at batch '+(i+1)+'.'); return;
+      }
+    }
+    renderSummary(state,true,'Scanned '+state.totalFiles+' picture(s).'); status(VERSION+': done. Total owned now '+ownedSet().size+'.');
+  }
+  window.mbzV12Resume=function(){const st=window.mbzV12ScanState; if(st)resumeQueue(st.nextIndex||0);};
+  window.scanInventoryImage=async function(){
+    const files=(window.mbzScanFiles||[]).map(x=>x.file); if(!files.length){status('Upload one or more inventory pictures first.'); results('<div class="ai-answer">No pictures selected yet.</div>'); return;}
+    const clear=$('inv-clear-before-scan')&&$('inv-clear-before-scan').checked; if(clear){writeOwned(new Set());}
+    const batches=makeBatches(files);
+    window.mbzV12ScanState={batches,totalBatches:batches.length,totalFiles:files.length,doneBatches:0,nextIndex:0,confirmedThisRun:new Set(),possible:[],raw:[],batchNotes:[]};
+    results('<div class="ai-answer"><strong>'+VERSION+' started.</strong><br>Selected <strong>'+files.length+'</strong> picture(s), split into <strong>'+batches.length+'</strong> quota-safe batch(es). Progress will save after every batch.</div>');
+    status(VERSION+': starting scan…');
+    await resumeQueue(0);
+  };
+  function patchUI(){
+    try{document.title='MadeByZebra\'s Value List - Scanner V12'}catch(e){}
+    const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview; input.removeAttribute('capture');}
+    const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture (V12)'; b.onclick=window.scanInventoryImage;}
+    const row=document.querySelector('.inv-scan-row');
+    if(row && !$('inv-v12-badge')){const span=document.createElement('span'); span.id='inv-v12-badge'; span.className='inv-stat'; span.textContent='Scanner V12 active'; row.appendChild(span)}
+    if(row && !$('inv-auto-wait-v12')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-auto-wait-v12" checked> auto-wait on quota'; row.appendChild(lab)}
+    if(row && !$('inv-clear-before-scan')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-clear-before-scan"> Clear owned before scan'; row.appendChild(lab)}
+    const oldAdd=$('inv-add-mode'); if(oldAdd){oldAdd.checked=true; try{oldAdd.parentElement.style.display='none'}catch(e){}}
+    const p=$('inv-progress'); if(p && !/V12/.test(p.textContent||'')) p.textContent=VERSION+': upload multiple pictures. Each scan adds to saved owned list.';
+  }
+  const oldRender=window.renderAI;
+  window.renderAI=function(){if(oldRender)try{oldRender.apply(this,arguments)}catch(e){} setTimeout(patchUI,100);};
+  setTimeout(patchUI,500); setInterval(patchUI,3000);
+  console.log('FINAL FIX v12 loaded: quota-safe multi-image scanner + progress + resume.');
+})();
+</script>
+<!-- ===== END FINAL FIX v12 ===== -->
 
 </body>
 </html>
