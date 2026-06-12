@@ -5862,6 +5862,45 @@ console.log('Scanner V10 strict smart OCR loaded.');
   }catch(e){}
 })();
 </script>
+<script>
+/* Groq AI database fix */
+async function askRealAI(message) {
+  const owned =
+    JSON.parse(localStorage.getItem("ownedGloves") || "[]") ||
+    JSON.parse(localStorage.getItem("owned") || "[]") ||
+    [];
 
+  const wishlist =
+    JSON.parse(localStorage.getItem("wishlist") || "[]") ||
+    JSON.parse(localStorage.getItem("wish") || "[]") ||
+    [];
+
+  const gloves =
+    typeof GLOVES !== "undefined"
+      ? GLOVES
+      : window.GLOVES || [];
+
+  const res = await fetch("/api/ai", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message,
+      gloves,
+      owned,
+      wishlist
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return "AI error: " + JSON.stringify(data.error || data);
+  }
+
+  return data.answer || "No answer returned.";
+}
+</script>
 </body>
 </html>
