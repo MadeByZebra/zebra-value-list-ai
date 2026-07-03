@@ -3105,6 +3105,164 @@ function clearOwnedFromScanner(){
 .inv-raw-log{white-space:pre-wrap;max-height:300px;overflow:auto;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);line-height:1.45}
 .inv-warning{margin-top:10px;padding:9px 11px;border:1px solid var(--border2);border-radius:var(--radius-sm);background:var(--surface2);color:var(--text-muted);font-size:12px;line-height:1.45}
 .inv-tools{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+
+
+/* ============================================================
+   MOBILE COMPATIBILITY PATCH — MadeByZebra Mobile V14
+   Keeps desktop layout, fixes phones/tablets/small screens.
+   ============================================================ */
+html{
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+  overflow-x:hidden;
+}
+body{
+  width:100%;
+  max-width:100vw;
+  overflow-x:hidden;
+  touch-action:manipulation;
+}
+img,video,canvas,svg,iframe{max-width:100%;height:auto}
+input,select,textarea,button{font-size:16px;max-width:100%}
+button,.ntab,.sbtn,.td-btn,.fchip,.ai-chip,.add-btn,.wish-btn,.target-btn,.cls-nav-btn{min-height:38px}
+
+.mobile-version-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  margin:8px 0 14px;
+  padding:6px 10px;
+  border:1px solid var(--border2);
+  background:var(--surface);
+  border-radius:999px;
+  color:var(--text-muted);
+  font-family:'DM Mono',monospace;
+  font-size:10.5px;
+}
+
+.table-wrap,
+.inv-text-table,
+.modal,
+.side-drop,
+.gsuggest,
+.inv-raw-log{
+  -webkit-overflow-scrolling:touch;
+}
+
+@media(max-width:1100px){
+  nav{height:auto;min-height:64px;align-items:flex-start;flex-wrap:wrap;padding:10px 14px;gap:10px}
+  .nav-logo-wrap{width:auto;min-height:38px}
+  .nav-divider{display:none}
+  .nav-tabs{order:3;width:100%;flex-basis:100%;padding:4px 0 2px;gap:6px;overflow-x:auto;scroll-snap-type:x proximity}
+  .ntab{scroll-snap-align:start;margin:0;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);font-size:12.5px;min-height:36px}
+  .ntab.active{background:var(--accent);color:var(--accent-text);border-color:var(--accent)}
+  .nav-right{margin-left:auto;min-width:0;flex:1;justify-content:flex-end;gap:7px}
+  .sb{min-width:0;flex:1;max-width:360px}
+  .sb input,.sb input:focus{width:100%;min-width:0;height:38px;font-size:16px;padding-top:8px;padding-bottom:8px}
+  .td-btn{height:38px;white-space:nowrap}
+  .td-menu{right:0;left:auto}
+}
+
+@media(max-width:860px){
+  main{width:100%;padding:20px 12px 110px}
+  .home-top{align-items:stretch;gap:14px;margin-bottom:22px}
+  .home-title{width:100%}
+  .home-title h1{font-size:24px;line-height:1.12}
+  .home-title p{font-size:13px;line-height:1.5}
+  .stats-row{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .stat-c{min-width:0;padding:12px 10px}
+  .recent-grid,.wl-grid,.ai-cards,.mini-res,.sugg-grid,.inv-match-grid{grid-template-columns:1fr;gap:8px}
+  .rc,.wl-card,.ai-card,.mini-card,.sugg-card,.inv-match-card{width:100%}
+  .page-header h1{font-size:23px}
+  .page-header p,.class-intro{font-size:13px}
+  .tier-hero,.class-hero{align-items:flex-start;flex-wrap:wrap;gap:10px;padding:14px}
+  .tier-hero h1{font-size:22px}
+  .tier-cnt,.class-hero-cnt{width:100%;margin-left:0;text-align:left}
+  .fbar-toggle-row{justify-content:flex-start;padding:10px 12px 0}
+  .fbar{border-radius:16px;padding:12px;margin:8px 12px 0;max-width:calc(100% - 24px);gap:7px}
+  .fsep{display:none}
+  .fclear{margin-left:0;width:100%}
+  .frange{width:100%;justify-content:space-between}
+  .frange input{flex:1;min-width:0;font-size:16px;height:38px}
+  .tbar{gap:6px;padding:9px;overflow-x:auto;flex-wrap:nowrap}
+  .tbar .sbtn{flex:0 0 auto}
+  .tcnt{margin-left:0;flex:0 0 auto;white-space:nowrap}
+  .table-wrap{width:100%;overflow-x:auto;border-radius:14px}
+  table{min-width:760px;font-size:12px}
+  th,td{padding:9px 10px}
+  .td-how{max-width:220px;white-space:normal}
+  .trade-grid{grid-template-columns:1fr;gap:12px}
+  .trade-side{width:100%}
+  .side-top{padding:13px}
+  .side-items{min-height:70px}
+  .vs-col{padding:0;flex-direction:row;justify-content:center}
+  .vs-circle{width:42px;height:42px}
+  .qs-bar{flex-direction:column}
+  .target-sel{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .target-btn{width:100%}
+  .trade-fab{right:12px;bottom:14px;padding:10px 14px;font-size:12px}
+  .cmp-bar{padding:10px 12px;gap:8px}
+  .cmp-items{width:100%;flex-basis:100%}
+  .cmp-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .cmp-go,.cmp-clear{width:100%;padding:9px 12px}
+  .modal-bg{align-items:flex-end;padding:0}
+  .modal{max-width:100%;max-height:92vh;border-radius:22px 22px 0 0;border-left:none;border-right:none;border-bottom:none}
+  .modal-hd,.modal-body{padding-left:14px;padding-right:14px}
+  .ai-box,.ai-answer,.inv-scan-box,.disclaimer,.class-intro,.wl-tools,.sugg-section{padding:13px;border-radius:15px}
+  .ai-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .ai-input{min-width:0;width:100%;font-size:16px;min-height:44px}
+  .ai-send{width:100%;min-height:44px}
+  .ai-chips,.inv-tools,.ai-api-actions,.missing-tools,.wl-bulk-row,.wl-search-row{gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px}
+  .ai-chip,.inv-tools .sbtn,.ai-api-actions .sbtn,.missing-tools .sbtn,.wl-bulk-row .sbtn,.wl-search-row .sbtn{flex:0 0 auto;white-space:nowrap}
+  .ai-msg.user,.ai-msg.bot{margin-left:0;margin-right:0}
+  .inv-scan-row{display:grid;grid-template-columns:1fr;gap:8px}
+  .inv-scan-row input[type=file],.inv-scan-row button,.inv-scan-row label,.inv-scan-row select{width:100%}
+  .inv-preview{max-width:100%;max-height:260px}
+  .inv-text{font-size:12px;min-height:120px}
+  .inv-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .inv-missing-row,.missing-card-top{align-items:flex-start;flex-wrap:wrap}
+  .inv-missing-name,.missing-name{white-space:normal;line-height:1.35}
+  .hist-tools{display:grid;grid-template-columns:1fr;gap:8px}
+  .hist-tools input{min-width:0;width:100%;font-size:16px;height:42px}
+  .hist-sides{grid-template-columns:1fr}
+  .cls-nav{overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}
+  .cls-nav-btn{flex:0 0 auto;white-space:nowrap}
+  .gsuggest{position:fixed;left:10px;right:10px;top:76px;min-width:0;max-height:55vh}
+}
+
+@media(max-width:520px){
+  nav{padding:9px 10px}
+  .nav-title{font-size:12.5px}
+  .nav-right{width:100%;order:2;flex-basis:100%}
+  .sb{max-width:none;width:100%}
+  .trello-label,#td-lbl{display:none}
+  .td-btn{padding:7px 10px}
+  .home-title h1{font-size:22px}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .stat-n{font-size:18px}
+  .recent-grid{margin-bottom:24px}
+  .rc{padding:10px 11px}
+  .table-wrap{margin-left:-2px;margin-right:-2px;width:calc(100% + 4px)}
+  table{min-width:720px}
+  .sbtn,.fchip,.ai-chip,.cls-nav-btn{font-size:11.5px;padding-left:10px;padding-right:10px}
+  .page-header{margin-bottom:18px;padding-bottom:14px}
+  .page-header h1{font-size:21px}
+  .class-hero-badge{font-size:16px;padding:6px 12px}
+  .side-top{display:grid;grid-template-columns:1fr auto;gap:8px}
+  .trade-item{padding:8px;gap:6px}
+  .ti-name{white-space:normal;line-height:1.3}
+  .ai-api-grid{grid-template-columns:1fr}
+  .inv-summary-grid{grid-template-columns:1fr 1fr}
+  .modal{border-radius:18px 18px 0 0}
+}
+
+@media(max-width:380px){
+  .home-title h1{font-size:20px}
+  .ntab{font-size:11.5px;padding:8px 10px}
+  table{min-width:690px}
+  .stats-row,.inv-summary-grid{grid-template-columns:1fr}
+}
+
 </style>
 
 <script>
@@ -5420,6 +5578,31 @@ console.log('Scanner V10 strict smart OCR loaded.');
 })();
 </script>
 <!-- ===== END REAL AI + GEMINI VISION OVERRIDE PATCH v8 ===== -->
+
+
+<script>
+/* Mobile V14 marker + safer mobile behavior */
+(function(){
+  try{
+    document.documentElement.setAttribute('data-mobile-version','Mobile V14');
+    function addBadge(){
+      if(document.querySelector('.mobile-version-badge')) return;
+      var main=document.querySelector('main');
+      if(!main) return;
+      var badge=document.createElement('div');
+      badge.className='mobile-version-badge';
+      badge.textContent='Mobile V14 compatible';
+      main.insertBefore(badge, main.firstChild);
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', addBadge); else addBadge();
+    document.addEventListener('click', function(e){
+      var a=e.target.closest && e.target.closest('a,button');
+      if(!a) return;
+      if(window.innerWidth < 861 && a.blur) setTimeout(function(){a.blur()}, 80);
+    }, true);
+  }catch(e){}
+})();
+</script>
 
 </body>
 </html>
