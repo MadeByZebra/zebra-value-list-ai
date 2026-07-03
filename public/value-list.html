@@ -3,28 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra's Value List - Mobile V13</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<title>MadeByZebra — Value List</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
 :root,[data-theme="dark"]{
-  --bg:#09090b;--surface:#111113;--surface2:#18181b;--surface3:#1f1f23;
-  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
-  --text:#f4f4f5;--text-muted:#71717a;--text-dim:#3f3f46;
-  --radius:10px;--radius-sm:6px;--accent:#e4e4e7;--accent-bg:rgba(228,228,231,0.1);
-  --tx:#dc2626;--tx-bg:rgba(220,38,38,0.1);--tx-b:rgba(220,38,38,0.25);
-  --tss:#7c3aed;--tss-bg:rgba(124,58,237,0.1);--tss-b:rgba(124,58,237,0.25);
-  --ts:#16a34a;--ts-bg:rgba(22,163,74,0.1);--ts-b:rgba(22,163,74,0.25);
-  --ta:#2563eb;--ta-bg:rgba(37,99,235,0.1);--ta-b:rgba(37,99,235,0.25);
-  --tb:#d97706;--tb-bg:rgba(217,119,6,0.1);--tb-b:rgba(217,119,6,0.25);
-  --tc:#ca8a04;--tc-bg:rgba(202,138,4,0.1);--tc-b:rgba(202,138,4,0.25);
-  --td:#ea580c;--td-bg:rgba(234,88,12,0.1);--td-b:rgba(234,88,12,0.25);
-  --shadow:0 4px 24px rgba(0,0,0,0.5);--nav-bg:rgba(9,9,11,0.93);
+  --bg:#050506;--surface:#0d0d0f;--surface2:#151517;--surface3:#1c1c1f;
+  --border:rgba(255,255,255,0.055);--border2:rgba(255,255,255,0.1);
+  --text:#f5f5f7;--text-muted:#8b8b93;--text-dim:#48484f;
+  --radius:18px;--radius-sm:11px;--radius-lg:26px;
+  --accent:#eceef1;--accent-bg:rgba(236,238,241,0.08);--accent-text:#0a0a0c;
+  --glow1:#6d5bff;--glow2:#3f6bff;
+  --tx:#f87171;--tx-bg:rgba(248,113,113,0.09);--tx-b:rgba(248,113,113,0.22);
+  --tss:#a78bfa;--tss-bg:rgba(167,139,250,0.09);--tss-b:rgba(167,139,250,0.22);
+  --ts:#4ade80;--ts-bg:rgba(74,222,128,0.09);--ts-b:rgba(74,222,128,0.22);
+  --ta:#60a5fa;--ta-bg:rgba(96,165,250,0.09);--ta-b:rgba(96,165,250,0.22);
+  --tb:#fbbf24;--tb-bg:rgba(251,191,36,0.09);--tb-b:rgba(251,191,36,0.22);
+  --tc:#facc15;--tc-bg:rgba(250,204,21,0.09);--tc-b:rgba(250,204,21,0.22);
+  --td:#fb923c;--td-bg:rgba(251,146,60,0.09);--td-b:rgba(251,146,60,0.22);
+  --shadow:0 12px 40px rgba(0,0,0,0.6);--shadow-sm:0 4px 16px rgba(0,0,0,0.4);
+  --nav-bg:rgba(0,0,0,0.72);
 }
 [data-theme="light"]{
-  --bg:#f7f7f9;--surface:#fff;--surface2:#f0f0f3;--surface3:#e8e8ed;
-  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.13);
-  --text:#18181b;--text-muted:#52525b;--text-dim:#a1a1aa;
+  --bg:#f8f8f9;--surface:#ffffff;--surface2:#f1f1f3;--surface3:#e8e8eb;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12);
+  --text:#17171a;--text-muted:#5b5b63;--text-dim:#a3a3ab;
+  --accent:#17171a;--accent-bg:rgba(23,23,26,0.06);--accent-text:#f8f8f9;
   --tx:#dc2626;--tx-bg:rgba(220,38,38,0.07);--tx-b:rgba(220,38,38,0.2);
   --tss:#7c3aed;--tss-bg:rgba(124,58,237,0.07);--tss-b:rgba(124,58,237,0.2);
   --ts:#16a34a;--ts-bg:rgba(22,163,74,0.07);--ts-b:rgba(22,163,74,0.2);
@@ -32,27 +41,29 @@
   --tb:#d97706;--tb-bg:rgba(217,119,6,0.07);--tb-b:rgba(217,119,6,0.2);
   --tc:#ca8a04;--tc-bg:rgba(202,138,4,0.07);--tc-b:rgba(202,138,4,0.2);
   --td:#ea580c;--td-bg:rgba(234,88,12,0.07);--td-b:rgba(234,88,12,0.2);
-  --shadow:0 4px 24px rgba(0,0,0,0.1);--nav-bg:rgba(247,247,249,0.93);
-  --accent:#52525b;--accent-bg:rgba(82,82,91,0.1);
+  --shadow:0 12px 40px rgba(0,0,0,0.12);--shadow-sm:0 4px 16px rgba(0,0,0,0.08);
+  --nav-bg:rgba(248,248,249,0.85);
 }
 [data-theme="amoled"]{
-  --bg:#000;--surface:#080808;--surface2:#101010;--surface3:#161616;
-  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.09);
-  --text:#fff;--text-muted:#555;--text-dim:#2a2a2a;
-  --tx:#ff3535;--tx-bg:rgba(255,53,53,0.1);--tx-b:rgba(255,53,53,0.22);
-  --tss:#aa44ff;--tss-bg:rgba(170,68,255,0.1);--tss-b:rgba(170,68,255,0.22);
-  --ts:#00cc55;--ts-bg:rgba(0,204,85,0.1);--ts-b:rgba(0,204,85,0.22);
-  --ta:#3388ff;--ta-bg:rgba(51,136,255,0.1);--ta-b:rgba(51,136,255,0.22);
-  --tb:#ffaa00;--tb-bg:rgba(255,170,0,0.1);--tb-b:rgba(255,170,0,0.22);
-  --tc:#ffdd00;--tc-bg:rgba(255,221,0,0.1);--tc-b:rgba(255,221,0,0.22);
-  --td:#ff7700;--td-bg:rgba(255,119,0,0.1);--td-b:rgba(255,119,0,0.22);
-  --shadow:0 4px 24px rgba(0,0,0,0.9);--nav-bg:rgba(0,0,0,0.98);
-  --accent:#d4d4d8;--accent-bg:rgba(212,212,216,0.1);
+  --bg:#000;--surface:#0a0a0a;--surface2:#121212;--surface3:#181818;
+  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.1);
+  --text:#fff;--text-muted:#666;--text-dim:#333;
+  --accent:#fff;--accent-bg:rgba(255,255,255,0.08);--accent-text:#000;
+  --tx:#ff5c5c;--tx-bg:rgba(255,92,92,0.1);--tx-b:rgba(255,92,92,0.22);
+  --tss:#b388ff;--tss-bg:rgba(179,136,255,0.1);--tss-b:rgba(179,136,255,0.22);
+  --ts:#00e676;--ts-bg:rgba(0,230,118,0.1);--ts-b:rgba(0,230,118,0.22);
+  --ta:#448aff;--ta-bg:rgba(68,138,255,0.1);--ta-b:rgba(68,138,255,0.22);
+  --tb:#ffb300;--tb-bg:rgba(255,179,0,0.1);--tb-b:rgba(255,179,0,0.22);
+  --tc:#ffea00;--tc-bg:rgba(255,234,0,0.1);--tc-b:rgba(255,234,0,0.22);
+  --td:#ff8a3d;--td-bg:rgba(255,138,61,0.1);--td-b:rgba(255,138,61,0.22);
+  --shadow:0 12px 40px rgba(0,0,0,0.9);--shadow-sm:0 4px 16px rgba(0,0,0,0.7);
+  --nav-bg:rgba(0,0,0,0.9);
 }
 [data-theme="colorblind"]{
-  --bg:#0e0e0e;--surface:#171717;--surface2:#1f1f1f;--surface3:#252525;
+  --bg:#0e0e0e;--surface:#171717;--surface2:#1f1f1f;--surface3:#272727;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#f0f0f0;--text-muted:#888;--text-dim:#444;
+  --text:#f0f0f0;--text-muted:#8f8f8f;--text-dim:#4a4a4a;
+  --accent:#f0f0f0;--accent-bg:rgba(240,240,240,0.09);--accent-text:#0e0e0e;
   --tx:#ff9900;--tx-bg:rgba(255,153,0,0.1);--tx-b:rgba(255,153,0,0.3);
   --tss:#0af;--tss-bg:rgba(0,170,255,0.1);--tss-b:rgba(0,170,255,0.3);
   --ts:#fff;--ts-bg:rgba(255,255,255,0.07);--ts-b:rgba(255,255,255,0.2);
@@ -60,525 +71,518 @@
   --tb:#ff6600;--tb-bg:rgba(255,102,0,0.1);--tb-b:rgba(255,102,0,0.3);
   --tc:#c9f;--tc-bg:rgba(204,153,255,0.1);--tc-b:rgba(204,153,255,0.3);
   --td:#4bf;--td-bg:rgba(68,187,255,0.1);--td-b:rgba(68,187,255,0.3);
-  --shadow:0 4px 24px rgba(0,0,0,0.6);--nav-bg:rgba(14,14,14,0.95);
-  --accent:#d4d4d8;--accent-bg:rgba(212,212,216,0.12);
+  --shadow:0 12px 40px rgba(0,0,0,0.6);--shadow-sm:0 4px 16px rgba(0,0,0,0.4);
+  --nav-bg:rgba(14,14,14,0.9);
 }
+
+/* ============================================================
+   BASE
+   ============================================================ */
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;min-height:100vh;transition:background .2s,color .2s}
-nav{position:sticky;top:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 16px;display:flex;align-items:center;gap:10px;height:50px}
-.nav-logo-wrap{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.nav-title{font-family:'Inter',sans-serif;font-size:14px;color:var(--text);white-space:nowrap}
-.nav-title b{color:var(--text);font-style:normal;font-weight:600}
-.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;min-height:100vh;transition:background .2s,color .2s;letter-spacing:-0.01em;position:relative}
+body::before{content:'';position:fixed;top:-22%;left:50%;transform:translateX(-50%);width:1000px;height:560px;max-width:150vw;background:radial-gradient(ellipse at center,rgba(109,91,255,.09),rgba(63,107,255,.05) 42%,transparent 72%);pointer-events:none;z-index:0;filter:blur(20px)}
+[data-theme="light"] body::before{opacity:.35}
+[data-theme="amoled"] body::before{opacity:0}
+nav,.fbar-toggle-row,.fbar,main,.cmp-bar,.modal-bg{position:relative;z-index:1}
+::selection{background:var(--accent);color:var(--accent-text)}
+:focus-visible{outline:1.5px solid var(--text);outline-offset:2px}
+h1,h2,h3,.disp{font-family:'Space Grotesk',sans-serif}
+
+/* ============================================================
+   MOTION — clean, premium micro-animations
+   ============================================================ */
+@media (prefers-reduced-motion: no-preference){
+  .rc,.stat-c,.tier-hero,.disclaimer,.table-wrap,.fbar-toggle-row,.home-top,.recent-grid .rc{
+    animation:fadeInUp .55s cubic-bezier(.16,1,.3,1) both;
+  }
+  .recent-grid .rc:nth-child(1){animation-delay:.03s}
+  .recent-grid .rc:nth-child(2){animation-delay:.06s}
+  .recent-grid .rc:nth-child(3){animation-delay:.09s}
+  .recent-grid .rc:nth-child(4){animation-delay:.12s}
+  .recent-grid .rc:nth-child(5){animation-delay:.15s}
+  .recent-grid .rc:nth-child(6){animation-delay:.18s}
+  .stats-row .stat-c:nth-child(1){animation-delay:.03s}
+  .stats-row .stat-c:nth-child(2){animation-delay:.07s}
+  .stats-row .stat-c:nth-child(3){animation-delay:.11s}
+  .stats-row .stat-c:nth-child(4){animation-delay:.15s}
+  tbody tr{animation:fadeIn .4s ease both}
+  .reveal{opacity:0;transform:translateY(16px)}
+  .reveal.in{animation:fadeInUp .6s cubic-bezier(.16,1,.3,1) forwards}
+}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes softPulse{0%,100%{opacity:1}50%{opacity:.55}}
+nav{transition:background .25s ease,border-color .25s ease}
+.rc,.stat-c,button,.sbtn,.td-btn,.fchip,.ntab,input,select,.table-wrap,.disclaimer,.inv-missing-row,.inv-match-card,.missing-card,.hist-side{
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s ease;
+}
+.rc:hover{box-shadow:var(--shadow-sm)}
+.stat-c{transition:transform .18s cubic-bezier(.16,1,.3,1),border-color .18s ease}
+.stat-c:hover{transform:translateY(-2px);border-color:var(--border2)}
+.sbtn:hover,.td-btn:hover,.fchip:hover{transform:translateY(-1px)}
+.sbtn:active,.td-btn:active,.fchip:active,.ntab:active{transform:translateY(0) scale(.97)}
+tr{transition:background .12s ease}
+tbody tr:hover{background:var(--surface2)}
+.tier-badge-lg{transition:transform .2s cubic-bezier(.16,1,.3,1)}
+.tier-hero:hover .tier-badge-lg{transform:scale(1.04)}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+nav{position:sticky;top:0;z-index:200;background:var(--nav-bg);backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:18px;height:64px}
+.nav-logo-wrap{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.nav-title{font-family:'Space Grotesk',sans-serif;font-size:15px;color:var(--text);white-space:nowrap;font-weight:500;letter-spacing:-0.02em}
+.nav-title b{color:var(--text);font-style:normal;font-weight:700}
+.nav-divider{width:1px;height:18px;background:var(--border2);flex-shrink:0;margin:0 4px}
+.nav-tabs{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none;min-width:0}
 .nav-tabs::-webkit-scrollbar{display:none}
-.ntab{padding:4px 9px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .14s;color:var(--text-muted);background:transparent;border:none;font-family:'Inter',sans-serif}
-.ntab:hover{color:var(--text);background:var(--surface2)}
-.ntab.active{color:var(--text);background:var(--surface3)}
-.ntab-x.active{color:#fca5a5;background:var(--tx-bg)}
-.ntab-ss.active{color:#c4b5fd;background:var(--tss-bg)}
-.ntab-s.active{color:#86efac;background:var(--ts-bg)}
-.ntab-a.active{color:#93c5fd;background:var(--ta-bg)}
-.ntab-b.active{color:#fcd34d;background:var(--tb-bg)}
-.ntab-c.active{color:#fde047;background:var(--tc-bg)}
-.ntab-d.active{color:#fdba74;background:var(--td-bg)}
-.ntab-special.active{color:var(--text);background:var(--surface3);border:1px solid var(--border2)}
-.nav-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.ntab{padding:8px 3px;margin:0 9px;border-radius:0;font-size:13px;font-weight:400;cursor:pointer;white-space:nowrap;transition:color .15s ease;color:var(--text-muted);background:transparent;border:none;border-bottom:1.5px solid transparent;font-family:'Inter',sans-serif;letter-spacing:-0.01em}
+.ntab:hover{color:var(--text)}
+.ntab.active{color:var(--text);border-bottom-color:var(--text)}
+.ntab-x.active{color:var(--tx);border-bottom-color:var(--tx)}
+.ntab-ss.active{color:var(--tss);border-bottom-color:var(--tss)}
+.ntab-s.active{color:var(--ts);border-bottom-color:var(--ts)}
+.ntab-a.active{color:var(--ta);border-bottom-color:var(--ta)}
+.ntab-b.active{color:var(--tb);border-bottom-color:var(--tb)}
+.ntab-c.active{color:var(--tc);border-bottom-color:var(--tc)}
+.ntab-d.active{color:var(--td);border-bottom-color:var(--td)}
+.ntab-special{color:var(--text-dim)}
+.ntab-special.active{color:var(--text);border-bottom-color:var(--text)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .sb{position:relative}
-.sb input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:5px 9px 5px 25px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:140px;transition:width .2s,border-color .2s}
-.sb input:focus{width:180px;border-color:rgba(255,255,255,0.2)}
-[data-theme="light"] .sb input:focus{border-color:rgba(0,0,0,.25)}
+.sb input{background:var(--surface2);border:1px solid transparent;border-radius:999px;padding:8px 14px 8px 32px;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;outline:none;width:150px;transition:width .2s,border-color .2s,background .2s}
+.sb input:focus{width:210px;border-color:var(--border2);background:var(--surface3)}
 .sb input::placeholder{color:var(--text-dim)}
-.sb-icon{position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:11px;pointer-events:none}
+.sb-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:12px;pointer-events:none}
 .td-wrap{position:relative}
-.td-btn{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);color:var(--text-muted);font-size:11px;padding:4px 8px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .14s;display:flex;align-items:center;gap:4px}
-.td-btn:hover{color:var(--text)}
-.td-menu{position:absolute;right:0;top:calc(100% + 5px);background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);padding:4px;min-width:148px;box-shadow:var(--shadow);z-index:300;display:none}
+.td-btn{background:var(--surface2);border:1px solid transparent;border-radius:999px;color:var(--text-muted);font-size:12px;padding:7px 13px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;display:flex;align-items:center;gap:5px}
+.td-btn:hover{color:var(--text);background:var(--surface3)}
+.td-menu{position:absolute;right:0;top:calc(100% + 8px);background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);padding:5px;min-width:150px;box-shadow:var(--shadow);z-index:300;display:none}
 .td-menu.open{display:block}
-.td-opt{padding:6px 10px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;color:var(--text-muted);font-family:'DM Mono',monospace;display:flex;align-items:center;gap:8px;transition:all .1s}
-.td-opt:hover,.td-opt.active{background:var(--surface2);color:var(--text)}
+.td-opt{padding:8px 10px;border-radius:var(--radius-sm);font-size:12.5px;cursor:pointer;color:var(--text-muted);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:8px;transition:all .1s}
+.td-opt:hover,.td-opt.active{background:var(--surface3);color:var(--text)}
 .t-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.fbar{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.trello-tip{position:absolute;top:calc(100% + 8px);right:0;width:220px;background:var(--surface3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 11px;font-size:11px;line-height:1.5;color:var(--text-muted);font-family:'Inter',sans-serif;box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s ease,transform .15s ease,visibility .15s;z-index:400;pointer-events:none;text-align:left}
+.trello-btn:hover .trello-tip,.trello-btn:focus-visible .trello-tip{opacity:1;visibility:visible;transform:translateY(0)}
+@media(max-width:860px){.trello-tip{display:none}}
+
+/* ============================================================
+   FILTER DRAWER (collapsible, off by default for a cleaner page)
+   ============================================================ */
+.fbar-toggle-row{max-width:1280px;margin:0 auto;padding:18px 24px 0;display:flex;justify-content:flex-end}
+.fbar-toggle{font-size:12px;font-family:'Inter',sans-serif;color:var(--text-dim);background:transparent;border:none;border-radius:999px;padding:6px 4px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.fbar-toggle:hover{color:var(--text)}
+.fbar-toggle.on{color:var(--text)}
+.fbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px 20px;display:none;align-items:center;gap:10px;flex-wrap:wrap;max-width:1280px;margin:10px auto 0;box-shadow:var(--shadow-sm)}
+.fbar.open{display:flex}
 .flabel{font-size:10px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:.08em;text-transform:uppercase;flex-shrink:0}
-.fchip{padding:3px 9px;border-radius:20px;font-size:11px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;white-space:nowrap}
+.fchip{padding:4px 11px;border-radius:999px;font-size:11.5px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s;white-space:nowrap}
 .fchip:hover{color:var(--text);border-color:var(--text-dim)}
-.fchip.on{background:var(--accent-bg);border-color:var(--accent);color:var(--accent)}
-.fsep{width:1px;height:14px;background:var(--border2);flex-shrink:0}
-.frange{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-dim)}
-.frange input{width:64px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:3px 6px;font-size:11px;color:var(--text);font-family:'DM Mono',monospace;outline:none}
-.fclear{font-size:11px;color:var(--text-dim);cursor:pointer;margin-left:auto;font-family:'DM Mono',monospace;padding:3px 7px;border-radius:var(--radius-sm);border:1px solid transparent;transition:all .12s}
+.fchip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-text)}
+.fsep{width:1px;height:16px;background:var(--border2);flex-shrink:0}
+.frange{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-dim)}
+.frange input{width:66px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 7px;font-size:11.5px;color:var(--text);font-family:'DM Mono',monospace;outline:none}
+.fclear{font-size:11.5px;color:var(--text-dim);cursor:pointer;margin-left:auto;font-family:'Inter',sans-serif;padding:4px 10px;border-radius:999px;border:1px solid transparent;transition:all .12s}
 .fclear:hover{color:var(--text);border-color:var(--border2)}
-main{max-width:1280px;margin:0 auto;padding:22px 16px 100px}
-.home-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:22px;flex-wrap:wrap}
-.home-title h1{font-size:28px;font-weight:600;line-height:1.2;margin-bottom:5px}
-.home-title h1 span{color:var(--text)}
-.home-title p{font-size:13px;color:var(--text-muted);max-width:480px;line-height:1.6}
-.stats-row{display:flex;gap:8px;flex-wrap:wrap}
-.stat-c{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px;text-align:center;min-width:78px}
-.stat-n{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--text)}
-.stat-l{font-size:10px;color:var(--text-dim);letter-spacing:.05em;text-transform:uppercase;margin-top:2px}
-.sec-title{font-size:10px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:9px}
-.recent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:6px;margin-bottom:26px}
-.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;display:flex;align-items:center;gap:9px;transition:border-color .14s;cursor:pointer}
-.rc:hover{border-color:var(--border2);background:var(--surface2)}
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+main{max-width:1280px;margin:0 auto;padding:36px 20px 110px}
+.home-top{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:34px;flex-wrap:wrap}
+.home-title h1{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:600;line-height:1.15;margin-bottom:8px;letter-spacing:-0.02em}
+.home-title h1 span{color:var(--text-muted);font-weight:400}
+.home-title p{font-size:14px;color:var(--text-muted);max-width:480px;line-height:1.65}
+.stats-row{display:flex;gap:10px;flex-wrap:wrap}
+.stat-c{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;text-align:center;min-width:88px}
+.stat-n{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:600;color:var(--text)}
+.stat-l{font-size:10px;color:var(--text-dim);letter-spacing:.06em;text-transform:uppercase;margin-top:3px;font-family:'DM Mono',monospace}
+.sec-title{font-size:10.5px;font-family:'DM Mono',monospace;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px}
+.recent-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px;margin-bottom:36px}
+.rc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px;display:flex;align-items:center;gap:10px;transition:all .15s;cursor:pointer}
+.rc:hover{border-color:var(--border2);background:var(--surface2);transform:translateY(-1px)}
 .rc-info{flex:1;min-width:0}
-.rc-name{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rc-meta{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:1px}
+.rc-name{font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rc-meta{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:2px}
 .rc-trend{font-size:13px;flex-shrink:0}
 .t-up{color:#4ade80}.t-dn{color:#f87171}.t-st{color:var(--text-dim)}.t-un{color:#fbbf24}
-.disclaimer{padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text-muted);display:flex;gap:9px;align-items:flex-start;margin-top:6px}
-.tier-hero{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.tier-badge-lg{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:500;font-family:'DM Mono',monospace;flex-shrink:0}
-.tier-hero h1{font-size:22px;font-weight:400;font-style:italic}
-.tier-note{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:2px}
-.tier-cnt{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);flex-shrink:0}
+.disclaimer{padding:13px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);font-size:12px;color:var(--text-muted);display:flex;gap:10px;align-items:flex-start;margin-top:8px;line-height:1.55}
+.tier-hero{display:flex;align-items:center;gap:16px;margin-bottom:26px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.tier-badge-lg{padding:5px 14px;border-radius:999px;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;flex-shrink:0}
+.tier-hero h1{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:600}
+.tier-note{font-size:11.5px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:3px}
+.tier-cnt{margin-left:auto;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-dim);flex-shrink:0}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
 .table-wrap{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border)}
-.tbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
-.sbtn{font-size:11px;padding:3px 7px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'DM Mono',monospace;transition:all .12s}
-.sbtn:hover{color:var(--text)}
-.sbtn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}
-.tcnt{margin-left:auto;font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace}
+.tbar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sbtn{font-size:11.5px;padding:5px 11px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .12s}
+.sbtn:hover{color:var(--text);border-color:var(--text-dim)}
+.sbtn.active{border-color:var(--accent);color:var(--accent-text);background:var(--accent)}
+.tcnt{margin-left:auto;font-size:10.5px;color:var(--text-dim);font-family:'DM Mono',monospace}
 table{width:100%;border-collapse:collapse;font-size:13px}
 thead{background:var(--surface)}
-th{padding:8px 12px;text-align:left;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);font-family:'DM Mono',monospace;white-space:nowrap;border-bottom:1px solid var(--border)}
+th{padding:11px 14px;text-align:left;font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);font-family:'DM Mono',monospace;white-space:nowrap;border-bottom:1px solid var(--border)}
 th:first-child{width:30px;text-align:center}
-td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-muted)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text-muted)}
 tr:last-child td{border-bottom:none}
-tr{transition:background .1s}
+tr{transition:background .12s}
 tr:hover td{background:var(--surface2)}
 .td-name{color:var(--text);font-weight:400;white-space:nowrap}
 .td-val{font-family:'DM Mono',monospace;font-weight:500;color:var(--text);white-space:nowrap}
 .td-trend{text-align:center;font-size:13px}
-.td-how{font-size:11px;color:var(--text-dim);max-width:300px}
+.td-how{font-size:11.5px;color:var(--text-dim);max-width:300px}
 .td-cls{text-align:center}
-.cpill{font-family:'DM Mono',monospace;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:500}
-.cls-X{background:var(--tx-bg);color:#fca5a5;border:1px solid var(--tx-b)}
-.cls-SS{background:var(--tss-bg);color:#c4b5fd;border:1px solid var(--tss-b)}
-.cls-S{background:var(--ts-bg);color:#86efac;border:1px solid var(--ts-b)}
-.cls-A{background:var(--ta-bg);color:#93c5fd;border:1px solid var(--ta-b)}
-.cls-B{background:var(--tb-bg);color:#fcd34d;border:1px solid var(--tb-b)}
-.cls-C{background:var(--tc-bg);color:#fde047;border:1px solid var(--tc-b)}
-.cls-D{background:var(--td-bg);color:#fdba74;border:1px solid var(--td-b)}
-.cls-E{background:rgba(161,161,170,.1);color:#a1a1aa;border:1px solid rgba(161,161,170,.2)}
-.dem{font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap}
-.dem-Insane{background:rgba(220,38,38,.12);color:#fca5a5}
-.dem-Good{background:rgba(22,163,74,.12);color:#86efac}
-.dem-GoodDecent{background:rgba(20,184,166,.12);color:#5eead4}
-.dem-Decent{background:rgba(37,99,235,.12);color:#93c5fd}
-.dem-DecentMid{background:rgba(124,58,237,.12);color:#c4b5fd}
-.dem-Mid{background:rgba(217,119,6,.12);color:#fcd34d}
-.dem-MidBad{background:rgba(234,88,12,.12);color:#fdba74}
-.dem-Bad{background:rgba(113,113,122,.12);color:#a1a1aa}
-.dem-BadHorrible{background:rgba(63,63,70,.2);color:#71717a}
-.dem-Horrible{background:rgba(39,39,42,.5);color:#52525b}
-.add-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-dim);font-size:10px;padding:2px 6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all .14s}
-.add-btn:hover{border-color:var(--border2);color:var(--text);background:var(--surface2)}
-.add-btn.added{border-color:rgba(22,163,74,.4);color:#86efac;background:rgba(22,163,74,.08)}
-.wish-btn{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:12px;padding:0 2px;transition:all .14s}
+.cpill{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:6px;font-weight:500}
+.cls-X{background:var(--tx-bg);color:var(--tx);border:1px solid var(--tx-b)}
+.cls-SS{background:var(--tss-bg);color:var(--tss);border:1px solid var(--tss-b)}
+.cls-S{background:var(--ts-bg);color:var(--ts);border:1px solid var(--ts-b)}
+.cls-A{background:var(--ta-bg);color:var(--ta);border:1px solid var(--ta-b)}
+.cls-B{background:var(--tb-bg);color:var(--tb);border:1px solid var(--tb-b)}
+.cls-C{background:var(--tc-bg);color:var(--tc);border:1px solid var(--tc-b)}
+.cls-D{background:var(--td-bg);color:var(--td);border:1px solid var(--td-b)}
+.cls-E{background:rgba(139,139,147,.1);color:var(--text-muted);border:1px solid rgba(139,139,147,.2)}
+.dem{font-size:11px;padding:3px 10px;border-radius:999px;white-space:nowrap}
+.dem-Insane{background:rgba(248,113,113,.12);color:#f87171}
+.dem-Good{background:rgba(74,222,128,.12);color:#4ade80}
+.dem-GoodDecent{background:rgba(45,212,191,.12);color:#2dd4bf}
+.dem-Decent{background:rgba(96,165,250,.12);color:#60a5fa}
+.dem-DecentMid{background:rgba(167,139,250,.12);color:#a78bfa}
+.dem-Mid{background:rgba(251,191,36,.12);color:#fbbf24}
+.dem-MidBad{background:rgba(251,146,60,.12);color:#fb923c}
+.dem-Bad{background:rgba(139,139,147,.12);color:var(--text-muted)}
+.dem-BadHorrible{background:rgba(139,139,147,.2);color:var(--text-dim)}
+.dem-Horrible{background:rgba(139,139,147,.3);color:var(--text-dim)}
+.add-btn{background:none;border:1px solid var(--border2);border-radius:999px;color:var(--text-dim);font-size:10.5px;padding:3px 9px;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.add-btn:hover{border-color:var(--text-dim);color:var(--text);background:var(--surface2)}
+.add-btn.added{border-color:rgba(74,222,128,.4);color:#4ade80;background:rgba(74,222,128,.08)}
+.wish-btn{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;padding:0 2px;transition:all .15s}
 .wish-btn:hover{color:#fbbf24;transform:scale(1.2)}
+
+/* ============================================================
+   PAGES / SHARED
+   ============================================================ */
 .wish-btn.wished{color:#fbbf24}
-.no-res{text-align:center;padding:40px 20px;color:var(--text-dim);font-size:13px}
+.no-res{text-align:center;padding:56px 20px;color:var(--text-dim);font-size:13px}
 .trade-page,.updates-page,.wishlist-page,.all-page{display:none}
 .trade-page.active,.updates-page.active,.wishlist-page.active,.all-page.active{display:block}
-.page-header{margin-bottom:22px;padding-bottom:16px;border-bottom:1px solid var(--border)}
-.page-header h1{font-size:24px;font-weight:400;font-style:italic;margin-bottom:4px}
-.page-header p{font-size:13px;color:var(--text-muted)}
-.class-intro{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:22px;font-size:13px;color:var(--text-muted);line-height:1.6}
+.page-header{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.page-header h1{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:600;margin-bottom:6px;letter-spacing:-0.02em}
+.page-header p{font-size:13.5px;color:var(--text-muted);line-height:1.6}
+.class-intro{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:26px;font-size:13px;color:var(--text-muted);line-height:1.65}
 .class-intro strong{color:var(--text)}
-.cls-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
-.cls-nav-btn{padding:5px 13px;border-radius:20px;font-size:12px;font-weight:500;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text-muted);transition:all .14s}
+.cls-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px}
+.cls-nav-btn{padding:6px 15px;border-radius:999px;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text-muted);transition:all .15s}
 .cls-nav-btn:hover{color:var(--text);border-color:var(--text-dim)}
 .cls-nav-btn.active{color:var(--text)}
-.cls-nav-btn.cnb-X.active{background:var(--tx-bg);border-color:var(--tx-b);color:#fca5a5}
-.cls-nav-btn.cnb-SS.active{background:var(--tss-bg);border-color:var(--tss-b);color:#c4b5fd}
-.cls-nav-btn.cnb-S.active{background:var(--ts-bg);border-color:var(--ts-b);color:#86efac}
-.cls-nav-btn.cnb-A.active{background:var(--ta-bg);border-color:var(--ta-b);color:#93c5fd}
-.cls-nav-btn.cnb-B.active{background:var(--tb-bg);border-color:var(--tb-b);color:#fcd34d}
-.cls-nav-btn.cnb-C.active{background:var(--tc-bg);border-color:var(--tc-b);color:#fde047}
-.cls-nav-btn.cnb-D.active{background:var(--td-bg);border-color:var(--td-b);color:#fdba74}
-.cls-nav-btn.cnb-E.active{background:rgba(161,161,170,.1);border-color:rgba(161,161,170,.2);color:#a1a1aa}
-.class-section{margin-bottom:28px}
-.class-hero{display:flex;align-items:center;gap:12px;margin-bottom:14px;padding:14px 18px;border-radius:var(--radius);border:1px solid var(--border)}
-.class-hero-badge{font-family:'DM Mono',monospace;font-size:18px;font-weight:700;padding:6px 14px;border-radius:8px;flex-shrink:0}
+.cls-nav-btn.cnb-X.active{background:var(--tx-bg);border-color:var(--tx-b);color:var(--tx)}
+.cls-nav-btn.cnb-SS.active{background:var(--tss-bg);border-color:var(--tss-b);color:var(--tss)}
+.cls-nav-btn.cnb-S.active{background:var(--ts-bg);border-color:var(--ts-b);color:var(--ts)}
+.cls-nav-btn.cnb-A.active{background:var(--ta-bg);border-color:var(--ta-b);color:var(--ta)}
+.cls-nav-btn.cnb-B.active{background:var(--tb-bg);border-color:var(--tb-b);color:var(--tb)}
+.cls-nav-btn.cnb-C.active{background:var(--tc-bg);border-color:var(--tc-b);color:var(--tc)}
+.cls-nav-btn.cnb-D.active{background:var(--td-bg);border-color:var(--td-b);color:var(--td)}
+.cls-nav-btn.cnb-E.active{background:rgba(139,139,147,.1);border-color:rgba(139,139,147,.2);color:var(--text-muted)}
+.class-section{margin-bottom:32px}
+.class-hero{display:flex;align-items:center;gap:14px;margin-bottom:16px;padding:16px 20px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface)}
+.class-hero-badge{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;padding:7px 15px;border-radius:var(--radius-sm);flex-shrink:0}
 .class-hero-info{flex:1}
 .class-hero-name{font-size:16px;font-weight:500;color:var(--text);margin-bottom:3px}
-.class-hero-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+.class-hero-desc{font-size:12.5px;color:var(--text-muted);line-height:1.5}
 .class-hero-cnt{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);flex-shrink:0;text-align:right}
-.class-hero-cnt span{display:block;font-size:18px;font-weight:500;color:var(--text-muted)}
+.class-hero-cnt span{display:block;font-size:18px;font-weight:500;color:var(--text-muted);font-family:'Space Grotesk',sans-serif}
 .td-tier{text-align:center}
-.trade-grid{display:grid;grid-template-columns:1fr 46px 1fr;gap:12px;align-items:start}
+
+/* Trade calculator */
+.trade-grid{display:grid;grid-template-columns:1fr 46px 1fr;gap:14px;align-items:start}
 .trade-side{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
-.side-top{padding:13px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.side-label{font-size:13px;font-weight:500;color:var(--text)}
+.side-top{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.side-label{font-size:13.5px;font-weight:500;color:var(--text)}
 .side-tv-label{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:.05em;text-transform:uppercase}
-.side-tv{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text);text-align:right}
-.side-items{padding:9px;min-height:90px;display:flex;flex-direction:column;gap:5px}
-.trade-item{display:flex;align-items:center;gap:7px;padding:7px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
-.ti-name{font-size:12px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.side-tv{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--text);text-align:right}
+.side-items{padding:10px;min-height:90px;display:flex;flex-direction:column;gap:6px}
+.trade-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.ti-name{font-size:12.5px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ti-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap}
-.ti-tier{font-size:10px;padding:1px 5px;border-radius:3px;font-family:'DM Mono',monospace;font-weight:500;flex-shrink:0}
-.ti-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;transition:color .14s;flex-shrink:0}
-.ti-rm:hover{color:#fca5a5}
-.t-empty{color:var(--text-dim);font-size:12px;text-align:center;padding:18px 0;font-family:'DM Mono',monospace}
-.side-search{padding:0 9px 9px}
-.side-search input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 9px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
+.ti-tier{font-size:10px;padding:2px 6px;border-radius:5px;font-family:'DM Mono',monospace;font-weight:500;flex-shrink:0}
+.ti-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:15px;line-height:1;padding:0 2px;transition:color .15s;flex-shrink:0}
+.ti-rm:hover{color:var(--tx)}
+.t-empty{color:var(--text-dim);font-size:12px;text-align:center;padding:20px 0;font-family:'DM Mono',monospace}
+.side-search{padding:0 10px 10px}
+.side-search input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 10px;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
 .side-search input::placeholder{color:var(--text-dim)}
-.side-search input:focus{border-color:rgba(255,255,255,.2)}
-[data-theme="light"] .side-search input:focus{border-color:rgba(0,0,0,.22)}
-.side-drop{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:4px;max-height:150px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
-.drop-item{padding:7px 9px;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:7px;transition:background .1s}
-.drop-item:hover{background:var(--surface2)}
+.side-search input:focus{border-color:var(--text-dim)}
+.side-drop{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);margin-top:5px;max-height:150px;overflow-y:auto;display:none;box-shadow:var(--shadow)}
+.drop-item{padding:8px 10px;font-size:12.5px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;transition:background .1s}
+.drop-item:hover{background:var(--surface3)}
 .drop-name{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .drop-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);white-space:nowrap;flex-shrink:0}
-.side-clear{font-size:11px;color:var(--text-dim);cursor:pointer;padding:0 9px 9px;display:block;font-family:'DM Mono',monospace;transition:color .14s}
+.side-clear{font-size:11.5px;color:var(--text-dim);cursor:pointer;padding:0 10px 10px;display:block;font-family:'Inter',sans-serif;transition:color .15s}
 .side-clear:hover{color:var(--text-muted)}
 .vs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:52px;gap:9px}
-.vs-circle{width:36px;height:36px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)}
-.verdict{margin-top:16px;padding:13px 16px;border-radius:var(--radius);border:1px solid var(--border);text-align:center;font-size:13px;color:var(--text-muted);background:var(--surface)}
-.verdict.fair{border-color:rgba(22,163,74,.3);background:rgba(22,163,74,.06);color:#86efac}
-.verdict.win{border-color:rgba(37,99,235,.3);background:rgba(37,99,235,.06);color:#93c5fd}
-.verdict.loss{border-color:rgba(220,38,38,.3);background:rgba(220,38,38,.06);color:#fca5a5}
-.verdict-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;opacity:.6}
-.verdict-txt{font-size:13px}
-.qs-section{margin-top:22px;padding-top:22px;border-top:1px solid var(--border)}
-.qs-label{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px}
-.qs-bar{display:flex;gap:7px;margin-bottom:9px}
-.qs-bar input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 9px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
+.vs-circle{width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-size:11px;color:var(--text-dim);font-weight:600}
+.verdict{margin-top:18px;padding:15px 18px;border-radius:var(--radius);border:1px solid var(--border);text-align:center;font-size:13.5px;color:var(--text-muted);background:var(--surface)}
+.verdict.fair{border-color:var(--ts-b);background:var(--ts-bg);color:var(--ts)}
+.verdict.win{border-color:var(--ta-b);background:var(--ta-bg);color:var(--ta)}
+.verdict.loss{border-color:var(--tx-b);background:var(--tx-bg);color:var(--tx)}
+.verdict-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:5px;opacity:.7}
+.verdict-txt{font-size:13.5px}
+.qs-section{margin-top:26px;padding-top:26px;border-top:1px solid var(--border)}
+.qs-label{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
+.qs-bar{display:flex;gap:8px;margin-bottom:10px}
+.qs-bar input{flex:1;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
 .qs-bar input::placeholder{color:var(--text-dim)}
-.qs-bar input:focus{border-color:rgba(255,255,255,.2)}
-[data-theme="light"] .qs-bar input:focus{border-color:rgba(0,0,0,.22)}
+.qs-bar input:focus{border-color:var(--text-dim)}
 .target-sel{display:flex;gap:5px}
-.target-btn{padding:6px 13px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text-muted);transition:all .14s;font-family:'Inter',sans-serif}
-.target-btn.a-my{border-color:rgba(37,99,235,.5);background:rgba(37,99,235,.1);color:#93c5fd}
-.target-btn.a-their{border-color:rgba(220,38,38,.5);background:rgba(220,38,38,.1);color:#fca5a5}
-.mini-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:5px}
-.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;cursor:pointer;transition:all .14s;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.target-btn{padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text-muted);transition:all .15s;font-family:'Inter',sans-serif}
+.target-btn.a-my{border-color:var(--ta-b);background:var(--ta-bg);color:var(--ta)}
+.target-btn.a-their{border-color:var(--tx-b);background:var(--tx-bg);color:var(--tx)}
+.mini-res{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mini-card:hover{border-color:var(--border2);background:var(--surface2)}
 
-.sugg-section{margin-top:14px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
-.sugg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:9px}
-.sugg-title{font-size:13px;font-weight:600;color:var(--text)}
+.sugg-section{margin-top:16px;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)}
+.sugg-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sugg-title{font-size:13.5px;font-weight:600;color:var(--text);font-family:'Space Grotesk',sans-serif}
 .sugg-sub{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace}
-.sugg-controls{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
-.sugg-controls label{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
-.sugg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:7px}
-.sugg-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 10px}
+.sugg-controls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.sugg-controls label{font-size:11.5px;color:var(--text-muted);display:flex;align-items:center;gap:5px}
+.sugg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:8px}
+.sugg-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 11px}
 .sugg-top{display:flex;align-items:center;gap:7px;margin-bottom:5px}
-.sugg-name{font-size:12px;color:var(--text);font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sugg-meta{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;line-height:1.45}
-.sugg-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
-.sugg-good{color:#86efac}.sugg-over{color:#fca5a5}.sugg-under{color:#93c5fd}
-.mc-name{font-size:12px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg-name{font-size:12.5px;color:var(--text);font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sugg-meta{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;line-height:1.5}
+.sugg-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.sugg-good{color:var(--ts)}.sugg-over{color:var(--tx)}.sugg-under{color:var(--ta)}
+.mc-name{font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mc-meta{display:flex;align-items:center;gap:5px;flex-shrink:0}
 .mc-val{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted)}
-.trade-fab{position:fixed;bottom:22px;right:20px;z-index:150;background:var(--accent);color:#000;border:none;border-radius:22px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 18px rgba(245,158,11,.35);transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px}
-.trade-fab:hover{transform:translateY(-2px);box-shadow:0 6px 26px rgba(245,158,11,.48)}
+.trade-fab{position:fixed;bottom:24px;right:24px;z-index:150;background:var(--accent);color:var(--accent-text);border:none;border-radius:999px;padding:11px 20px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:var(--shadow);transition:all .2s;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px}
+.trade-fab:hover{transform:translateY(-2px)}
 .trade-fab.hide{display:none}
-.cl-list{display:flex;flex-direction:column;gap:14px}
-.cl-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px}
-.cl-head{display:flex;align-items:center;gap:9px;margin-bottom:11px;flex-wrap:wrap}
-.cl-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);background:var(--surface2);padding:2px 7px;border-radius:20px}
-.cl-title{font-size:14px;font-weight:500;color:var(--text)}
-.cl-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;font-weight:500}
-.cl-badge.major{background:rgba(220,38,38,.12);color:#fca5a5}
-.cl-badge.minor{background:rgba(37,99,235,.12);color:#93c5fd}
-.cl-badge.hotfix{background:rgba(217,119,6,.12);color:#fcd34d}
-.cl-changes{display:flex;flex-direction:column;gap:5px}
-.cl-chg{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--text-muted)}
+
+/* Updates */
+.cl-list{display:flex;flex-direction:column;gap:16px}
+.cl-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.cl-head{display:flex;align-items:center;gap:9px;margin-bottom:13px;flex-wrap:wrap}
+.cl-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim);background:var(--surface2);padding:3px 9px;border-radius:999px}
+.cl-title{font-size:14.5px;font-weight:500;color:var(--text);font-family:'Space Grotesk',sans-serif}
+.cl-badge{font-size:10px;padding:3px 9px;border-radius:999px;font-family:'DM Mono',monospace;font-weight:500}
+.cl-badge.major{background:var(--tx-bg);color:var(--tx)}
+.cl-badge.minor{background:var(--ta-bg);color:var(--ta)}
+.cl-badge.hotfix{background:var(--tb-bg);color:var(--tb)}
+.cl-changes{display:flex;flex-direction:column;gap:6px}
+.cl-chg{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:var(--text-muted)}
 .cl-chg-icon{flex-shrink:0;margin-top:1px;font-size:13px}
 .cl-chg-text{flex:1}
 .cl-chg-text strong{color:var(--text);font-weight:500}
-.cl-reason{font-size:11px;color:var(--text-dim);margin-top:2px;font-style:italic}
-.wl-empty{text-align:center;padding:54px 20px;color:var(--text-dim);font-size:13px}
-.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:7px}
-.wl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;transition:border-color .14s}
-.wl-card:hover{border-color:var(--border2)}
-.wl-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.cl-reason{font-size:11.5px;color:var(--text-dim);margin-top:3px;font-style:italic}
+
+/* Wishlist */
+.wl-empty{text-align:center;padding:60px 20px;color:var(--text-dim);font-size:13px}
+.wl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.wl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px;transition:all .15s}
+.wl-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.wl-top{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .wl-name{font-size:13px;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wl-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;transition:color .14s;padding:0}
-.wl-rm:hover{color:#fca5a5}
+.wl-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;transition:color .15s;padding:0}
+.wl-rm:hover{color:var(--tx)}
 .wl-meta{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
-.wl-tools{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.wl-tools{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .wl-tools .flabel{margin-right:2px}
 .wl-cat{margin-left:4px}
-.wl-source{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:2px 7px}
+.wl-source{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:999px;padding:3px 9px}
 
-.ai-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
-.ai-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.ai-input{flex:1;min-width:240px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px 11px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
-.ai-input:focus{border-color:rgba(255,255,255,.22)}
-[data-theme="light"] .ai-input:focus{border-color:rgba(0,0,0,.25)}
-.ai-send{padding:9px 14px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent-bg);color:var(--accent);cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:600}
+/* AI Helper */
+.ai-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.ai-row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.ai-input{flex:1;min-width:240px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
+.ai-input:focus{border-color:var(--text-dim)}
+.ai-send{padding:10px 16px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:var(--accent);color:var(--accent-text);cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;transition:opacity .15s}
 .ai-send:hover{opacity:.85}
-.ai-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.ai-chip{font-size:11px;padding:5px 9px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'DM Mono',monospace}
-.ai-chip:hover{color:var(--text);background:var(--surface2)}
-.ai-answer{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;color:var(--text-muted);font-size:13px;line-height:1.55}
+.ai-chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.ai-chip{font-size:11.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--text-muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.ai-chip:hover{color:var(--text);background:var(--surface2);border-color:var(--text-dim)}
+.ai-answer{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:14px;color:var(--text-muted);font-size:13px;line-height:1.6}
 .ai-answer strong{color:var(--text);font-weight:600}
-.ai-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:7px;margin-top:10px}
-.ai-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px}
+.ai-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;margin-top:11px}
+.ai-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px}
 .ai-card:hover{border-color:var(--border2)}
-.ai-card-top{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.ai-card-top{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .ai-card-name{font-size:13px;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ai-card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:7px}
-.ai-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
-.ai-note{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:7px}
-.inv-scan-box{border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);padding:14px;margin-bottom:12px}
-.inv-scan-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:8px}
-.inv-preview{max-width:260px;max-height:170px;border:1px solid var(--border2);border-radius:var(--radius-sm);display:none;margin-top:10px}
-.inv-text{width:100%;min-height:85px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;margin-top:8px}
-.inv-stat{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border);background:var(--surface2);border-radius:20px;padding:3px 8px}
-.inv-progress{font-size:12px;color:var(--text-muted);margin-top:8px}
-
-.ai-log{display:flex;flex-direction:column;gap:8px}
-.ai-msg{padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface)}
+.ai-card-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+.ai-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.ai-note{font-size:11.5px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:8px;line-height:1.5}
+.inv-scan-box{border:1px solid var(--border2);border-radius:var(--radius);background:var(--surface);padding:16px;margin-bottom:14px}
+.inv-scan-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:9px}
+.inv-preview{max-width:260px;max-height:170px;border:1px solid var(--border2);border-radius:var(--radius-sm);display:none;margin-top:11px}
+.inv-text{width:100%;min-height:85px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:9px;color:var(--text);font-family:'DM Mono',monospace;font-size:11.5px;outline:none;margin-top:9px}
+.inv-stat{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);border:1px solid var(--border);background:var(--surface2);border-radius:999px;padding:4px 10px}
+.inv-progress{font-size:12px;color:var(--text-muted);margin-top:9px}
+.ai-log{display:flex;flex-direction:column;gap:9px}
+.ai-msg{padding:11px 13px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface)}
 .ai-msg.user{margin-left:35px;background:var(--surface2);color:var(--text)}
 .ai-msg.bot{margin-right:35px;color:var(--text-muted)}
 
-.all-section{margin-bottom:32px}
-.cmp-bar{position:fixed;bottom:0;left:0;right:0;z-index:140;background:var(--surface);border-top:1px solid var(--border2);padding:10px 16px;display:none;align-items:center;gap:9px;flex-wrap:wrap;box-shadow:0 -4px 20px rgba(0,0,0,.25)}
+.all-section{margin-bottom:36px}
+
+/* Compare bar / modal */
+.cmp-bar{position:fixed;bottom:0;left:0;right:0;z-index:140;background:var(--surface);border-top:1px solid var(--border2);padding:12px 20px;display:none;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:var(--shadow)}
 .cmp-bar.show{display:flex}
-.cmp-items{display:flex;gap:7px;flex:1;flex-wrap:wrap}
-.cmp-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:4px 9px;font-size:12px;color:var(--text)}
-.cmp-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;transition:color .14s;padding:0;line-height:1}
-.cmp-rm:hover{color:#fca5a5}
-.cmp-actions{display:flex;gap:5px;flex-shrink:0}
-.cmp-go{padding:5px 13px;border-radius:var(--radius-sm);font-size:12px;font-weight:500;cursor:pointer;background:var(--accent-bg);border:1px solid var(--accent);color:var(--accent);font-family:'Inter',sans-serif;transition:all .14s}
+.cmp-items{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+.cmp-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:5px 11px;font-size:12px;color:var(--text)}
+.cmp-rm{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;transition:color .15s;padding:0;line-height:1}
+.cmp-rm:hover{color:var(--tx)}
+.cmp-actions{display:flex;gap:6px;flex-shrink:0}
+.cmp-go{padding:6px 15px;border-radius:999px;font-size:12px;font-weight:600;cursor:pointer;background:var(--accent);border:1px solid var(--accent);color:var(--accent-text);font-family:'Inter',sans-serif;transition:all .15s}
 .cmp-go:hover{opacity:.85}
-.cmp-clear{padding:5px 11px;border-radius:var(--radius-sm);font-size:12px;cursor:pointer;background:transparent;border:1px solid var(--border2);color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .14s}
+.cmp-clear{padding:6px 13px;border-radius:999px;font-size:12px;cursor:pointer;background:transparent;border:1px solid var(--border2);color:var(--text-muted);font-family:'Inter',sans-serif;transition:all .15s}
 .cmp-clear:hover{color:var(--text)}
 .cmp-lbl{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;flex-shrink:0}
-.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:400;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .modal-bg.hidden{display:none}
-.modal{background:var(--surface);border:1px solid var(--border2);border-radius:12px;width:100%;max-width:620px;max-height:82vh;overflow-y:auto;box-shadow:var(--shadow)}
-.modal-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
-.modal-hd h2{font-size:19px;font-weight:400;font-style:italic}
-.modal-x{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:19px;line-height:1;transition:color .14s}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-lg);width:100%;max-width:620px;max-height:82vh;overflow-y:auto;box-shadow:var(--shadow)}
+.modal-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-hd h2{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600}
+.modal-x{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:19px;line-height:1;transition:color .15s}
 .modal-x:hover{color:var(--text)}
-.modal-body{padding:14px 18px}
-.cmp-tbl{width:100%;border-collapse:collapse;font-size:12px}
-.cmp-tbl th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:7px 9px;text-align:left;border-bottom:1px solid var(--border)}
-.cmp-tbl td{padding:9px;border-bottom:1px solid var(--border);vertical-align:top}
+.modal-body{padding:16px 20px}
+.cmp-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.cmp-tbl th{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.cmp-tbl td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
 .cmp-tbl tr:last-child td{border-bottom:none}
 .cmp-n{color:var(--text);font-weight:500;font-size:13px}
 .cmp-v{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text)}
-.cmp-win{color:#4ade80;font-size:10px;font-family:'DM Mono',monospace;margin-top:2px}
+.cmp-win{color:var(--ts);font-size:10px;font-family:'DM Mono',monospace;margin-top:3px}
+
 /* Custom Serial page */
-.cs-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;background:rgba(255,255,255,.06);color:var(--text-muted);border:1px solid var(--border2)}
+.cs-badge{font-size:10px;padding:3px 9px;border-radius:999px;font-family:'DM Mono',monospace;background:var(--surface2);color:var(--text-muted);border:1px solid var(--border2)}
 .star-rating{color:#fbbf24;font-size:12px;letter-spacing:1px}
 
 /* Smart global search + full history */
-.gsuggest{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500;display:none;max-height:360px;overflow-y:auto;padding:4px;min-width:280px}
+.gsuggest{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:var(--shadow);z-index:500;display:none;max-height:360px;overflow-y:auto;padding:5px;min-width:280px}
 .gsuggest.show{display:block}
-.gs-item{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:var(--radius-sm);cursor:pointer;font-size:12px;color:var(--text-muted);transition:background .1s}
-.gs-item:hover,.gs-item.active{background:var(--surface2);color:var(--text)}
+.gs-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:12.5px;color:var(--text-muted);transition:background .1s}
+.gs-item:hover,.gs-item.active{background:var(--surface3);color:var(--text)}
 .gs-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
 .gs-meta{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);white-space:nowrap}
-.gs-head{padding:6px 9px 4px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
-.hist-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.hist-tools input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 10px;font-size:12px;color:var(--text);outline:none;min-width:230px;flex:1}
-.hist-list{display:flex;flex-direction:column;gap:8px}
-.hist-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 13px}
-.hist-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:5px}
-.hist-type{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:20px;padding:2px 7px}
+.gs-head{padding:7px 10px 5px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim)}
+.hist-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.hist-tools input{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 11px;font-size:12.5px;color:var(--text);outline:none;min-width:230px;flex:1}
+.hist-list{display:flex;flex-direction:column;gap:9px}
+.hist-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
+.hist-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.hist-type{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text);background:var(--surface2);border:1px solid var(--border2);border-radius:999px;padding:3px 9px}
 .hist-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim)}
 .hist-title{font-size:13px;color:var(--text);font-weight:500}
-.hist-detail{font-size:12px;color:var(--text-muted);line-height:1.5}
-.hist-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.hist-side{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px}
+.hist-detail{font-size:12px;color:var(--text-muted);line-height:1.55}
+.hist-sides{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.hist-side{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px}
 .hist-side b{font-size:11px;color:var(--text);font-family:'DM Mono',monospace}
 .hist-side div{font-size:11px;color:var(--text-muted);margin-top:3px}
-@media(max-width:700px){.hist-sides{grid-template-columns:1fr}.gsuggest{min-width:230px}}
-
 
 /* Ultimate AI/API/options */
-.ai-api-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
-.ai-api-grid input,.ai-api-grid select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 9px;font-size:12px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
+.ai-api-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px}
+.ai-api-grid input,.ai-api-grid select{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;font-size:12.5px;color:var(--text);font-family:'Inter',sans-serif;outline:none}
 .ai-api-grid label{font-size:10px;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;display:flex;flex-direction:column;gap:4px}
-.ai-api-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.ai-warn{font-size:11px;color:var(--text-dim);line-height:1.45;margin-top:7px}
-.ai-pill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border2);background:var(--surface2);border-radius:20px;padding:2px 7px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin:2px}
-@media(max-width:720px){.ai-api-grid{grid-template-columns:1fr}}
-
-@media(max-width:860px){
-  nav{padding:0 10px;gap:7px}
-  main{padding:14px 10px 90px}
-  .trade-grid{grid-template-columns:1fr;gap:10px}
-  .vs-col{flex-direction:row;padding-top:0;justify-content:flex-start}
-  table{font-size:12px}
-  th,td{padding:7px 9px}
-}
+.ai-api-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.ai-warn{font-size:11.5px;color:var(--text-dim);line-height:1.5;margin-top:8px}
+.ai-pill{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border2);background:var(--surface2);border-radius:999px;padding:3px 9px;font-family:'DM Mono',monospace;font-size:10px;color:var(--text-muted);margin:2px}
 
 /* Enhanced inventory scanner */
-.inv-tools{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.inv-match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:7px;margin-top:10px}
-.inv-match-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px}
-.inv-match-top{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.inv-tools{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.inv-match-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;margin-top:11px}
+.inv-match-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px}
+.inv-match-top{display:flex;align-items:center;gap:7px;margin-bottom:6px}
 .inv-confidence{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);margin-left:auto;white-space:nowrap}
-.inv-source-line{font-size:11px;color:var(--text-dim);line-height:1.35;margin-top:5px;max-height:42px;overflow:hidden}
-.inv-warning{border:1px solid rgba(217,119,6,.35);background:rgba(217,119,6,.08);border-radius:var(--radius);padding:10px;margin-top:8px;color:#fcd34d;font-size:12px;line-height:1.45}
-.inv-missing-list{display:flex;flex-direction:column;gap:5px;margin-top:10px}
-.inv-missing-row{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:7px 9px}
-.inv-missing-name{flex:1;color:var(--text);font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.inv-counts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-.inv-count-pill{font-family:'DM Mono',monospace;font-size:10px;border:1px solid var(--border2);background:var(--surface2);border-radius:20px;padding:3px 8px;color:var(--text-muted)}
-
+.inv-source-line{font-size:11.5px;color:var(--text-dim);line-height:1.4;margin-top:6px;max-height:42px;overflow:hidden}
+.inv-warning{border:1px solid var(--tb-b);background:var(--tb-bg);border-radius:var(--radius);padding:11px;margin-top:9px;color:var(--tb);font-size:12px;line-height:1.5}
+.inv-missing-list{display:flex;flex-direction:column;gap:6px;margin-top:11px}
+.inv-missing-row{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px}
+.inv-missing-name{flex:1;color:var(--text);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-counts{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.inv-count-pill{font-family:'DM Mono',monospace;font-size:10px;border:1px solid var(--border2);background:var(--surface2);border-radius:999px;padding:4px 9px;color:var(--text-muted)}
+.inv-status-saved{color:var(--ts);font-family:'DM Mono',monospace;font-size:10px}
+.inv-status-review{color:var(--tb);font-family:'DM Mono',monospace;font-size:10px}
+.inv-status-miss{color:var(--tx);font-family:'DM Mono',monospace;font-size:10px}
 
 /* Inventory dropdown color fix */
 .inv-tab-toolbar select,
 .inv-tab-toolbar select.sbtn,
 #inventory-mode{
-  appearance:auto;
-  -webkit-appearance:menulist;
-  background:var(--surface2) !important;
-  color:var(--text) !important;
-  border:1px solid var(--border2) !important;
-  border-radius:var(--radius-sm);
-  padding:6px 28px 6px 10px;
-  font-family:'DM Mono',monospace;
-  font-size:11px;
-  color-scheme:dark;
+  appearance:auto;-webkit-appearance:menulist;
+  background:var(--surface2) !important;color:var(--text) !important;
+  border:1px solid var(--border2) !important;border-radius:var(--radius-sm);
+  padding:7px 28px 7px 11px;font-family:'Inter',sans-serif;font-size:12px;color-scheme:dark;
 }
-.inv-tab-toolbar select option,
-#inventory-mode option{
-  background:#111113;
-  color:#f4f4f5;
-}
-[data-theme="light"] .inv-tab-toolbar select,
-[data-theme="light"] #inventory-mode{
-  background:#ffffff !important;
-  color:#18181b !important;
-  color-scheme:light;
-}
-[data-theme="light"] .inv-tab-toolbar select option,
-[data-theme="light"] #inventory-mode option{
-  background:#ffffff;
-  color:#18181b;
-}
-[data-theme="amoled"] .inv-tab-toolbar select option,
-[data-theme="amoled"] #inventory-mode option{
-  background:#000000;
-  color:#ffffff;
-}
+.inv-tab-toolbar select option,#inventory-mode option{background:#131315;color:#f4f4f6}
+[data-theme="light"] .inv-tab-toolbar select,[data-theme="light"] #inventory-mode{background:#ffffff !important;color:#17171a !important;color-scheme:light}
+[data-theme="light"] .inv-tab-toolbar select option,[data-theme="light"] #inventory-mode option{background:#ffffff;color:#17171a}
+[data-theme="amoled"] .inv-tab-toolbar select option,[data-theme="amoled"] #inventory-mode option{background:#000000;color:#ffffff}
 
-
-
-/* ─────────────────────────────────────────────────────────────
-   Mobile / responsive upgrade V13
-   Makes the value list usable on phones, tablets, and small screens.
-   ───────────────────────────────────────────────────────────── */
-html,body{max-width:100%;overflow-x:hidden;touch-action:manipulation}
-img,canvas,video,iframe{max-width:100%}
-button,input,textarea,select{font:inherit}
-button,.sbtn,.fchip,.ntab,.td-btn,.target-btn,.ai-send{min-height:34px;touch-action:manipulation}
-input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
-.table-wrap,.side-drop,.gsuggest,.modal,.ai-answer,.inv-text,.inv-text-table,pre{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-
-@media(max-width:900px){
-  body{font-size:14px}
-  nav{height:auto;min-height:52px;flex-wrap:wrap;padding:8px 10px;gap:8px;align-items:center}
-  .nav-logo-wrap{min-width:max-content}
-  .nav-tabs{order:3;flex:1 0 100%;width:100%;padding:4px 0;gap:5px;overflow-x:auto;scroll-snap-type:x proximity}
-  .ntab{font-size:12px;padding:7px 10px;scroll-snap-align:start;background:var(--surface);border:1px solid var(--border)}
-  .nav-right{margin-left:auto;min-width:0;flex:1;justify-content:flex-end}
-  .sb{flex:1;min-width:150px;max-width:320px}
-  .sb input,.sb input:focus{width:100%}
-  .gsuggest{left:auto;right:0;min-width:min(92vw,360px);max-height:55vh}
-  .fbar{position:relative;display:flex;flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding:8px 10px;gap:6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-  .fbar>*{flex:0 0 auto;scroll-snap-align:start}
-  .fclear{margin-left:0}
-  main{max-width:100%;padding:14px 10px 92px}
-  .home-top{display:block}
-  .home-title h1{font-size:24px}
-  .stats-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
-  .stat-c{min-width:0;padding:10px}
-  .recent-grid,.wl-grid,.ai-cards,.sugg-grid,.mini-res,.inv-match-grid{grid-template-columns:1fr!important}
-  .class-hero,.tier-hero{flex-wrap:wrap;align-items:flex-start}
-  .class-hero-cnt,.tier-cnt{margin-left:0;text-align:left;width:100%}
-  .table-wrap{overflow-x:auto;width:100%}
-  table{min-width:780px}
-  .td-how{max-width:240px}
-  .trade-grid{grid-template-columns:1fr!important;gap:10px}
-  .vs-col{flex-direction:row;padding:0;justify-content:center}
-  .side-top{gap:10px;flex-wrap:wrap}
-  .qs-bar,.ai-row{flex-direction:column;align-items:stretch}
-  .target-sel{width:100%;display:grid;grid-template-columns:1fr 1fr}
-  .target-btn,.ai-send{width:100%;justify-content:center}
-  .ai-input{min-width:0;width:100%}
-  .ai-box,.ai-answer,.inv-scan-box,.sugg-section,.trade-side,.verdict,.wl-tools{padding:12px}
-  .inv-scan-row,.inv-tools,.sugg-controls,.ai-api-actions,.cmp-actions{gap:7px;align-items:stretch}
-  .inv-scan-row button,.inv-tools button,.sugg-controls button,.ai-api-actions button{flex:1 1 auto}
-  .inv-preview{max-width:100%;width:auto;height:auto;max-height:240px;display:block}
-  .inv-text{min-height:120px;font-size:12px}
-  .inv-counts{gap:7px}
-  .inv-count-pill{font-size:11px;line-height:1.4}
-  .inv-missing-row{align-items:flex-start;flex-wrap:wrap}
-  .hist-tools{flex-direction:column;align-items:stretch}
-  .hist-tools input{min-width:0;width:100%}
-  .hist-sides{grid-template-columns:1fr!important}
-  .modal-bg{align-items:stretch;padding:8px}
-  .modal{max-width:100%;max-height:96vh;border-radius:10px}
-  .cmp-bar{padding:8px;gap:7px;align-items:stretch}
-  .cmp-items{width:100%;flex:1 0 100%}
-  .cmp-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}
-  .trade-fab{left:10px;right:10px;bottom:10px;justify-content:center;border-radius:14px}
-}
-
-@media(max-width:560px){
-  nav{padding:7px 8px}
-  .nav-logo-wrap{width:100%;justify-content:space-between}
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:860px){
+  nav{padding:0 12px;gap:8px}
   .nav-title{font-size:13px}
-  .nav-right{order:2;width:100%;flex:1 0 100%;display:grid;grid-template-columns:1fr auto;gap:7px}
-  .sb{max-width:none;width:100%}
-  .td-btn{height:38px}
-  main{padding:10px 8px 86px}
-  .home-title h1,.page-header h1{font-size:20px;line-height:1.25}
-  .home-title p,.page-header p{font-size:12px}
-  .stats-row{grid-template-columns:1fr 1fr}
-  .stat-n{font-size:15px}
-  .recent-grid{gap:8px}
-  .rc{padding:10px}
-  .tier-hero h1{font-size:18px}
-  .class-hero{padding:12px}
-  .class-hero-badge{font-size:16px}
-  .fbar{padding:7px 8px}
-  .fchip{padding:6px 10px}
-  .frange input{width:72px;min-height:34px}
-  .wl-tools{display:grid;grid-template-columns:1fr 1fr;align-items:stretch}
-  .wl-tools .flabel{grid-column:1/-1}
-  .sbtn{padding:7px 9px;min-height:36px}
-  .ai-input,textarea{font-size:16px}
-  .ai-chip{padding:7px 10px}
-  .ai-msg.user,.ai-msg.bot{margin-left:0;margin-right:0}
-  .inv-scan-row,.inv-tools{display:grid;grid-template-columns:1fr 1fr}
-  .inv-scan-row .inv-stat,.inv-tools .inv-stat{grid-column:1/-1}
-  .inv-text-table{overflow-x:auto;border-radius:var(--radius)}
-  .inv-text-row{grid-template-columns:minmax(160px,1fr) minmax(160px,1fr) minmax(70px,.4fr) minmax(100px,.6fr)!important;min-width:560px}
-  .inv-warning{font-size:12px;padding:9px}
-  .ai-api-grid{grid-template-columns:1fr!important}
-  .side-items{min-height:70px}
-  .trade-item{padding:9px}
-  .cmp-chip{max-width:100%}
-  .cmp-chip span,.ti-name,.wl-name,.rc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  main{padding:24px 14px 100px}
+  .home-title h1{font-size:26px}
+  .fbar-toggle-row{padding:10px 14px 0}
+  .fbar{margin:8px 14px 0;max-width:calc(100% - 28px)}
+  .trade-grid{grid-template-columns:1fr;gap:12px}
+  .vs-col{flex-direction:row;padding-top:0;justify-content:flex-start}
+  table{font-size:12px}
+  th,td{padding:8px 10px}
+  .hist-sides{grid-template-columns:1fr}
+  .gsuggest{min-width:230px}
+  .ai-api-grid{grid-template-columns:1fr}
+  .inv-text-row{grid-template-columns:1fr}
+  .inv-text-head{display:none}
+  .sb input{width:88px}
+  .sb input:focus{width:130px}
+  .trello-label{display:none}
+  .td-btn{padding:7px 9px}
+  .nav-right{gap:6px}
 }
 
-@media(max-width:380px){
-  .stats-row{grid-template-columns:1fr}
-  .inv-scan-row,.inv-tools,.wl-tools{grid-template-columns:1fr}
-  .target-sel,.cmp-actions{grid-template-columns:1fr}
-  .home-title h1,.page-header h1{font-size:18px}
-  .ntab{font-size:11px;padding:7px 9px}
-}
-
+/* Additional component classes referenced by app logic */
+.inv-text-table{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:10px;background:var(--surface)}
+.inv-section-title{font-size:11px;font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);margin:16px 0 8px}
+.inv-raw-log{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--text-muted);line-height:1.6;white-space:pre-wrap;max-height:180px;overflow:auto}
+.inv-ok{color:var(--ts)}
+.inv-review{color:var(--tb)}
+.inv-qty-pill{display:inline-flex;align-items:center;border:1px solid var(--ts-b);background:var(--ts-bg);color:var(--ts);border-radius:999px;font-family:'DM Mono',monospace;font-size:10px;padding:2px 8px;margin-left:6px}
+.inv-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin:10px 0}
+.inv-summary-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px;text-align:center}
+.inv-summary-num{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;color:var(--text)}
+.inv-summary-label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-top:3px;font-family:'DM Mono',monospace}
+.missing-tools{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.missing-list{display:flex;flex-direction:column;gap:6px}
+.missing-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 11px}
+.missing-card-top{display:flex;align-items:center;gap:8px}
+.missing-name{flex:1;color:var(--text);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.missing-meta{font-size:11px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:3px}
+.rc-tier{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim)}
+.selecting{outline:1.5px solid var(--accent);outline-offset:-1px}
+.wl-search-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.wl-bulk-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.wl-check{width:15px;height:15px;accent-color:var(--text)}
+.auto-last-updated{color:var(--text)}
 </style>
 </head>
+
 <body>
 <nav>
   <div class="nav-logo-wrap">
-    <div class="nav-title">MadeByZebra's <b>VL</b></div>
+    <div class="nav-title">MadeByZebra <b>VL</b></div>
   </div>
+  <div class="nav-divider"></div>
   <div class="nav-tabs" id="nav-tabs">
-    <button class="ntab active" onclick="showHome()">🏠 Home</button>
-    <button class="ntab ntab-special" onclick="showAI()">🤖 AI Helper</button>
+    <button class="ntab active" onclick="showHome()">Home</button>
+    <button class="ntab ntab-special" onclick="showAI()">AI Helper</button>
     <button class="ntab" onclick="showAll()">All</button>
     <button class="ntab ntab-x" onclick="showTier('X')">X</button>
     <button class="ntab ntab-ss" onclick="showTier('SS')">SS</button>
@@ -587,12 +591,12 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
     <button class="ntab ntab-b" onclick="showTier('B')">B</button>
     <button class="ntab ntab-c" onclick="showTier('C')">C</button>
     <button class="ntab ntab-d" onclick="showTier('D')">D</button>
-    <button class="ntab ntab-special" onclick="showClassPage()">🏷️ Class</button>
-    <button class="ntab ntab-special" onclick="showCustomSerial()">🎨 Custom Serial</button>
-    <button class="ntab ntab-special" onclick="showTrade()">⇄ Trade</button>
-    <button class="ntab ntab-special" onclick="showHistory()">🕘 History</button>
-    <button class="ntab ntab-special" onclick="showUpdates()">📋 Updates</button>
-    <button class="ntab ntab-special" onclick="showWishlist()">⭐ Wishlist</button>
+    <button class="ntab ntab-special" onclick="showClassPage()">Class</button>
+    <button class="ntab ntab-special" onclick="showCustomSerial()">Custom Serial</button>
+    <button class="ntab ntab-special" onclick="showTrade()">Trade</button>
+    <button class="ntab ntab-special" onclick="showHistory()">History</button>
+    <button class="ntab ntab-special" onclick="showUpdates()">Updates</button>
+    <button class="ntab ntab-special" onclick="showWishlist()">Wishlist</button>
   </div>
   <div class="nav-right">
     <div class="sb">
@@ -600,8 +604,13 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
       <input type="text" id="gsearch" placeholder="Search…" autocomplete="off" oninput="onSearchInput(this.value)" onfocus="showSearchSuggest()" onkeydown="searchKey(event)">
       <div class="gsuggest" id="gsuggest"></div>
     </div>
+    <a class="td-btn trello-btn" href="https://trello.com/b/gZDUwLC1/boxing-league-trello" target="_blank" rel="noopener noreferrer" title="For more information on Boxing League — controls, fighting styles, ranked, codes, updates — visit the official Trello board" style="text-decoration:none;display:flex;align-items:center;gap:6px;position:relative">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><rect x="2" y="2" width="20" height="20" rx="4" fill="currentColor" opacity=".15"/><rect x="5" y="5" width="6" height="11" rx="1.3" fill="currentColor"/><rect x="13" y="5" width="6" height="7" rx="1.3" fill="currentColor"/></svg>
+      <span class="trello-label">Trello</span>
+      <span class="trello-tip">For more info on Boxing League — click here for the official Trello (controls, styles, ranked, codes, updates)</span>
+    </a>
     <div class="td-wrap">
-      <button class="td-btn" onclick="toggleTMenu()" id="td-btn">🎨 <span id="td-lbl">Dark</span> ▾</button>
+      <button class="td-btn" onclick="toggleTMenu()" id="td-btn"><span id="td-lbl">Dark</span> ▾</button>
       <div class="td-menu" id="td-menu">
         <div class="td-opt active" onclick="setTheme('dark','Dark')"><span class="t-dot" style="background:#3f3f46"></span>Dark</div>
         <div class="td-opt" onclick="setTheme('light','Light')"><span class="t-dot" style="background:#e4e4e7;border:1px solid #ccc"></span>Light</div>
@@ -611,6 +620,9 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
     </div>
   </div>
 </nav>
+<div class="fbar-toggle-row">
+  <button class="fbar-toggle" id="fbar-toggle" onclick="toggleFbar()">Filters ▾</button>
+</div>
 <div class="fbar" id="fbar">
   <span class="flabel">Demand</span>
   <button class="fchip" data-f="demand" data-v="Good" onclick="toggleF(this)">Good</button>
@@ -697,7 +709,7 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
     <div class="sugg-section" id="trade-suggestions">
       <div class="sugg-head">
         <div>
-          <div class="sugg-title">⚖️ Equal Trade Suggestions</div>
+          <div class="sugg-title">Equal Trade Suggestions</div>
           <div class="sugg-sub" id="sugg-sub">Add gloves to their side to get suggestions.</div>
         </div>
         <button class="sbtn" onclick="renderTradeSuggestions()">Refresh</button>
@@ -731,9 +743,10 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
     <div class="page-header"><h1>Recent Updates</h1><p>Every value change is logged here with reasoning. Last updated: <strong class="auto-last-updated">June 7, 2026</strong></p></div>
     <div class="cl-list" id="cl-list"></div>
     <div class="disclaimer" style="margin-top:18px"><span>ℹ️</span><span>Changes are made by the MadeByZebra value team based on real trade data. Values labeled <strong>Unstable</strong> may shift quickly. These are guides, not guaranteed prices.</span></div>
+    <div class="disclaimer" style="margin-top:8px"><span>🔗</span><span>This site only covers glove values. For everything else about the game — controls, fighting styles, ranked/maps, codes, shop, and update logs — the <a href="https://trello.com/b/gZDUwLC1/boxing-league-trello" target="_blank" rel="noopener noreferrer" style="color:var(--text);text-decoration:underline;font-weight:500">official Boxing League Trello board</a> has way more info.</span></div>
   </div>
   <div id="wishlist-page" class="wishlist-page">
-    <div class="page-header"><h1>My Wishlist</h1><p>Star ⭐ any item to save it here. Stored in your browser.</p><p style="margin-top:8px"><button class="sbtn" onclick="showAI();setTimeout(()=>aiPreset('make me a wishlist under 640619'),100)">🤖 AI make wishlist</button> <button class="sbtn" onclick="showAI()">Open AI Helper</button></p></div>
+    <div class="page-header"><h1>My Wishlist</h1><p>Star ⭐ any item to save it here. Stored in your browser.</p><p style="margin-top:8px"><button class="sbtn" onclick="showAI();setTimeout(()=>aiPreset('make me a wishlist under 640619'),100)">AI make wishlist</button> <button class="sbtn" onclick="showAI()">Open AI Helper</button></p></div>
     <div id="wl-content"></div>
   </div>
   <div id="ai-page" class="all-page">
@@ -756,6 +769,17 @@ input,textarea,select{font-size:16px} /* prevents iPhone zooming form fields */
     <div class="modal-body" id="cmp-modal-body"></div>
   </div>
 </div>
+<script>
+/* Filter drawer toggle — purely additive, doesn't touch filtering logic */
+function toggleFbar(){
+  var bar=document.getElementById('fbar'), btn=document.getElementById('fbar-toggle');
+  if(!bar||!btn)return;
+  var open=bar.classList.toggle('open');
+  btn.classList.toggle('on',open);
+  btn.textContent=(open?'Filters ▴':'Filters ▾');
+}
+</script>
+
 <script>
 const GLOVES=[
 // ── X TIER ──
@@ -5397,510 +5421,5 @@ console.log('Scanner V10 strict smart OCR loaded.');
 </script>
 <!-- ===== END REAL AI + GEMINI VISION OVERRIDE PATCH v8 ===== -->
 
-
-
-<!-- ===== HARD FIX v9: real AI scan only, no text-scan fallback ===== -->
-<script>
-(function(){
-  function $(id){return document.getElementById(id)}
-  function esc(s){return String(s??'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  function gloves(){try{return Array.isArray(GLOVES)?GLOVES:[]}catch(e){return []}}
-  function getOwnedSet(){try{if(typeof owned!=='undefined'&&owned)return owned}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-owned')||'[]'))}catch(e){return new Set()}}
-  function writeOwnedSet(set){try{if(typeof owned!=='undefined'&&owned){owned.clear(); set.forEach(x=>owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){} try{localStorage.setItem('mbz-owned',JSON.stringify([...set]));}catch(e){} try{if(typeof updateInventoryStat==='function')updateInventoryStat();}catch(e){}}
-  function findName(n){n=String(n||'').trim().toLowerCase(); if(!n)return null; const all=gloves(); return all.find(g=>g.n.toLowerCase()===n)||null}
-  function fileToDataURL(file){return new Promise((res,rej)=>{const r=new FileReader(); r.onload=()=>res(String(r.result)); r.onerror=rej; r.readAsDataURL(file)})}
-  window.invPreview=function(e){
-    const files=e&&e.target&&e.target.files?Array.from(e.target.files):[];
-    const img=$('inv-preview'); if(img&&files[0]){img.src=URL.createObjectURL(files[0]); img.style.display='block'}
-    const p=$('inv-progress'); if(p)p.textContent=files.length+' picture(s) loaded. Click AI Scan Picture.';
-    const out=$('inv-results'); if(out)out.innerHTML='<div class="ai-answer"><strong>Picture loaded.</strong><br>Now click <strong>AI Scan Picture</strong>. Do not use Scan Pasted Text for images.</div>';
-  };
-  window.aiScanConfirm=function(encoded){
-    const name=decodeURIComponent(encoded); const g=findName(name); if(!g)return;
-    const set=getOwnedSet(); set.add(g.n); writeOwnedSet(set);
-    const p=$('inv-progress'); if(p)p.textContent='Added '+g.n+' to owned.';
-  };
-  function renderScan(data){
-    const conf=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).filter(Boolean);
-    const poss=(data.possible||data.review||[]).filter(Boolean);
-    const cards=conf.map(n=>{const g=findName(n);return '<div class="inv-missing-row"><span class="inv-missing-name">'+esc(g?g.n:n)+'</span>'+(g?'<span class="cpill cls-'+esc(g.cls)+'">'+esc(g.cls)+'</span><span class="td-val" style="font-size:11px">'+esc(g.vs||g.v)+'</span>':'')+'<span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>'}).join('');
-    const rows=poss.map(p=>{const text=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const cands=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(c=>typeof c==='string'?c:(c.name||c.glove||'')).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(text)+'</div><div>'+(cands.length?cands.map(c=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(c)+'\')">✓ '+esc(c)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div><span style="color:#fcd34d;font-family:DM Mono,monospace;font-size:10px">REVIEW</span></div></div>'}).join('');
-    return '<div class="ai-answer"><strong>AI picture scan complete.</strong><br>This used <strong>/api/scan</strong>, not the old text OCR scanner.<div class="inv-counts"><span class="inv-count-pill" style="color:#86efac">Confirmed saved: '+conf.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs review: '+poss.length+'</span></div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3><div class="inv-missing-list">'+(cards||'<div class="wl-empty">No confirmed gloves. Try a closer screenshot where the names under icons are readable.</div>')+'</div><h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review only if true</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(data,null,2))+'</pre></details></div>'
-  }
-  window.scanInventoryImage=async function(){
-    const input=$('inv-img'), files=input&&input.files?Array.from(input.files):[], out=$('inv-results'), p=$('inv-progress');
-    if(!files.length){if(p)p.textContent='Upload an inventory picture first.'; return}
-    if(p)p.textContent='AI scanning picture through /api/scan...';
-    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning picture...</strong><br>Using backend <strong>/api/scan</strong>. This will not run the old text scanner.</div>';
-    try{
-      const images=[]; for(const f of files.slice(0,4)) images.push(await fileToDataURL(f));
-      const payload={images,gloveNames:gloves().map(g=>g.n)};
-      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-      const data=await res.json().catch(()=>({error:'The /api/scan route did not return JSON.'}));
-      if(!res.ok) throw new Error(JSON.stringify(data.error||data));
-      const replace=!$('inv-add-mode') || !$('inv-add-mode').checked;
-      const set=replace?new Set():getOwnedSet();
-      (data.confirmed||[]).forEach(n=>{const g=findName(typeof n==='string'?n:(n.name||n.glove||'')); if(g)set.add(g.n)});
-      writeOwnedSet(set);
-      const ta=$('inv-ocr-text'); if(ta)ta.value='AI picture scan result:\n'+JSON.stringify(data,null,2);
-      if(out)out.innerHTML=renderScan(data);
-      if(p)p.textContent='AI picture scan done.';
-    }catch(e){
-      if(p)p.textContent='AI picture scan failed.';
-      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre><div class="ai-note">This is a backend/Gemini error, not the old text scanner. Check Command Prompt for <strong>POST /api/scan 500</strong>.</div></div>';
-    }
-  };
-  const oldRender=window.renderAI;
-  window.renderAI=function(){ if(oldRender) oldRender.apply(this,arguments); setTimeout(()=>{const b=[...document.querySelectorAll('button')].find(x=>/Smart Scan Picture|Scan Picture|AI Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;} const p=$('inv-progress'); if(p && !p.textContent)p.textContent='Upload picture, then click AI Scan Picture.';},50); };
-  setTimeout(()=>{try{if(typeof window.renderAI==='function' && document.getElementById('ai-page')?.classList.contains('active')) window.renderAI()}catch(e){}},500);
-  console.log('HARD FIX v9 scanner override loaded: no text fallback.');
-})();
-</script>
-<!-- ===== END HARD FIX v9 ===== -->
-
-
-
-<!-- ===== FINAL FIX v10: multi-image upload + real website actions ===== -->
-<script>
-(function(){
-  const $ = (id)=>document.getElementById(id);
-  const esc = (s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function gloves(){ try{return Array.isArray(GLOVES)?GLOVES:[]}catch(e){return []} }
-  function ownedSet(){ try{if(typeof owned!=='undefined'&&owned)return new Set([...owned])}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-owned')||'[]'))}catch(e){return new Set()} }
-  function writeOwned(set){ try{if(typeof owned!=='undefined'&&owned){owned.clear(); set.forEach(x=>owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){} localStorage.setItem('mbz-owned',JSON.stringify([...set])); try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){} }
-  function wishSet(){ try{if(typeof wishlist!=='undefined'&&wishlist)return new Set([...wishlist])}catch(e){} try{return new Set(JSON.parse(localStorage.getItem('mbz-wl')||'[]'))}catch(e){return new Set()} }
-  function writeWishlist(set){ try{if(typeof wishlist!=='undefined'&&wishlist){wishlist.clear(); set.forEach(x=>wishlist.add(x)); if(typeof saveWL==='function')saveWL();}}catch(e){} localStorage.setItem('mbz-wl',JSON.stringify([...set])); try{if(typeof renderWishlist==='function'&&window.view==='wishlist')renderWishlist()}catch(e){} }
-  function addMsg(kind,html){const log=$('ai-log'); if(!log)return; const div=document.createElement('div'); div.className='ai-msg '+kind; div.innerHTML=html; log.prepend(div);}
-  function gloveKey(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim()}
-  function findGlove(name){const q=gloveKey(name); if(!q)return null; const all=gloves(); return all.find(g=>gloveKey(g.n)===q)||all.find(g=>gloveKey(g.n).includes(q)||q.includes(gloveKey(g.n)))||null;}
-  function fmtNameList(items,max=18){return items.slice(0,max).map(g=>'<strong>'+esc(g.n)+'</strong>').join(', ')+(items.length>max?' and '+(items.length-max)+' more':'');}
-  function parseClassTier(q){
-    let m=q.match(/class\s+(ss|x|s|a|b|c|d|e)\b/i); if(m)return {type:'class',value:m[1].toUpperCase()};
-    m=q.match(/\b(ss|x|s|a|b|c|d|e)\s+class\b/i); if(m)return {type:'class',value:m[1].toUpperCase()};
-    m=q.match(/tier\s+(ss|x|s|a|b|c|d|e)\b/i); if(m)return {type:'tier',value:m[1].toUpperCase()};
-    m=q.match(/\b(ss|x|s|a|b|c|d|e)\s+tier\b/i); if(m)return {type:'tier',value:m[1].toUpperCase()};
-    return null;
-  }
-  function actionWishlist(text){
-    const q=String(text||'').toLowerCase();
-    const wantsWishlist=/wish\s*list|wishlist/.test(q);
-    const addWords=/(add|save|star|put|place)/.test(q);
-    const removeWords=/(remove|delete|unstar)/.test(q);
-    if(!wantsWishlist) return null;
-    const set=wishSet();
-    if((addWords||q.includes('all')) && /\ball\b/.test(q)){
-      const ct=parseClassTier(q);
-      let pool=gloves();
-      if(ct){pool=pool.filter(g=>ct.type==='class'?String(g.cls).toUpperCase()===ct.value:String(g.t).toUpperCase()===ct.value);}
-      if(q.includes('missing')){const os=ownedSet(); pool=pool.filter(g=>!os.has(g.n));}
-      if(q.includes('owned')){const os=ownedSet(); pool=pool.filter(g=>os.has(g.n));}
-      if(q.includes('good demand'))pool=pool.filter(g=>String(g.d).toLowerCase().includes('good'));
-      if(q.includes('rising'))pool=pool.filter(g=>g.trend==='up');
-      if(q.includes('stable'))pool=pool.filter(g=>g.trend==='stable');
-      pool=[...new Map(pool.map(g=>[g.n,g])).values()];
-      if(removeWords){let removed=0; pool.forEach(g=>{if(set.delete(g.n))removed++;}); writeWishlist(set); return `Removed <strong>${removed}</strong> gloves from your wishlist${ct?' for '+ct.type+' '+ct.value:''}. <button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;}
-      let added=0; pool.forEach(g=>{if(!set.has(g.n)){set.add(g.n); added++;}}); writeWishlist(set);
-      return `Done — actually added <strong>${added}</strong> glove${added===1?'':'s'} to your wishlist${ct?' for '+ct.type+' '+ct.value:''}. Wishlist now has <strong>${set.size}</strong> gloves.<br>${fmtNameList(pool,20)}<br><button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;
-    }
-    let m=text.match(/(?:add|save|star|put)\s+(.+?)\s+(?:to|in|into)\s+(?:my\s+)?wish\s*list/i) || text.match(/(?:add|save|star|put)\s+(.+?)\s+(?:to|in|into)\s+(?:my\s+)?wishlist/i);
-    if(m){
-      const g=findGlove(m[1]); if(!g)return `I could not find a glove named <strong>${esc(m[1])}</strong> in the database.`;
-      const before=set.size; set.add(g.n); writeWishlist(set);
-      return `${set.size>before?'Added':'Already had'} <strong>${esc(g.n)}</strong> in your wishlist. <button class="sbtn" onclick="showWishlist()">Open Wishlist</button>`;
-    }
-    return null;
-  }
-  async function callReal(text){
-    const os=ownedSet(), ws=wishSet();
-    const ctx=gloves().filter(g=>{
-      const q=gloveKey(text); const hay=gloveKey(g.n+' '+g.cls+' '+g.t+' '+g.d+' '+g.how+' '+g.trend);
-      return q.split(' ').some(t=>t.length>1&&hay.includes(t));
-    }).slice(0,120).map(g=>({name:g.n,value:g.vs,tier:g.t,class:g.cls,demand:g.d,trend:g.trend,obtain:g.how,owned:os.has(g.n),wishlist:ws.has(g.n)}));
-    const message=`User request: ${text}\n\nYou are the real AI helper inside MadeByZebra's Roblox glove value website. Be natural and helpful. Important: You cannot directly change the website unless the frontend already performed an action. If the user asks to save/add/remove wishlist or owned gloves, explain what command to use, do not claim it is done unless the message says it was already done.\n\nOwned count: ${os.size}. Wishlist count: ${ws.size}. Relevant glove data: ${JSON.stringify(ctx).slice(0,50000)}`;
-    const res=await fetch('/api/ai',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});
-    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/ai'}));
-    if(!res.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
-    return data.answer||data.reply||'No answer returned.';
-  }
-  window.askAI=async function(){
-    const inp=$('ai-input'); const text=(inp&&inp.value||'').trim(); if(!text)return; inp.value='';
-    addMsg('user',esc(text));
-    const action=actionWishlist(text);
-    if(action){addMsg('bot',action); return;}
-    addMsg('bot','<strong>Real AI:</strong> thinking…');
-    try{const ans=await callReal(text); const first=$('ai-log')?.querySelector('.ai-msg.bot'); if(first)first.innerHTML=esc(ans).replace(/\n/g,'<br>');}
-    catch(e){const first=$('ai-log')?.querySelector('.ai-msg.bot'); if(first)first.innerHTML='<strong>AI error:</strong> '+esc(e.message||e);}
-  };
-  window.aiPreset=function(text){const inp=$('ai-input'); if(inp){inp.value=text; window.askAI();}};
-
-  window.mbzScanFiles=window.mbzScanFiles||[];
-  function renderScanFiles(){
-    const files=window.mbzScanFiles||[]; const out=$('inv-results');
-    const thumbs=files.map((f,i)=>'<div style="display:inline-block;margin:4px;text-align:center"><img src="'+esc(f.preview||'')+'" style="width:90px;height:58px;object-fit:cover;border:1px solid var(--border2);border-radius:6px"><br><button class="sbtn" onclick="mbzRemoveScanFile('+i+')">remove</button></div>').join('');
-    if(out)out.innerHTML='<div class="ai-answer"><strong>'+files.length+' picture(s) ready.</strong><br>Click <strong>AI Scan Picture</strong>. '+(files.length>6?'Only the first 6 are sent each scan to avoid size limits.':'')+'<div style="margin-top:8px">'+thumbs+'</div><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>';
-    const p=$('inv-progress'); if(p)p.textContent=files.length+' picture(s) selected. Click AI Scan Picture.';
-  }
-  window.invPreview=function(e){
-    const incoming=e&&e.target&&e.target.files?Array.from(e.target.files):[];
-    const existing=window.mbzScanFiles||[];
-    for(const f of incoming){
-      const key=f.name+'|'+f.size+'|'+f.lastModified; if(existing.some(x=>x.key===key))continue;
-      existing.push({file:f,key,preview:URL.createObjectURL(f)});
-    }
-    window.mbzScanFiles=existing;
-    const img=$('inv-preview'); if(img&&existing[0]){img.src=existing[0].preview; img.style.display='block'}
-    if(e&&e.target)e.target.value='';
-    renderScanFiles();
-  };
-  window.mbzRemoveScanFile=function(i){const files=window.mbzScanFiles||[]; const f=files.splice(i,1)[0]; try{if(f&&f.preview)URL.revokeObjectURL(f.preview)}catch(e){} window.mbzScanFiles=files; renderScanFiles();};
-  window.mbzClearScanFiles=function(){for(const f of (window.mbzScanFiles||[])){try{URL.revokeObjectURL(f.preview)}catch(e){}} window.mbzScanFiles=[]; renderScanFiles();};
-  function compressFile(file,maxSide=1400,quality=.86){
-    return new Promise((resolve,reject)=>{const img=new Image(); const url=URL.createObjectURL(file); img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}}; img.onerror=reject; img.src=url;});
-  }
-  function findName(n){const g=findGlove(n); return g?g.n:null;}
-  window.scanInventoryImage=async function(){
-    const files=(window.mbzScanFiles||[]).map(x=>x.file); const out=$('inv-results'), p=$('inv-progress');
-    if(!files.length){if(p)p.textContent='Upload one or more inventory pictures first.'; if(out)out.innerHTML='<div class="ai-answer">No pictures selected yet.</div>'; return;}
-    if(p)p.textContent='Compressing '+files.length+' picture(s)…';
-    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning '+files.length+' picture(s)…</strong><br>Sending up to 6 compressed screenshots to <strong>/api/scan</strong>.</div>';
-    try{
-      const images=[]; for(const f of files.slice(0,6))images.push(await compressFile(f));
-      if(p)p.textContent='Calling /api/scan with '+images.length+' picture(s)…';
-      const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
-      const data=await res.json().catch(()=>({error:'Bad JSON response'})); if(!res.ok)throw new Error(JSON.stringify(data.error||data));
-      const replace=!$('inv-add-mode') || !$('inv-add-mode').checked; const set=replace?new Set():ownedSet();
-      const confirmed=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean);
-      confirmed.forEach(n=>set.add(n)); writeOwned(set);
-      const possible=(data.possible||data.review||[]);
-      const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
-      const rows=possible.map(p=>{const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(read)+'</div><div>'+(c.length?c.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>';}).join('');
-      if($('inv-ocr-text'))$('inv-ocr-text').value=JSON.stringify(data,null,2);
-      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan complete.</strong><br>Scanned <strong>'+images.length+'</strong> picture(s). Confirmed saved: <strong>'+confirmed.length+'</strong>. Review: <strong>'+possible.length+'</strong>.<div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(data,null,2))+'</pre></details></div>';
-      if(p)p.textContent='AI scan done.';
-    }catch(e){if(p)p.textContent='AI scan failed.'; if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre></div>';}
-  };
-  const oldRender=window.renderAI;
-  window.renderAI=function(){
-    if(oldRender)oldRender.apply(this,arguments);
-    setTimeout(()=>{
-      const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;}
-      const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview;}
-      const send=[...document.querySelectorAll('button')].find(x=>/Ask Real AI|Ask AI/i.test(x.textContent)); if(send)send.textContent='Ask / Do Action';
-      const note=$('inv-progress'); if(note&&!note.textContent)note.textContent='Upload one or more pictures, then click AI Scan Picture.';
-    },80);
-  };
-  console.log('FINAL FIX v10 loaded: multi-upload + actionable wishlist AI.');
-})();
-</script>
-<!-- ===== END FINAL FIX v10 ===== -->
-
-
-
-<!-- ===== FINAL FIX v11: scan ALL pictures in batches + keep previous pages by default ===== -->
-<script>
-(function(){
-  function $(id){return document.getElementById(id)}
-  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-  function gloves(){return window.GLOVES||GLOVES||[]}
-  function ownedSet(){try{return new Set(JSON.parse(localStorage.getItem('ownedGloves')||'[]'))}catch(e){return new Set()}}
-  function writeOwned(set){localStorage.setItem('ownedGloves',JSON.stringify([...set])); try{renderWishlist&&renderWishlist()}catch(e){} }
-  function findName(n){
-    const q=String(n||'').trim().toLowerCase();
-    if(!q)return null;
-    const list=gloves();
-    let g=list.find(x=>String(x.n).toLowerCase()===q);
-    if(g)return g.n;
-    g=list.find(x=>String(x.n).toLowerCase().replace(/[^a-z0-9]/g,'')===q.replace(/[^a-z0-9]/g,''));
-    return g?g.n:null;
-  }
-  window.aiScanConfirm=function(enc){
-    const name=decodeURIComponent(enc); const real=findName(name)||name;
-    const set=ownedSet(); set.add(real); writeOwned(set);
-    const p=$('inv-progress'); if(p)p.textContent='Confirmed and saved '+real+'. Owned now: '+set.size;
-    try{showOwnedFromScanner&&showOwnedFromScanner()}catch(e){}
-  };
-  function compressFile(file,maxSide=1500,quality=.88){
-    return new Promise((resolve,reject)=>{
-      const img=new Image(); const url=URL.createObjectURL(file);
-      img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}};
-      img.onerror=e=>{try{URL.revokeObjectURL(url)}catch(x){}; reject(e)};
-      img.src=url;
-    });
-  }
-  async function scanBatch(batch,idx,total){
-    const images=[];
-    for(const f of batch)images.push(await compressFile(f));
-    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
-    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/scan'}));
-    if(!res.ok)throw new Error('Batch '+idx+'/'+total+' failed: '+JSON.stringify(data.error||data));
-    return data;
-  }
-  function renderFinal(allData,confirmedSet,possible,filesScanned){
-    const confirmed=[...confirmedSet].sort();
-    const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
-    const rows=possible.map(p=>{const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain'); const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean).slice(0,8); return '<div class="inv-text-row"><div>'+esc(read)+'</div><div>'+(c.length?c.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>';}).join('');
-    return '<div class="ai-answer"><strong>AI scan complete.</strong><br>Scanned <strong>'+filesScanned+'</strong> picture(s) in batches. Saved confirmed names into your existing inventory.<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed saved this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span></div><div class="inv-warning"><strong>V11 behavior:</strong> Scanning one page at a time now ADDS to your saved inventory. It will not erase previous pages unless you click Clear owned first.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="clearOwnedFromScanner()">Clear owned and start over</button></div><h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(allData,null,2))+'</pre></details></div>';
-  }
-  window.scanInventoryImage=async function(){
-    const files=(window.mbzScanFiles||[]).map(x=>x.file); const out=$('inv-results'), p=$('inv-progress');
-    if(!files.length){if(p)p.textContent='Upload one or more inventory pictures first.'; if(out)out.innerHTML='<div class="ai-answer">No pictures selected yet.</div>'; return;}
-    const clearFirst=$('inv-clear-before-scan') && $('inv-clear-before-scan').checked;
-    if(clearFirst){writeOwned(new Set());}
-    if(out)out.innerHTML='<div class="ai-answer"><strong>AI scanning '+files.length+' picture(s)…</strong><br>V11 scans all pictures in batches and keeps previous owned gloves by default.</div>';
-    try{
-      const batchSize=4; const batches=[]; for(let i=0;i<files.length;i+=batchSize)batches.push(files.slice(i,i+batchSize));
-      const allData=[]; const confirmedSet=new Set(); const possible=[]; const owned=ownedSet();
-      for(let i=0;i<batches.length;i++){
-        if(p)p.textContent='Scanning batch '+(i+1)+'/'+batches.length+' ('+batches[i].length+' picture(s))…';
-        const data=await scanBatch(batches[i],i+1,batches.length); allData.push(data);
-        const confirmed=(data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(findName).filter(Boolean);
-        confirmed.forEach(n=>{confirmedSet.add(n); owned.add(n);});
-        (data.possible||data.review||[]).forEach(x=>possible.push(x));
-        writeOwned(owned);
-      }
-      if($('inv-ocr-text'))$('inv-ocr-text').value='V11 AI scan result:\n'+JSON.stringify(allData,null,2);
-      if(out)out.innerHTML=renderFinal(allData,confirmedSet,possible,files.length);
-      if(p)p.textContent='AI scan done. Total owned now: '+ownedSet().size+'.';
-    }catch(e){if(p)p.textContent='AI scan failed.'; if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(e.message||e)+'</pre></div>';}
-  };
-  const oldRender=window.renderAI;
-  window.renderAI=function(){
-    if(oldRender)oldRender.apply(this,arguments);
-    setTimeout(()=>{
-      const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture'; b.onclick=window.scanInventoryImage;}
-      const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview;}
-      const box=document.querySelector('.inv-scan-row');
-      if(box && !$('inv-clear-before-scan')){
-        const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-clear-before-scan"> Clear owned before scan'; box.appendChild(lab);
-      }
-      const oldAdd=$('inv-add-mode'); if(oldAdd){oldAdd.checked=true; oldAdd.parentElement.style.display='none';}
-      const note=$('inv-progress'); if(note&&!note.textContent)note.textContent='Upload pages. Each scan ADDS to saved inventory. Use Clear owned before scan only when starting over.';
-    },100);
-  };
-  console.log('FINAL FIX v11 loaded: scan all pictures in batches + add-to-existing default.');
-})();
-</script>
-
-
-
-<!-- ===== FINAL FIX v12: quota-safe multi-image scanner + progress + resume ===== -->
-<script>
-(function(){
-  window.MBZ_SCANNER_VERSION='V13_MOBILE';
-  const VERSION='Scanner V13';
-  const $=(id)=>document.getElementById(id);
-  const esc=(s)=>String(s==null?'':s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  function gloves(){try{return Array.isArray(window.GLOVES)?window.GLOVES:GLOVES}catch(e){return []}}
-  function key(s){return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim()}
-  function findGlove(name){
-    const q=key(name); if(!q)return null; const list=gloves();
-    return list.find(g=>key(g.n)===q)||list.find(g=>key(g.n).includes(q)||q.includes(key(g.n)))||null;
-  }
-  function readArray(k){try{const v=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(v)?v:[]}catch(e){return []}}
-  function ownedSet(){
-    const s=new Set();
-    try{if(window.owned) for(const x of window.owned) s.add(x)}catch(e){}
-    for(const k of ['ownedGloves','mbz-owned','owned']) for(const x of readArray(k)) s.add(x);
-    return s;
-  }
-  function writeOwned(s){
-    const arr=[...s];
-    localStorage.setItem('ownedGloves',JSON.stringify(arr));
-    localStorage.setItem('mbz-owned',JSON.stringify(arr));
-    try{if(window.owned){window.owned.clear(); arr.forEach(x=>window.owned.add(x)); if(typeof saveOwned==='function')saveOwned();}}catch(e){}
-    try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){}
-  }
-  function status(msg){const p=$('inv-progress'); if(p)p.textContent=msg;}
-  function results(html){const out=$('inv-results'); if(out)out.innerHTML=html;}
-  function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
-  function quotaErrorText(err){
-    const msg=String(err&&err.message||err||'');
-    if(/RESOURCE_EXHAUSTED|quota|rate|429/i.test(msg))return true;
-    return false;
-  }
-  function parseRetrySeconds(msg){
-    const s=String(msg||'');
-    let m=s.match(/retry(?:Delay| in)?[^0-9]{0,20}(\d+(?:\.\d+)?)/i) || s.match(/Please retry in\s*(\d+(?:\.\d+)?)/i);
-    return m?Math.ceil(Number(m[1])):65;
-  }
-  window.mbzScanFiles=window.mbzScanFiles||[];
-  function renderSelected(){
-    const files=window.mbzScanFiles||[];
-    const thumbs=files.map((f,i)=>'<div style="display:inline-block;margin:4px;text-align:center;vertical-align:top"><img src="'+esc(f.preview||'')+'" style="width:92px;height:60px;object-fit:cover;border:1px solid var(--border2);border-radius:6px"><br><span style="font-size:10px;color:var(--text-dim)">#'+(i+1)+'</span> <button class="sbtn" onclick="mbzRemoveScanFile('+i+')">remove</button></div>').join('');
-    results('<div class="ai-answer"><strong>'+VERSION+': '+files.length+' picture(s) selected.</strong><br>Click <strong>AI Scan Picture</strong>. Images stay in the queue until you clear them.<div class="inv-counts" style="margin-top:8px"><span class="inv-count-pill">multi-upload fixed</span><span class="inv-count-pill">keeps previous owned</span><span class="inv-count-pill">quota retry support</span></div><div style="margin-top:8px">'+(thumbs||'<div class="wl-empty">No pictures selected.</div>')+'</div><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>');
-    status(VERSION+': '+files.length+' picture(s) ready. It will add to saved inventory unless Clear owned before scan is checked.');
-  }
-  window.invPreview=function(e){
-    const incoming=e&&e.target&&e.target.files?Array.from(e.target.files):[];
-    const existing=window.mbzScanFiles||[];
-    for(const f of incoming){
-      const k=f.name+'|'+f.size+'|'+f.lastModified;
-      if(existing.some(x=>x.key===k))continue;
-      existing.push({file:f,key:k,preview:URL.createObjectURL(f)});
-    }
-    window.mbzScanFiles=existing;
-    const img=$('inv-preview'); if(img&&existing[0]){img.src=existing[0].preview; img.style.display='block';}
-    if(e&&e.target)e.target.value='';
-    renderSelected();
-  };
-  window.mbzRemoveScanFile=function(i){const files=window.mbzScanFiles||[]; const f=files.splice(i,1)[0]; try{if(f&&f.preview)URL.revokeObjectURL(f.preview)}catch(e){} window.mbzScanFiles=files; renderSelected();};
-  window.mbzClearScanFiles=function(){for(const f of (window.mbzScanFiles||[])){try{URL.revokeObjectURL(f.preview)}catch(e){}} window.mbzScanFiles=[]; renderSelected();};
-  async function compressFile(file,maxSide=1150,quality=.74){
-    return new Promise((resolve,reject)=>{
-      const img=new Image(); const url=URL.createObjectURL(file);
-      img.onload=()=>{try{let w=img.width,h=img.height; const scale=Math.min(1,maxSide/Math.max(w,h)); w=Math.round(w*scale); h=Math.round(h*scale); const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h); URL.revokeObjectURL(url); resolve(c.toDataURL('image/jpeg',quality));}catch(e){reject(e)}};
-      img.onerror=e=>{try{URL.revokeObjectURL(url)}catch(x){} reject(e)}; img.src=url;
-    });
-  }
-  function makeBatches(files){
-    const batchSize=6; const batches=[];
-    for(let i=0;i<files.length;i+=batchSize)batches.push(files.slice(i,i+batchSize));
-    return batches;
-  }
-  async function scanBatch(batch,idx,total){
-    const images=[];
-    for(let i=0;i<batch.length;i++){status(VERSION+': compressing image '+(i+1)+'/'+batch.length+' for batch '+idx+'/'+total+'…'); images.push(await compressFile(batch[i]));}
-    status(VERSION+': sending batch '+idx+'/'+total+' ('+images.length+' picture(s)) to /api/scan…');
-    const res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images,gloveNames:gloves().map(g=>g.n)})});
-    const data=await res.json().catch(()=>({error:'Bad JSON response from /api/scan'}));
-    if(!res.ok){const err=new Error(JSON.stringify(data.error||data)); err.data=data; throw err;}
-    return data;
-  }
-  function normalizeConfirmed(data){return (data.confirmed||[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(x=>{const g=findGlove(x); return g?g.n:null}).filter(Boolean)}
-  function normalizePossible(data){return (data.possible||data.review||[]).map(p=>{
-    const read=typeof p==='string'?p:(p.text||p.read||p.label||'uncertain');
-    const c=(typeof p==='object'?(p.candidates||p.matches||[]):[]).map(x=>typeof x==='string'?x:(x.name||x.glove||'')).map(x=>{const g=findGlove(x);return g?g.n:null}).filter(Boolean).slice(0,8);
-    return {read,candidates:c};
-  });}
-  function renderSummary(state,done=false,extra=''){
-    const confirmed=[...state.confirmedThisRun].sort();
-    const cards=confirmed.map(n=>'<div class="inv-missing-row"><span class="inv-missing-name">'+esc(n)+'</span><span style="color:#86efac;font-family:DM Mono,monospace;font-size:10px">SAVED</span></div>').join('');
-    const rows=state.possible.map(p=>'<div class="inv-text-row"><div>'+esc(p.read)+'</div><div>'+(p.candidates.length?p.candidates.map(n=>'<button class="add-btn" onclick="aiScanConfirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>').join(' '):'No candidate')+'</div><div>review</div><div>REVIEW</div></div>').join('');
-    const batchInfo=state.batchNotes.map(x=>'<div class="ai-note">'+esc(x)+'</div>').join('');
-    results('<div class="ai-answer"><strong>'+VERSION+' '+(done?'complete':'paused')+'.</strong><br>'+extra+'<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill" style="color:#86efac">Confirmed this run: '+confirmed.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+state.possible.length+'</span><span class="inv-count-pill">Total owned now: '+ownedSet().size+'</span><span class="inv-count-pill">Batches: '+state.doneBatches+'/'+state.totalBatches+'</span></div><div class="inv-warning"><strong>V13:</strong> It adds to your saved inventory. It does not erase previous pages unless <strong>Clear owned before scan</strong> is checked.</div><div class="inv-tools"><button class="sbtn" onclick="showOwnedFromScanner()">Show owned</button><button class="sbtn" onclick="showMissingFromOwned()">Show missing</button><button class="sbtn" onclick="mbzClearScanFiles()">Clear selected pictures</button></div>'+batchInfo+'<h3 style="font-size:13px;margin:12px 0 6px">✅ Confirmed saved</h3>'+(cards||'<div class="wl-empty">No confirmed gloves yet. Try closer screenshots where glove names are readable.</div>')+'<h3 style="font-size:13px;margin:12px 0 6px;color:#fcd34d">⚠️ Review</h3><div class="inv-text-table"><div class="inv-text-row inv-text-head"><div>AI saw</div><div>Confirm candidate</div><div>Score</div><div>Status</div></div>'+(rows||'<div class="wl-empty">No review items.</div>')+'</div><details style="margin-top:10px"><summary class="sbtn" style="display:inline-block">Raw backend result</summary><pre style="white-space:pre-wrap;font-size:11px;color:var(--text-muted);max-height:240px;overflow:auto">'+esc(JSON.stringify(state.raw,null,2))+'</pre></details></div>');
-  }
-  async function resumeQueue(startIndex){
-    const state=window.mbzV12ScanState; if(!state)return;
-    const autoWait=$('inv-auto-wait-v12')?$('inv-auto-wait-v12').checked:true;
-    const owned=ownedSet();
-    for(let i=startIndex;i<state.batches.length;i++){
-      if(i>startIndex && autoWait){
-        for(let sec=65;sec>0;sec--){status(VERSION+': waiting '+sec+'s before next batch to avoid Gemini free quota…'); await sleep(1000);}
-      }
-      try{
-        const data=await scanBatch(state.batches[i],i+1,state.batches.length); state.raw.push(data); state.doneBatches=i+1;
-        const conf=normalizeConfirmed(data); conf.forEach(n=>{state.confirmedThisRun.add(n); owned.add(n)}); writeOwned(owned);
-        state.possible.push(...normalizePossible(data));
-        state.batchNotes.push('Batch '+(i+1)+'/'+state.batches.length+': saved '+conf.length+' confirmed, review '+normalizePossible(data).length+'.');
-        renderSummary(state,false,'Saved progress after batch '+(i+1)+'.');
-      }catch(e){
-        const msg=e.message||String(e); const retry=parseRetrySeconds(msg);
-        if(quotaErrorText(e)){
-          state.nextIndex=i; window.mbzV12ScanState=state; renderSummary(state,false,'<strong style="color:#fca5a5">Gemini quota hit.</strong> Confirmed results so far were saved. Wait about '+retry+' seconds, then click Resume. <br><button class="sbtn" onclick="mbzV12Resume()">Resume remaining batches</button>');
-          status(VERSION+': quota hit. Saved progress. Retry after '+retry+' seconds.');
-          if(autoWait){
-            for(let sec=retry;sec>0;sec--){status(VERSION+': quota wait '+sec+'s then auto-resume…'); await sleep(1000);}
-            return resumeQueue(i);
-          }
-          return;
-        }
-        renderSummary(state,false,'<strong style="color:#fca5a5">Batch '+(i+1)+' failed:</strong><pre style="white-space:pre-wrap;color:#fca5a5">'+esc(msg)+'</pre>');
-        status(VERSION+': failed at batch '+(i+1)+'.'); return;
-      }
-    }
-    renderSummary(state,true,'Scanned '+state.totalFiles+' picture(s).'); status(VERSION+': done. Total owned now '+ownedSet().size+'.');
-  }
-  window.mbzV12Resume=function(){const st=window.mbzV12ScanState; if(st)resumeQueue(st.nextIndex||0);};
-  window.scanInventoryImage=async function(){
-    const files=(window.mbzScanFiles||[]).map(x=>x.file); if(!files.length){status('Upload one or more inventory pictures first.'); results('<div class="ai-answer">No pictures selected yet.</div>'); return;}
-    const clear=$('inv-clear-before-scan')&&$('inv-clear-before-scan').checked; if(clear){writeOwned(new Set());}
-    const batches=makeBatches(files);
-    window.mbzV12ScanState={batches,totalBatches:batches.length,totalFiles:files.length,doneBatches:0,nextIndex:0,confirmedThisRun:new Set(),possible:[],raw:[],batchNotes:[]};
-    results('<div class="ai-answer"><strong>'+VERSION+' started.</strong><br>Selected <strong>'+files.length+'</strong> picture(s), split into <strong>'+batches.length+'</strong> quota-safe batch(es). Progress will save after every batch.</div>');
-    status(VERSION+': starting scan…');
-    await resumeQueue(0);
-  };
-  function patchUI(){
-    try{document.title='MadeByZebra\'s Value List - Scanner V13'}catch(e){}
-    const input=$('inv-img'); if(input){input.multiple=true; input.onchange=window.invPreview; input.removeAttribute('capture');}
-    const b=[...document.querySelectorAll('button')].find(x=>/AI Scan Picture|Smart Scan Picture|Scan Picture/i.test(x.textContent)); if(b){b.textContent='AI Scan Picture (V13)'; b.onclick=window.scanInventoryImage;}
-    const row=document.querySelector('.inv-scan-row');
-    if(row && !$('inv-v12-badge')){const span=document.createElement('span'); span.id='inv-v12-badge'; span.className='inv-stat'; span.textContent='Scanner V13 active'; row.appendChild(span)}
-    if(row && !$('inv-auto-wait-v12')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-auto-wait-v12" checked> auto-wait on quota'; row.appendChild(lab)}
-    if(row && !$('inv-clear-before-scan')){const lab=document.createElement('label'); lab.className='sbtn'; lab.style.cursor='pointer'; lab.innerHTML='<input type="checkbox" id="inv-clear-before-scan"> Clear owned before scan'; row.appendChild(lab)}
-    const oldAdd=$('inv-add-mode'); if(oldAdd){oldAdd.checked=true; try{oldAdd.parentElement.style.display='none'}catch(e){}}
-    const p=$('inv-progress'); if(p && !/V12/.test(p.textContent||'')) p.textContent=VERSION+': upload multiple pictures. Each scan adds to saved owned list.';
-  }
-  const oldRender=window.renderAI;
-  window.renderAI=function(){if(oldRender)try{oldRender.apply(this,arguments)}catch(e){} setTimeout(patchUI,100);};
-  setTimeout(patchUI,500); setInterval(patchUI,3000);
-  console.log('FINAL FIX v12 loaded: quota-safe multi-image scanner + progress + resume.');
-})();
-</script>
-<!-- ===== END FINAL FIX v12 ===== -->
-
-
-<script>
-(function(){
-  try{
-    document.documentElement.classList.add('mobile-v13-ready');
-    var meta=document.querySelector('meta[name="viewport"]');
-    if(meta) meta.setAttribute('content','width=device-width, initial-scale=1, viewport-fit=cover');
-    document.title='MadeByZebra\'s Value List - Mobile V13';
-    function addBadge(){
-      var row=document.querySelector('.nav-logo-wrap');
-      if(row && !document.getElementById('mobile-v13-badge')){
-        var b=document.createElement('span');
-        b.id='mobile-v13-badge';
-        b.className='inv-stat';
-        b.style.marginLeft='6px';
-        b.textContent='Mobile V13';
-        row.appendChild(b);
-      }
-    }
-    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',addBadge); else addBadge();
-  }catch(e){}
-})();
-</script>
-<script>
-/* Groq AI database fix */
-async function askRealAI(message) {
-  const owned =
-    JSON.parse(localStorage.getItem("ownedGloves") || "[]") ||
-    JSON.parse(localStorage.getItem("owned") || "[]") ||
-    [];
-
-  const wishlist =
-    JSON.parse(localStorage.getItem("wishlist") || "[]") ||
-    JSON.parse(localStorage.getItem("wish") || "[]") ||
-    [];
-
-  const gloves =
-    typeof GLOVES !== "undefined"
-      ? GLOVES
-      : window.GLOVES || [];
-
-  const res = await fetch("/api/ai", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message,
-      gloves,
-      owned,
-      wishlist
-    })
-  });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    return "AI error: " + JSON.stringify(data.error || data);
-  }
-
-  return data.answer || "No answer returned.";
-}
-</script>
 </body>
 </html>
