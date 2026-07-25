@@ -21443,5 +21443,421 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
 </script>
 <!-- ========================= /V157 ========================= -->
 
+
+<!-- ========================= V52 RESPONSIVE TABS + MOBILE FIX ========================= -->
+<style id="mbz-v52-responsive-tabs-mobile-fix">
+/* V52: Make the tab bar fit on smaller browser widths and make the site phone-safe.
+   This patch is intentionally last so it overrides older stacked patches. */
+
+html, body {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+body {
+  touch-action: pan-y !important;
+}
+
+nav, #nav-tabs, .nav-right, main, .table-wrap, .modal, .modal-bg {
+  max-width: 100vw !important;
+}
+
+main {
+  width: min(1280px, 100%) !important;
+  padding-left: clamp(12px, 3vw, 24px) !important;
+  padding-right: clamp(12px, 3vw, 24px) !important;
+}
+
+/* Default: keep the old desktop style, but never let tabs disappear off-screen. */
+nav {
+  height: auto !important;
+  min-height: 64px !important;
+  overflow: visible !important;
+  flex-wrap: nowrap !important;
+}
+
+#nav-tabs {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-x: contain !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255,255,255,.22) transparent !important;
+  padding-bottom: 2px !important;
+}
+
+#nav-tabs::-webkit-scrollbar {
+  height: 5px !important;
+}
+
+#nav-tabs::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+#nav-tabs::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.18) !important;
+  border-radius: 999px !important;
+}
+
+[data-theme="light"] #nav-tabs {
+  scrollbar-color: rgba(0,0,0,.22) transparent !important;
+}
+
+[data-theme="light"] #nav-tabs::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,.18) !important;
+}
+
+/* Medium screens: let the tab row wrap under the logo/search instead of cutting off. */
+@media (max-width: 1180px) {
+  nav {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 8px 12px !important;
+    padding: 9px 14px !important;
+  }
+
+  .nav-logo-wrap {
+    flex: 0 0 auto !important;
+  }
+
+  .nav-divider {
+    display: none !important;
+  }
+
+  .nav-right {
+    margin-left: auto !important;
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  #nav-tabs {
+    order: 5 !important;
+    flex: 1 0 100% !important;
+    display: flex !important;
+    gap: 4px !important;
+    width: 100% !important;
+    padding: 4px 0 6px !important;
+  }
+
+  #nav-tabs .ntab,
+  #nav-tabs .mbz-v67-credits-tab {
+    flex: 0 0 auto !important;
+    margin: 0 4px !important;
+  }
+}
+
+/* Phone/tablet: tabs become a clean grid so every tab is visible and tappable. */
+@media (max-width: 760px) {
+  nav {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+  }
+
+  .nav-logo-wrap {
+    min-width: 0 !important;
+  }
+
+  .nav-title {
+    font-size: 14px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  .nav-right {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto auto !important;
+    gap: 7px !important;
+    align-items: center !important;
+  }
+
+  .sb {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .sb input,
+  .sb input:focus {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 16px !important;
+    padding-top: 9px !important;
+    padding-bottom: 9px !important;
+  }
+
+  .trello-label {
+    display: none !important;
+  }
+
+  .td-btn,
+  .ai-send,
+  .sbtn,
+  .fchip,
+  .td-opt,
+  button {
+    min-height: 34px;
+  }
+
+  #nav-tabs {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 7px !important;
+    overflow: visible !important;
+    padding: 2px 0 4px !important;
+  }
+
+  #nav-tabs .ntab,
+  #nav-tabs .mbz-v67-credits-tab {
+    margin: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    padding: 9px 6px !important;
+    border: 1px solid var(--border2) !important;
+    border-radius: 999px !important;
+    background: var(--surface) !important;
+    color: var(--text-muted) !important;
+    text-align: center !important;
+    font-size: 12px !important;
+    line-height: 1.1 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+
+  #nav-tabs .ntab:hover,
+  #nav-tabs .mbz-v67-credits-tab:hover {
+    color: var(--text) !important;
+    background: var(--surface2) !important;
+    border-color: var(--border2) !important;
+  }
+
+  #nav-tabs .ntab.active,
+  #nav-tabs .mbz-v67-credits-tab.active {
+    background: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: var(--accent-text) !important;
+  }
+
+  .fbar-toggle-row {
+    padding: 10px 12px 0 !important;
+  }
+
+  main {
+    padding-top: 20px !important;
+    padding-bottom: 90px !important;
+  }
+
+  .home-top,
+  .tier-hero,
+  .class-hero,
+  .page-header {
+    gap: 12px !important;
+  }
+
+  .home-title h1,
+  .page-header h1 {
+    font-size: clamp(26px, 8vw, 36px) !important;
+    line-height: 1.05 !important;
+  }
+
+  .home-title p,
+  .page-header p,
+  .class-intro {
+    font-size: 13px !important;
+  }
+
+  .stats-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100% !important;
+  }
+
+  .stat-c {
+    min-width: 0 !important;
+    padding: 12px 10px !important;
+  }
+
+  .recent-grid,
+  .wl-grid,
+  .ai-cards,
+  .mini-res,
+  .inv-match-grid,
+  .sugg-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .trade-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .vs-col {
+    padding: 0 !important;
+    min-height: 24px !important;
+  }
+
+  .qs-bar,
+  .ai-row,
+  .inv-scan-row,
+  .hist-tools {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+  }
+
+  .ai-input,
+  .qs-bar input,
+  .hist-tools input,
+  .inv-text {
+    width: 100% !important;
+    min-width: 0 !important;
+    font-size: 16px !important;
+  }
+
+  .table-wrap {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .table-wrap table {
+    min-width: 680px !important;
+  }
+
+  .modal-bg {
+    padding: 10px !important;
+    align-items: center !important;
+  }
+
+  .modal {
+    max-width: 100% !important;
+    max-height: 86vh !important;
+    border-radius: 18px !important;
+  }
+
+  .trade-fab {
+    right: 12px !important;
+    bottom: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+    padding: 10px 14px !important;
+    font-size: 12px !important;
+  }
+
+  .cmp-bar {
+    padding: 10px 12px !important;
+  }
+}
+
+@media (max-width: 460px) {
+  #nav-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  #nav-tabs .ntab,
+  #nav-tabs .mbz-v67-credits-tab {
+    font-size: 11.5px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .nav-right {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+  }
+
+  .trello-btn {
+    display: none !important;
+  }
+
+  .td-menu {
+    right: 0 !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+}
+
+/* Keep decorative 3D layers from creating accidental side-scroll or blocking taps. */
+canvas,
+[class*="particle"],
+[class*="orb"],
+[class*="glove"],
+[class*="mesh"],
+[class*="bg"] {
+  max-width: 100vw;
+}
+
+#mbz-v52-mobile-ready-badge {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--surface) 86%, transparent);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  padding: 5px 9px;
+  box-shadow: var(--shadow-sm);
+}
+@media (max-width: 520px){
+  #mbz-v52-mobile-ready-badge{display:none}
+}
+</style>
+<script id="mbz-v52-responsive-tabs-mobile-fix-js">
+(function(){
+  'use strict';
+  function ready(){
+    try{
+      document.documentElement.classList.add('mbz-v52-responsive');
+      if(!document.getElementById('mbz-v52-mobile-ready-badge')){
+        var b=document.createElement('div');
+        b.id='mbz-v52-mobile-ready-badge';
+        b.textContent='V52 · responsive tabs/mobile';
+        document.body.appendChild(b);
+      }
+
+      /* Make sure every nav click restores normal page scrolling. */
+      document.addEventListener('click',function(e){
+        var t=e.target && e.target.closest ? e.target.closest('#nav-tabs button,.ntab,.mbz-v67-credits-tab') : null;
+        if(!t)return;
+        document.documentElement.style.overflowX='hidden';
+        document.body.style.overflowX='hidden';
+        document.documentElement.style.overflowY='auto';
+        document.body.style.overflowY='auto';
+      },true);
+
+      /* If older patches leave body wider than the viewport, clamp it back. */
+      function clamp(){
+        document.documentElement.style.maxWidth='100%';
+        document.body.style.maxWidth='100%';
+        document.documentElement.style.overflowX='hidden';
+        document.body.style.overflowX='hidden';
+      }
+      clamp();
+      window.addEventListener('resize',clamp,{passive:true});
+      setTimeout(clamp,250);
+      setTimeout(clamp,1200);
+    }catch(_){}
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ready,{once:true});
+  else ready();
+})();
+</script>
+<!-- ========================= /V52 RESPONSIVE TABS + MOBILE FIX ========================= -->
+
 </body>
 </html>
