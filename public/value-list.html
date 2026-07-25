@@ -21444,420 +21444,185 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
 <!-- ========================= /V157 ========================= -->
 
 
-<!-- ========================= V52 RESPONSIVE TABS + MOBILE FIX ========================= -->
-<style id="mbz-v52-responsive-tabs-mobile-fix">
-/* V52: Make the tab bar fit on smaller browser widths and make the site phone-safe.
-   This patch is intentionally last so it overrides older stacked patches. */
 
-html, body {
-  width: 100% !important;
-  max-width: 100% !important;
-  overflow-x: hidden !important;
-}
-
-body {
-  touch-action: pan-y !important;
-}
-
-nav, #nav-tabs, .nav-right, main, .table-wrap, .modal, .modal-bg {
-  max-width: 100vw !important;
-}
-
-main {
-  width: min(1280px, 100%) !important;
-  padding-left: clamp(12px, 3vw, 24px) !important;
-  padding-right: clamp(12px, 3vw, 24px) !important;
-}
-
-/* Default: keep the old desktop style, but never let tabs disappear off-screen. */
-nav {
-  height: auto !important;
-  min-height: 64px !important;
-  overflow: visible !important;
-  flex-wrap: nowrap !important;
-}
-
-#nav-tabs {
-  min-width: 0 !important;
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  overscroll-behavior-x: contain !important;
-  scrollbar-width: thin !important;
-  scrollbar-color: rgba(255,255,255,.22) transparent !important;
-  padding-bottom: 2px !important;
-}
-
-#nav-tabs::-webkit-scrollbar {
-  height: 5px !important;
-}
-
-#nav-tabs::-webkit-scrollbar-track {
-  background: transparent !important;
-}
-
-#nav-tabs::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,.18) !important;
-  border-radius: 999px !important;
-}
-
-[data-theme="light"] #nav-tabs {
-  scrollbar-color: rgba(0,0,0,.22) transparent !important;
-}
-
-[data-theme="light"] #nav-tabs::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,.18) !important;
-}
-
-/* Medium screens: let the tab row wrap under the logo/search instead of cutting off. */
-@media (max-width: 1180px) {
-  nav {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    gap: 8px 12px !important;
-    padding: 9px 14px !important;
+<!-- ========================= V158 RESPONSIVE TABS + LEADERBOARD COMMAND FIX ========================= -->
+<style id="mbz-v158-responsive-tabs-leaderboard-fix">
+  /* V158: keep the newest V157 build, but make tabs fit every screen and stay swipeable on mobile. */
+  html,body{max-width:100%!important;overflow-x:hidden!important;}
+  nav{max-width:100vw!important;box-sizing:border-box!important;}
+  #nav-tabs,.nav-tabs{
+    min-width:0!important;
+    max-width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    -webkit-overflow-scrolling:touch!important;
+    overscroll-behavior-x:contain!important;
+    touch-action:pan-x!important;
+    scrollbar-width:thin!important;
+    scroll-snap-type:x proximity!important;
+    flex-wrap:nowrap!important;
+    white-space:nowrap!important;
+    padding-bottom:3px!important;
   }
-
-  .nav-logo-wrap {
-    flex: 0 0 auto !important;
+  #nav-tabs::-webkit-scrollbar,.nav-tabs::-webkit-scrollbar{height:5px!important;display:block!important;}
+  #nav-tabs::-webkit-scrollbar-track,.nav-tabs::-webkit-scrollbar-track{background:rgba(255,255,255,.04)!important;border-radius:999px!important;}
+  #nav-tabs::-webkit-scrollbar-thumb,.nav-tabs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18)!important;border-radius:999px!important;}
+  #nav-tabs .ntab,.nav-tabs .ntab{
+    flex:0 0 auto!important;
+    scroll-snap-align:start!important;
+    -webkit-user-select:none!important;
+    user-select:none!important;
   }
-
-  .nav-divider {
-    display: none !important;
+  .table-wrap,.mbz-v93-table-wrap,.mbz-v93-shell,.modal,.mbz-v93-modal-card,.gsuggest,.td-menu{
+    max-width:100%!important;
   }
+  img,video,canvas,svg{max-width:100%;}
+  select,input,textarea,button{max-width:100%;}
 
-  .nav-right {
-    margin-left: auto !important;
-    flex: 0 1 auto !important;
-    min-width: 0 !important;
+  @media(max-width:1100px){
+    nav{height:auto!important;min-height:64px!important;flex-wrap:wrap!important;padding:10px 14px!important;gap:8px!important;align-items:center!important;}
+    .nav-logo-wrap{max-width:calc(100vw - 28px)!important;}
+    .nav-title{max-width:calc(100vw - 90px)!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+    .nav-right{margin-left:auto!important;}
+    #nav-tabs,.nav-tabs{order:9!important;flex:1 0 100%!important;width:100%!important;margin-top:2px!important;}
+    #nav-tabs .ntab,.nav-tabs .ntab{margin:0 7px!important;padding:9px 4px!important;font-size:12.5px!important;}
   }
-
-  #nav-tabs {
-    order: 5 !important;
-    flex: 1 0 100% !important;
-    display: flex !important;
-    gap: 4px !important;
-    width: 100% !important;
-    padding: 4px 0 6px !important;
+  @media(max-width:720px){
+    body{font-size:15px!important;}
+    nav{padding:9px 10px!important;}
+    .nav-right{order:8!important;display:flex!important;gap:6px!important;flex:1 0 100%!important;width:100%!important;justify-content:stretch!important;}
+    .sb{flex:1 1 100%!important;min-width:0!important;}
+    .sb input,.sb input:focus{width:100%!important;min-width:0!important;}
+    .td-wrap,.trello-btn,.td-btn{flex:0 0 auto!important;}
+    #nav-tabs .ntab,.nav-tabs .ntab{font-size:12px!important;margin:0 6px!important;padding:9px 3px!important;}
+    main{width:100%!important;max-width:100%!important;padding-left:12px!important;padding-right:12px!important;}
+    .home-top,.stats-row,.recent-grid,.trade-grid,.ai-row,.ai-api-grid,.hist-sides,.mbz-v93-stats,.mbz-v93-manager,.mbz-v93-detail-grid{grid-template-columns:1fr!important;flex-direction:column!important;align-items:stretch!important;}
+    .trade-grid{display:grid!important;grid-template-columns:1fr!important;}
+    .vs-col{padding-top:4px!important;}
+    .modal-bg,.mbz-v93-modal{padding:10px!important;align-items:flex-start!important;overflow-y:auto!important;}
+    .modal,.mbz-v93-modal-card{width:100%!important;max-width:calc(100vw - 20px)!important;max-height:calc(100vh - 20px)!important;}
   }
-
-  #nav-tabs .ntab,
-  #nav-tabs .mbz-v67-credits-tab {
-    flex: 0 0 auto !important;
-    margin: 0 4px !important;
-  }
-}
-
-/* Phone/tablet: tabs become a clean grid so every tab is visible and tappable. */
-@media (max-width: 760px) {
-  nav {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 10px 12px !important;
-  }
-
-  .nav-logo-wrap {
-    min-width: 0 !important;
-  }
-
-  .nav-title {
-    font-size: 14px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  .nav-right {
-    grid-column: 1 / -1 !important;
-    width: 100% !important;
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto auto !important;
-    gap: 7px !important;
-    align-items: center !important;
-  }
-
-  .sb {
-    min-width: 0 !important;
-    width: 100% !important;
-  }
-
-  .sb input,
-  .sb input:focus {
-    width: 100% !important;
-    max-width: 100% !important;
-    font-size: 16px !important;
-    padding-top: 9px !important;
-    padding-bottom: 9px !important;
-  }
-
-  .trello-label {
-    display: none !important;
-  }
-
-  .td-btn,
-  .ai-send,
-  .sbtn,
-  .fchip,
-  .td-opt,
-  button {
-    min-height: 34px;
-  }
-
-  #nav-tabs {
-    grid-column: 1 / -1 !important;
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-    gap: 7px !important;
-    overflow: visible !important;
-    padding: 2px 0 4px !important;
-  }
-
-  #nav-tabs .ntab,
-  #nav-tabs .mbz-v67-credits-tab {
-    margin: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    padding: 9px 6px !important;
-    border: 1px solid var(--border2) !important;
-    border-radius: 999px !important;
-    background: var(--surface) !important;
-    color: var(--text-muted) !important;
-    text-align: center !important;
-    font-size: 12px !important;
-    line-height: 1.1 !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-  }
-
-  #nav-tabs .ntab:hover,
-  #nav-tabs .mbz-v67-credits-tab:hover {
-    color: var(--text) !important;
-    background: var(--surface2) !important;
-    border-color: var(--border2) !important;
-  }
-
-  #nav-tabs .ntab.active,
-  #nav-tabs .mbz-v67-credits-tab.active {
-    background: var(--accent) !important;
-    border-color: var(--accent) !important;
-    color: var(--accent-text) !important;
-  }
-
-  .fbar-toggle-row {
-    padding: 10px 12px 0 !important;
-  }
-
-  main {
-    padding-top: 20px !important;
-    padding-bottom: 90px !important;
-  }
-
-  .home-top,
-  .tier-hero,
-  .class-hero,
-  .page-header {
-    gap: 12px !important;
-  }
-
-  .home-title h1,
-  .page-header h1 {
-    font-size: clamp(26px, 8vw, 36px) !important;
-    line-height: 1.05 !important;
-  }
-
-  .home-title p,
-  .page-header p,
-  .class-intro {
-    font-size: 13px !important;
-  }
-
-  .stats-row {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    width: 100% !important;
-  }
-
-  .stat-c {
-    min-width: 0 !important;
-    padding: 12px 10px !important;
-  }
-
-  .recent-grid,
-  .wl-grid,
-  .ai-cards,
-  .mini-res,
-  .inv-match-grid,
-  .sugg-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .trade-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  .vs-col {
-    padding: 0 !important;
-    min-height: 24px !important;
-  }
-
-  .qs-bar,
-  .ai-row,
-  .inv-scan-row,
-  .hist-tools {
-    display: grid !important;
-    grid-template-columns: 1fr !important;
-    width: 100% !important;
-  }
-
-  .ai-input,
-  .qs-bar input,
-  .hist-tools input,
-  .inv-text {
-    width: 100% !important;
-    min-width: 0 !important;
-    font-size: 16px !important;
-  }
-
-  .table-wrap {
-    width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-  }
-
-  .table-wrap table {
-    min-width: 680px !important;
-  }
-
-  .modal-bg {
-    padding: 10px !important;
-    align-items: center !important;
-  }
-
-  .modal {
-    max-width: 100% !important;
-    max-height: 86vh !important;
-    border-radius: 18px !important;
-  }
-
-  .trade-fab {
-    right: 12px !important;
-    bottom: 12px !important;
-    max-width: calc(100vw - 24px) !important;
-    padding: 10px 14px !important;
-    font-size: 12px !important;
-  }
-
-  .cmp-bar {
-    padding: 10px 12px !important;
-  }
-}
-
-@media (max-width: 460px) {
-  #nav-tabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  }
-
-  #nav-tabs .ntab,
-  #nav-tabs .mbz-v67-credits-tab {
-    font-size: 11.5px !important;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-  }
-
-  .stats-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .nav-right {
-    grid-template-columns: minmax(0, 1fr) auto !important;
-  }
-
-  .trello-btn {
-    display: none !important;
-  }
-
-  .td-menu {
-    right: 0 !important;
-    max-width: calc(100vw - 24px) !important;
-  }
-}
-
-/* Keep decorative 3D layers from creating accidental side-scroll or blocking taps. */
-canvas,
-[class*="particle"],
-[class*="orb"],
-[class*="glove"],
-[class*="mesh"],
-[class*="bg"] {
-  max-width: 100vw;
-}
-
-#mbz-v52-mobile-ready-badge {
-  position: fixed;
-  left: 10px;
-  bottom: 10px;
-  z-index: 9999;
-  pointer-events: none;
-  font-family: 'DM Mono', monospace;
-  font-size: 10px;
-  letter-spacing: .04em;
-  color: var(--text-muted);
-  background: color-mix(in srgb, var(--surface) 86%, transparent);
-  border: 1px solid var(--border2);
-  border-radius: 999px;
-  padding: 5px 9px;
-  box-shadow: var(--shadow-sm);
-}
-@media (max-width: 520px){
-  #mbz-v52-mobile-ready-badge{display:none}
-}
 </style>
-<script id="mbz-v52-responsive-tabs-mobile-fix-js">
+<script id="mbz-v158-responsive-tabs-leaderboard-fix">
 (function(){
   'use strict';
-  function ready(){
+  var d=document,w=window;
+  if(w.__MBZ_V158_RESPONSIVE_FIX__)return;w.__MBZ_V158_RESPONSIVE_FIX__=true;
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function onReady(fn){if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',fn,{once:true});else fn()}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  var fallbackEntries=[
+    [1,'mx2hz',933],[2,'telepmor',932],[3,'BaconagirlPx',923],[4,'vanillabunnypuff',913],[5,'YiBerlinX',900],
+    [6,'Zub_Zero3000',899],[7,'MemeEqual101',897],[8,'Xhschshsixm1',881],[9,'Solodites',869],[10,'partyintherave',865],
+    [11,'theiazas',862],[12,'LaggyBott',857],[13,'MarlenouTheFlashou',856],[14,'josidini',848],[15,'Monstrosity123456',836],
+    [16,'o8x1ghPyCz4abRvh67x',826],[17,'Idolyyx',819],[18,'VincentxTo0t',817],[19,'AekazeSz',817],[20,'JULIOUwUq2',813]
+  ];
+  function getEntries(){
     try{
-      document.documentElement.classList.add('mbz-v52-responsive');
-      if(!document.getElementById('mbz-v52-mobile-ready-badge')){
-        var b=document.createElement('div');
-        b.id='mbz-v52-mobile-ready-badge';
-        b.textContent='V52 · responsive tabs/mobile';
-        document.body.appendChild(b);
+      var raw=localStorage.getItem('mbz_v93_collection_leaderboard');
+      var st=raw&&JSON.parse(raw);
+      if(st&&Array.isArray(st.entries)&&st.entries.length){
+        return st.entries.slice(0,100).map(function(x,i){return {rank:x.rank||i+1,username:x.username||('Player'+(i+1)),score:x.score||0,reputation:x.reputation||'unverified'}})
       }
-
-      /* Make sure every nav click restores normal page scrolling. */
-      document.addEventListener('click',function(e){
-        var t=e.target && e.target.closest ? e.target.closest('#nav-tabs button,.ntab,.mbz-v67-credits-tab') : null;
-        if(!t)return;
-        document.documentElement.style.overflowX='hidden';
-        document.body.style.overflowX='hidden';
-        document.documentElement.style.overflowY='auto';
-        document.body.style.overflowY='auto';
-      },true);
-
-      /* If older patches leave body wider than the viewport, clamp it back. */
-      function clamp(){
-        document.documentElement.style.maxWidth='100%';
-        document.body.style.maxWidth='100%';
-        document.documentElement.style.overflowX='hidden';
-        document.body.style.overflowX='hidden';
-      }
-      clamp();
-      window.addEventListener('resize',clamp,{passive:true});
-      setTimeout(clamp,250);
-      setTimeout(clamp,1200);
-    }catch(_){}
+    }catch(_){ }
+    return fallbackEntries.map(function(x){return {rank:x[0],username:x[1],score:x[2],reputation:'unverified'}})
   }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',ready,{once:true});
-  else ready();
+  function ensureLeaderboardPage(){
+    var main=q('main')||d.body;
+    var page=q('#leaderboards-page');
+    if(!page){
+      page=d.createElement('div');
+      page.id='leaderboards-page';
+      page.className='all-page';
+      page.innerHTML='<div id="mbz-v93-leaderboards-root"></div>';
+      main.appendChild(page);
+    }
+    var root=q('#mbz-v93-leaderboards-root',page);
+    if(!root){root=d.createElement('div');root.id='mbz-v93-leaderboards-root';page.appendChild(root)}
+    return {page:page,root:root};
+  }
+  function isRootEmpty(root){
+    if(!root)return true;
+    var txt=(root.textContent||'').replace(/\s+/g,'').trim();
+    return !root.children.length || txt.length<20;
+  }
+  function renderFallback(root){
+    var entries=getEntries();
+    var rows=entries.map(function(x){
+      var medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':'#'+x.rank;
+      return '<tr data-user="'+esc(x.username)+'"><td class="mbz-v158-rank">'+medal+'</td><td><strong>'+esc(x.username)+'</strong><small>'+esc(x.reputation||'unverified')+'</small></td><td class="mbz-v158-score">'+esc(x.score)+'</td><td><a target="_blank" rel="noopener noreferrer" href="https://www.roblox.com/search/users?keyword='+encodeURIComponent(x.username)+'">Open Roblox</a></td></tr>';
+    }).join('');
+    root.innerHTML='<section class="mbz-v158-leaderboard-fallback">'+
+      '<style>.mbz-v158-leaderboard-fallback{padding:6px 0 80px}.mbz-v158-lb-hero{border:1px solid var(--border2);background:linear-gradient(135deg,var(--surface),rgba(255,255,255,.03));border-radius:var(--radius-lg);padding:22px;margin-bottom:14px;box-shadow:var(--shadow-sm)}.mbz-v158-lb-hero h1{font-family:\'Space Grotesk\',sans-serif;font-size:clamp(28px,5vw,52px);line-height:1;margin:0 0 8px}.mbz-v158-lb-hero p{color:var(--text-muted);line-height:1.6;max-width:780px}.mbz-v158-lb-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.mbz-v158-lb-tools input{flex:1;min-width:220px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:999px;padding:10px 13px}.mbz-v158-lb-card{border:1px solid var(--border2);background:var(--surface);border-radius:var(--radius-lg);overflow:hidden}.mbz-v158-lb-table{width:100%;border-collapse:collapse}.mbz-v158-lb-table th{font-family:\'DM Mono\',monospace;font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em}.mbz-v158-lb-table td,.mbz-v158-lb-table th{padding:12px 14px;border-bottom:1px solid var(--border)}.mbz-v158-lb-table tr:hover td{background:var(--surface2)}.mbz-v158-lb-table small{display:block;color:var(--text-dim);font-family:\'DM Mono\',monospace;font-size:10px;margin-top:3px}.mbz-v158-rank{width:82px;font-family:\'DM Mono\',monospace;color:var(--text)}.mbz-v158-score{font-family:\'DM Mono\',monospace;color:var(--text);font-weight:700}.mbz-v158-lb-table a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border2)}@media(max-width:680px){.mbz-v158-lb-card{overflow-x:auto}.mbz-v158-lb-table{min-width:620px}.mbz-v158-lb-hero{padding:18px 14px}}</style>'+
+      '<div class="mbz-v158-lb-hero"><h1>Collection Leaderboards</h1><p>Top Boxing League collectors from the saved weekly board. This fallback keeps the page working when the command palette opens Leaderboards before the older renderer finishes.</p><div class="mbz-v158-lb-tools"><input id="mbz-v158-lb-search" placeholder="Search player…"><button class="sbtn" id="mbz-v158-lb-refresh">Refresh board</button></div></div>'+
+      '<div class="mbz-v158-lb-card"><table class="mbz-v158-lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Profile</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      '</section>';
+    var input=q('#mbz-v158-lb-search',root),tbody=q('tbody',root);
+    if(input&&tbody){input.addEventListener('input',function(){var term=this.value.toLowerCase().trim();qa('tr',tbody).forEach(function(tr){tr.style.display=(tr.textContent||'').toLowerCase().includes(term)?'':'none'})})}
+    var ref=q('#mbz-v158-lb-refresh',root);if(ref)ref.onclick=function(){root.innerHTML='';setTimeout(function(){safeShowLeaderboards(true)},0)};
+  }
+  function activateLeaderboardUI(page){
+    try{d.body.classList.add('mbz-v94-leaderboards-open');d.body.dataset.mbzRoute='leaderboards';}catch(_){ }
+    qa('main > *').forEach(function(el){
+      if(el===page||el.id==='leaderboards-page'||el.classList.contains('mobile-version-badge')||/badge/i.test(el.className||''))return;
+      el.classList.remove('active');
+      el.setAttribute('aria-hidden','true');
+      if(['SCRIPT','STYLE'].indexOf(el.tagName)<0)el.style.display='none';
+    });
+    page.classList.add('active');page.style.display='block';page.removeAttribute('aria-hidden');
+    qa('#nav-tabs .ntab,.nav-tabs .ntab').forEach(function(tab){
+      var active=tab.id==='mbz-v93-leaderboards-tab'||String(tab.textContent||'').trim().toLowerCase()==='leaderboards';
+      tab.classList.toggle('active',active);
+      if(active)try{tab.scrollIntoView({inline:'center',block:'nearest'})}catch(_){ }
+    });
+  }
+  function safeShowLeaderboards(forceFallback){
+    var old=w.__MBZ_V158_OLD_SHOW_LEADERBOARDS__;
+    if(old&&!forceFallback){try{old.apply(w,arguments)}catch(_){ }}
+    var pr=ensureLeaderboardPage();
+    activateLeaderboardUI(pr.page);
+    setTimeout(function(){
+      var pr2=ensureLeaderboardPage();
+      activateLeaderboardUI(pr2.page);
+      if(forceFallback||isRootEmpty(pr2.root))renderFallback(pr2.root);
+    }, forceFallback?0:80);
+    setTimeout(function(){
+      var pr3=ensureLeaderboardPage();
+      activateLeaderboardUI(pr3.page);
+      if(isRootEmpty(pr3.root))renderFallback(pr3.root);
+    },320);
+  }
+  function wrapLeaderboards(){
+    if(w.showLeaderboards&&w.showLeaderboards.__mbzV158)return;
+    w.__MBZ_V158_OLD_SHOW_LEADERBOARDS__=w.showLeaderboards;
+    w.showLeaderboards=function(){return safeShowLeaderboards(false)};
+    w.showLeaderboards.__mbzV158=true;
+  }
+  function fixTabs(){
+    var tabs=q('#nav-tabs')||q('.nav-tabs');if(!tabs)return;
+    tabs.style.overflowX='auto';tabs.style.overflowY='hidden';tabs.style.webkitOverflowScrolling='touch';tabs.style.touchAction='pan-x';
+    qa('.ntab',tabs).forEach(function(t){t.style.flex='0 0 auto'});
+  }
+  function boot(){
+    wrapLeaderboards();fixTabs();
+    [100,400,900,1800].forEach(function(ms){setTimeout(function(){wrapLeaderboards();fixTabs()},ms)});
+  }
+  onReady(boot);
+  w.addEventListener('resize',function(){fixTabs()},{passive:true});
+  d.addEventListener('click',function(e){
+    var t=e.target&&e.target.closest?e.target.closest('[data-v93-palette],#mbz-v93-leaderboards-tab,.mbz-v82-palette-item,.mbz-v82-palette-name'):null;
+    if(!t)return;
+    var txt=(t.textContent||'').toLowerCase();
+    if(t.id==='mbz-v93-leaderboards-tab'||txt.includes('leaderboard')){
+      e.preventDefault();e.stopPropagation();safeShowLeaderboards(false);
+    }
+  },true);
+  try{d.title='MadeByZebra — Value List · V158 Responsive Tabs';}catch(_){ }
 })();
 </script>
-<!-- ========================= /V52 RESPONSIVE TABS + MOBILE FIX ========================= -->
+<!-- ========================= /V158 ========================= -->
 
 </body>
 </html>
