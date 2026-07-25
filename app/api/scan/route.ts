@@ -14,25 +14,35 @@ export async function POST(req: Request) {
     }
 
     const allowedNames = Array.isArray(gloveNames)
-      ? gloveNames.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 2000)
+      ? gloveNames.map((x: any) => String(x).trim()).filter(Boolean).slice(0, 2500)
       : [];
 
     const prompt = `
 You are the image scanner for MadeByZebra's Boxing League glove value list.
-Read Roblox inventory screenshots and identify visible glove names.
+Read Roblox inventory screenshots and identify visible glove names AND visible serial numbers.
 
 Critical rules:
 - Only return names that are in the allowed glove list.
 - confirmed = exact/very clear names only.
 - review = blurry/partial/uncertain names with best candidates.
 - Do not invent glove names.
-- Do not guess exact serial/range variants unless the text clearly shows the variant.
+- IMPORTANT SERIAL RULE: many limited gloves show a serial like #33, #33/400, #19, #120/500 on the card.
+- When you can read a base glove name plus a serial number, use the allowed glove range to pick the exact variant.
+  Examples:
+  * Frostbite #33/400 -> choose the allowed Frostbite variant whose bracket includes 33, such as Frostbite Low [11-47].
+  * Chronos #19 -> choose the allowed Chronos variant whose bracket includes 19, such as Chronos [10-50].
+  * Shrimple #33 -> choose the allowed Shrimple variant whose bracket includes 33, such as Shrimple [10-50].
+  * Nuclear #19 -> choose the allowed Nuclear variant whose bracket includes 19, such as Nuclear [10-50].
+- If only the base family is readable but no serial/range is readable, put it in review with family candidates. Do not auto-save the wrong variant.
 - If a screenshot is too blurry, return review candidates, not confirmed.
 - Return ONLY valid JSON. No markdown.
 
 JSON format:
 {
   "confirmed": ["Exact Allowed Glove Name"],
+  "serials": [
+    { "baseName": "Frostbite", "visibleText": "Frostbite #33/400", "serial": 33, "total": 400, "candidate": "Frostbite Low [11-47]", "confidence": 0-100, "reason": "serial 33 fits [11-47]" }
+  ],
   "review": [
     { "text": "visible or partial text", "candidates": ["Allowed Name 1", "Allowed Name 2"], "confidence": 0-100, "reason": "short reason" }
   ],
@@ -45,7 +55,6 @@ ${JSON.stringify(allowedNames)}
 
     const parts: any[] = [{ text: prompt }];
 
-    // Use one image per request for stability. The frontend can call again for more images.
     for (const dataUrl of images.slice(0, 1)) {
       const match = String(dataUrl).match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
       if (!match) continue;
@@ -68,7 +77,7 @@ ${JSON.stringify(allowedNames)}
 
     async function callGemini(model: string, attempt: number) {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
+      const timeout = setTimeout(() => controller.abort(), 35000);
 
       try {
         const res = await fetch(
@@ -80,9 +89,9 @@ ${JSON.stringify(allowedNames)}
             body: JSON.stringify({
               contents: [{ role: "user", parts }],
               generationConfig: {
-                temperature: 0.05,
+                temperature: 0.02,
                 response_mime_type: "application/json",
-                maxOutputTokens: 2048
+                maxOutputTokens: 3072
               }
             })
           }
@@ -90,7 +99,6 @@ ${JSON.stringify(allowedNames)}
 
         const data = await res.json().catch(() => ({}));
         attempts.push({ model, attempt, status: res.status, message: data?.error?.message || "" });
-
         return { res, data };
       } finally {
         clearTimeout(timeout);
@@ -99,7 +107,7 @@ ${JSON.stringify(allowedNames)}
 
     let finalData: any = null;
     let finalModel = "";
-    let lastStatus = 500;
+    let lastStatus: any = 500;
     let lastMessage = "Gemini scanner failed.";
 
     for (const model of models) {
@@ -111,18 +119,14 @@ ${JSON.stringify(allowedNames)}
             finalModel = model;
             break;
           }
-
           lastStatus = res.status;
           lastMessage = data?.error?.message || `Gemini scanner error ${res.status}`;
-
           if (!retryable.has(res.status)) break;
-          await sleep(attempt === 1 ? 900 : attempt === 2 ? 1800 : 0);
+          await sleep(attempt === 1 ? 850 : attempt === 2 ? 1750 : 0);
         } catch (err: any) {
-          lastMessage = err?.name === "AbortError"
-            ? `Scanner timed out on ${model}.`
-            : err?.message || `Scanner failed on ${model}.`;
+          lastMessage = err?.name === "AbortError" ? `Scanner timed out on ${model}.` : err?.message || `Scanner failed on ${model}.`;
           attempts.push({ model, attempt, status: "exception", message: lastMessage });
-          if (attempt < 3) await sleep(attempt === 1 ? 900 : 1800);
+          if (attempt < 3) await sleep(attempt === 1 ? 850 : 1750);
         }
       }
       if (finalData) break;
@@ -158,20 +162,76 @@ ${JSON.stringify(allowedNames)}
     const exact = new Map(allowedNames.map((n: string) => [n.toLowerCase(), n]));
     const cleanName = (x: any) => exact.get(String(x || "").trim().toLowerCase());
 
-    const confirmed = Array.from(
-      new Set(
-        (Array.isArray(parsed.confirmed) ? parsed.confirmed : [])
-          .map(cleanName)
-          .filter(Boolean)
-      )
-    );
+    function normalizeBase(x: any) {
+      return String(x || "")
+        .toLowerCase()
+        .replace(/[\[\]#()]/g, " ")
+        .replace(/\b(low|mid|high|class|serial|limited|the|classic)\b/g, " ")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    }
 
-    const review = (Array.isArray(parsed.review) ? parsed.review : Array.isArray(parsed.possible) ? parsed.possible : [])
+    function parseRange(name: string) {
+      const m = String(name).match(/\[(\d+)\s*(?:-|–|to)\s*(\d+)\]/i);
+      if (m) return { min: Number(m[1]), max: Number(m[2]) };
+      const p = String(name).match(/\[(\d+)\s*\+\]/i);
+      if (p) return { min: Number(p[1]), max: Infinity };
+      return null;
+    }
+
+    function inferBySerial(baseName: any, serialAny: any) {
+      const serial = Number(String(serialAny || "").replace(/[^0-9]/g, ""));
+      if (!Number.isFinite(serial) || serial <= 0) return null;
+      const base = normalizeBase(baseName);
+      if (!base) return null;
+      const candidates = allowedNames.filter((name: string) => {
+        const beforeBracket = String(name).split("[")[0];
+        const nb = normalizeBase(beforeBracket);
+        return nb === base || nb.includes(base) || base.includes(nb);
+      });
+      for (const name of candidates) {
+        const r = parseRange(name);
+        if (r && serial >= r.min && serial <= r.max) return name;
+      }
+      return null;
+    }
+
+    const serials = (Array.isArray(parsed.serials) ? parsed.serials : [])
+      .map((s: any) => {
+        const inferred = cleanName(s.candidate) || inferBySerial(s.baseName || s.name || s.text || s.visibleText, s.serial || s.number || s.rank);
+        const serial = Number(s.serial || s.number || s.rank || 0) || undefined;
+        return {
+          baseName: String(s.baseName || s.name || ""),
+          visibleText: String(s.visibleText || s.text || ""),
+          serial,
+          total: Number(s.total || 0) || undefined,
+          candidate: inferred || String(s.candidate || ""),
+          confidence: Number(s.confidence || 0) || undefined,
+          reason: String(s.reason || (inferred && serial ? `serial ${serial} mapped to ${inferred}` : ""))
+        };
+      })
+      .filter((s: any) => s.visibleText || s.baseName || s.candidate)
+      .slice(0, 80);
+
+    const confirmedSet = new Set<string>();
+    for (const x of Array.isArray(parsed.confirmed) ? parsed.confirmed : []) {
+      const n = cleanName(x);
+      if (n) confirmedSet.add(n);
+    }
+    for (const s of serials) {
+      const n = cleanName(s.candidate) || (s.candidate && exact.get(String(s.candidate).toLowerCase()));
+      if (n && (Number(s.confidence || 0) >= 70 || s.serial)) confirmedSet.add(n);
+    }
+
+    const confirmed = Array.from(confirmedSet);
+
+    const reviewRaw = Array.isArray(parsed.review) ? parsed.review : Array.isArray(parsed.possible) ? parsed.possible : [];
+    const review = reviewRaw
       .map((r: any) => {
         const candidates = (Array.isArray(r.candidates) ? r.candidates : [])
           .map(cleanName)
           .filter(Boolean)
-          .slice(0, 8);
+          .slice(0, 10);
         return {
           text: String(r.text || r.read || r.partial || ""),
           candidates: Array.from(new Set(candidates)),
@@ -180,12 +240,31 @@ ${JSON.stringify(allowedNames)}
         };
       })
       .filter((r: any) => r.candidates.length || r.text)
-      .slice(0, 80);
+      .slice(0, 100);
+
+    // Add serials that could not be confidently saved to review, so the website shows review buttons.
+    for (const s of serials) {
+      const exactCandidate = cleanName(s.candidate);
+      if (!exactCandidate || !confirmed.includes(exactCandidate)) {
+        const family = allowedNames.filter((name: string) => {
+          const nb = normalizeBase(String(name).split("[")[0]);
+          const base = normalizeBase(s.baseName || s.visibleText);
+          return base && (nb.includes(base) || base.includes(nb));
+        }).slice(0, 10);
+        review.push({
+          text: s.visibleText || `${s.baseName} #${s.serial || "?"}`,
+          candidates: family,
+          confidence: s.confidence,
+          reason: s.reason || "Serial/base was visible, but exact range could not be confirmed."
+        });
+      }
+    }
 
     return Response.json({
       confirmed,
       review,
-      notes: parsed.notes || "",
+      serials,
+      notes: parsed.notes || "Serial-aware scanner V52: reads #serials and maps them to bracket variants when clear.",
       model: finalModel,
       attempts,
       raw
