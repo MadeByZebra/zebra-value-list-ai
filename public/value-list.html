@@ -21624,5 +21624,176 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
 </script>
 <!-- ========================= /V158 ========================= -->
 
+
+
+<!-- ========================= V159 COMMAND PALETTE ROUTER FIX ========================= -->
+<style id="mbz-v159-command-palette-fix-style">
+  /* V159: make the command palette reliable, readable, and actually useful. */
+  .mbz-v159-palette-help{padding:8px 10px 9px;color:var(--text-dim);font:10px 'DM Mono',monospace;letter-spacing:.04em;line-height:1.55;border-bottom:1px solid var(--border);margin-bottom:4px}
+  .mbz-v159-palette-tag{font:10px 'DM Mono',monospace;color:var(--text-dim);border:1px solid var(--border2);border-radius:999px;padding:3px 8px;background:var(--surface2);white-space:nowrap}
+  .mbz-v159-palette-item{position:relative;overflow:hidden}
+  .mbz-v159-palette-item::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.07) 45%,transparent 70%);translate:-120% 0;pointer-events:none;transition:translate .42s cubic-bezier(.16,1,.3,1)}
+  .mbz-v159-palette-item:hover::after,.mbz-v159-palette-item.active::after{translate:120% 0}
+  .mbz-v159-palette-empty{padding:24px 14px;color:var(--text-dim);font-size:13px;text-align:center}
+  .mbz-v159-lb-page{padding:8px 0 88px;max-width:1280px;margin:0 auto}
+  .mbz-v159-lb-hero{border:1px solid var(--border2);background:linear-gradient(135deg,var(--surface),rgba(255,255,255,.035));border-radius:var(--radius-lg);padding:24px;margin-bottom:14px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
+  .mbz-v159-lb-hero::before{content:'';position:absolute;inset:-40% -20%;background:radial-gradient(circle at 20% 10%,rgba(255,255,255,.09),transparent 32%);pointer-events:none}
+  .mbz-v159-lb-hero>*{position:relative;z-index:1}
+  .mbz-v159-lb-hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,56px);line-height:.95;margin:0 0 10px;letter-spacing:-.045em}
+  .mbz-v159-lb-hero p{color:var(--text-muted);line-height:1.65;max-width:840px;font-size:13px}
+  .mbz-v159-lb-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .mbz-v159-lb-tools input{flex:1;min-width:220px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:999px;padding:10px 13px;outline:none;font:13px 'Inter',sans-serif}
+  .mbz-v159-lb-card{border:1px solid var(--border2);background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+  .mbz-v159-lb-table{width:100%;border-collapse:collapse;font-size:13px}
+  .mbz-v159-lb-table th{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;text-align:left;background:var(--surface2)}
+  .mbz-v159-lb-table td,.mbz-v159-lb-table th{padding:12px 14px;border-bottom:1px solid var(--border)}
+  .mbz-v159-lb-table tr:hover td{background:var(--surface2)}
+  .mbz-v159-lb-table small{display:block;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:10px;margin-top:3px}
+  .mbz-v159-rank{width:86px;font-family:'DM Mono',monospace;color:var(--text);font-weight:700}
+  .mbz-v159-score{font-family:'DM Mono',monospace;color:var(--text);font-weight:700}
+  .mbz-v159-lb-table a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border2)}
+  @media(max-width:720px){
+    .mbz-v82-palette{padding:74px 10px 14px!important}.mbz-v82-palette-card{max-height:calc(100vh - 92px)!important;border-radius:18px!important}
+    .mbz-v82-palette-item{grid-template-columns:32px minmax(0,1fr) auto!important;padding:11px 9px!important}.mbz-v82-palette-name{font-size:13px!important}.mbz-v82-palette-note{font-size:9.5px!important}
+    .mbz-v159-lb-hero{padding:18px 14px}.mbz-v159-lb-card{overflow-x:auto}.mbz-v159-lb-table{min-width:640px}.mbz-v159-lb-tools input{min-width:0;flex-basis:100%}
+  }
+</style>
+<script id="mbz-v159-command-palette-fix-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V159_COMMAND_FIX__)return;window.__MBZ_V159_COMMAND_FIX__=true;
+  var d=document,w=window;
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function closePalette(){var p=q('#mbz-v82-palette');if(p){p.classList.remove('show');p.setAttribute('aria-hidden','true')}}
+  function scrollTop(){try{w.scrollTo({top:0,behavior:'smooth'})}catch(_){try{w.scrollTo(0,0)}catch(__){}}}
+
+  var leaderboardEntries=[
+    [1,'mx2hz',933],[2,'telepmor',932],[3,'BaconagirlPx',923],[4,'vanillabunnypuff',913],[5,'YiBerlinX',900],
+    [6,'Zub_Zero3000',899],[7,'MemeEqual101',897],[8,'Xhschshsixm1',881],[9,'Solodites',869],[10,'partyintherave',865],
+    [11,'theiazas',862],[12,'LaggyBott',857],[13,'MarlenouTheFlashou',856],[14,'josidini',848],[15,'Monstrosity123456',836],
+    [16,'o8x1ghPyCz4abRvh67x',826],[17,'Idolyyx',819],[18,'VincentxTo0t',817],[19,'AekazeSz',817],[20,'JULIOUwUq2',813]
+  ];
+  function savedLeaderboard(){
+    try{
+      var keys=['mbz_v93_collection_leaderboard','mbz-v93-collection-leaderboard','mbzCollectionLeaderboard'];
+      for(var i=0;i<keys.length;i++){
+        var raw=localStorage.getItem(keys[i]);if(!raw)continue;
+        var st=JSON.parse(raw);if(st&&Array.isArray(st.entries)&&st.entries.length){
+          return st.entries.slice(0,100).map(function(x,j){return {rank:x.rank||j+1,username:x.username||x.name||('Player'+(j+1)),score:x.score||x.total||0,reputation:x.reputation||x.note||'saved board'}})
+        }
+      }
+    }catch(_){ }
+    return leaderboardEntries.map(function(x){return {rank:x[0],username:x[1],score:x[2],reputation:'fallback board'}})
+  }
+  function ensurePage(id,cls){
+    var main=q('main')||d.body,el=q('#'+id);
+    if(!el){el=d.createElement('div');el.id=id;el.className=cls||'all-page';main.appendChild(el)}
+    return el;
+  }
+  function hardHideNon(page){
+    qa('main > *').forEach(function(el){
+      if(el===page||el.tagName==='SCRIPT'||el.tagName==='STYLE'||/badge/i.test(el.className||''))return;
+      el.classList.remove('active');el.setAttribute('aria-hidden','true');el.style.display='none';
+    });
+    page.classList.add('active');page.style.display='block';page.removeAttribute('aria-hidden');
+  }
+  function setActiveTab(label){
+    label=String(label||'').toLowerCase();
+    qa('#nav-tabs .ntab,.nav-tabs .ntab').forEach(function(tab){
+      var t=String(tab.textContent||'').trim().toLowerCase();
+      var on=(label==='leaderboards'?(t==='leaderboards'||tab.id==='mbz-v93-leaderboards-tab'):t===label);
+      tab.classList.toggle('active',on);if(on){tab.setAttribute('aria-current','page');try{tab.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}}else tab.removeAttribute('aria-current');
+    })
+  }
+  function renderLeaderboard(){
+    var page=ensurePage('leaderboards-page','all-page');
+    var root=q('#mbz-v93-leaderboards-root',page);if(!root){root=d.createElement('div');root.id='mbz-v93-leaderboards-root';page.appendChild(root)}
+    var entries=savedLeaderboard();
+    var rows=entries.map(function(x){
+      var rank=Number(x.rank)||0,medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
+      return '<tr data-user="'+esc(x.username)+'"><td class="mbz-v159-rank">'+medal+'</td><td><strong>'+esc(x.username)+'</strong><small>'+esc(x.reputation||'unverified')+'</small></td><td class="mbz-v159-score">'+esc(x.score)+'</td><td><a target="_blank" rel="noopener noreferrer" href="https://www.roblox.com/search/users?keyword='+encodeURIComponent(x.username)+'">Open Roblox</a></td></tr>';
+    }).join('');
+    root.innerHTML='<section class="mbz-v159-lb-page"><div class="mbz-v159-lb-hero"><h1>Collection Leaderboards</h1><p>Weekly Boxing League collector ranking. This version opens directly from the command palette and will not accidentally route to Ideas Lab.</p><div class="mbz-v159-lb-tools"><input id="mbz-v159-lb-search" placeholder="Search player…"><button class="sbtn" data-v159-cmd="home">Home</button><button class="sbtn" data-v159-cmd="ideas">Ideas Lab</button></div></div><div class="mbz-v159-lb-card"><table class="mbz-v159-lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Profile</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
+    var input=q('#mbz-v159-lb-search',root),tbody=q('tbody',root);if(input&&tbody){input.addEventListener('input',function(){var term=this.value.toLowerCase().trim();qa('tr',tbody).forEach(function(tr){tr.style.display=(tr.textContent||'').toLowerCase().includes(term)?'':'none'})})}
+    d.body.classList.add('mbz-v94-leaderboards-open');d.body.classList.remove('mbz-v82-ideas-open');d.body.dataset.mbzRoute='leaderboards';
+    hardHideNon(page);setActiveTab('leaderboards');scrollTop();
+  }
+  w.MBZOpenLeaderboardsV159=renderLeaderboard;
+  w.showLeaderboards=function(){renderLeaderboard()};
+
+  function actions(){
+    return [
+      ['Home','Open the full dashboard/home page','home','⌂','PAGE'],
+      ['All Values','Open every glove value','all','A','PAGE'],
+      ['Leaderboards','Open collection rankings','leaderboards','#','PAGE'],
+      ['Trade Calculator','Check win/fair/overpay trades','trade','⇄','PAGE'],
+      ['AI Helper','Ask the site AI about trades and values','ai','AI','PAGE'],
+      ['Inventory Scanner','Open AI scan picture / owned inventory','inventory','▣','PAGE'],
+      ['Wishlist','Open saved wishlist','wishlist','★','PAGE'],
+      ['Changelog / Updates','Open value changes and updates','updates','↻','PAGE'],
+      ['Ideas Lab','Open feature ideas and design experiments','ideas','✦','PAGE'],
+      ['History','Open local history/actions','history','H','PAGE'],
+      ['Custom Serials','Open custom serial glove index','custom','◇','PAGE'],
+      ['Play Boxing League','Open the Roblox game in a new tab','play','▶','LINK'],
+      ['Search M134','Search for M134 variants','search:M134','⌕','ACTION'],
+      ['Search Blackmarket','Search Blackmarket','search:Blackmarket','⌕','ACTION'],
+      ['Top Rising','Ask AI/helper for rising gloves','ask:Show me the best rising gloves and why.','↑','AI'],
+      ['Best Trade Test','Ask AI to test M134 for Blackmarket','ask:Is M134 [1-5] for Blackmarket a good trade?','?','AI']
+    ];
+  }
+  function icon(text){return '<span class="mbz-v82-palette-icon">'+esc(text)+'</span>'}
+  function paletteButton(a){return '<button class="mbz-v82-palette-item mbz-v159-palette-item" type="button" data-v159-cmd="'+esc(a[2])+'">'+icon(a[3])+'<span><span class="mbz-v82-palette-name">'+esc(a[0])+'</span><br><span class="mbz-v82-palette-note">'+esc(a[1])+'</span></span><span class="mbz-v159-palette-tag">'+esc(a[4])+'</span></button>'}
+  function renderPalette(){
+    var p=q('#mbz-v82-palette'),host=q('#mbz-v82-palette-results'),input=q('#mbz-v82-palette-input');if(!p||!host||!p.classList.contains('show'))return;
+    var term=(input&&input.value||'').trim().toLowerCase();
+    var rows=actions().filter(function(a){return !term||a.join(' ').toLowerCase().includes(term)}).slice(0,16).map(paletteButton);
+    var gloves=[];try{gloves=(w.GLOVES||[]).filter(function(g){return term&&String(g.n||'').toLowerCase().includes(term)}).slice(0,8)}catch(_){ }
+    gloves.forEach(function(g){rows.push('<button class="mbz-v82-palette-item mbz-v159-palette-item" type="button" data-v159-cmd="search:'+esc(g.n)+'">'+icon(g.c||'G')+'<span><span class="mbz-v82-palette-name">'+esc(g.n)+'</span><br><span class="mbz-v82-palette-note">'+esc(g.v)+' '+esc(g.u||'Currency')+' · '+esc(g.d||'')+'</span></span><span class="mbz-v159-palette-tag">GLOVE</span></button>')});
+    host.innerHTML='<div class="mbz-v159-palette-help">Type a page, command, glove, or player action. Leaderboards now opens the leaderboard page directly.</div><div class="mbz-v82-palette-group">Command Palette</div>'+(rows.length?rows.join(''):'<div class="mbz-v159-palette-empty">No matching command. Try “leaderboard”, “trade”, “scan”, “M134”, or “wishlist”.</div>');
+  }
+  function openPalette(){
+    var p=q('#mbz-v82-palette');
+    if(!p&&w.MBZV82&&typeof w.MBZV82.openPalette==='function'){try{w.MBZV82.openPalette()}catch(_){ }}
+    p=q('#mbz-v82-palette');if(!p)return;
+    p.classList.add('show');p.setAttribute('aria-hidden','false');
+    var input=q('#mbz-v82-palette-input',p);if(input){input.placeholder='Search pages, actions, gloves…';setTimeout(function(){try{input.focus()}catch(_){ }},10)}
+    setTimeout(renderPalette,0);setTimeout(renderPalette,60);
+  }
+  w.MBZOpenUsefulCommandPaletteV159=openPalette;
+
+  function run(cmd){
+    cmd=String(cmd||'');closePalette();
+    if(cmd==='leaderboards'){renderLeaderboard();return}
+    if(cmd==='play'){w.open('https://www.roblox.com/games/3738091713/Boxing-League#!/game-instances','_blank','noopener,noreferrer');return}
+    if(cmd.indexOf('search:')===0){var val=cmd.slice(7),gs=q('#gsearch');if(typeof w.showAll==='function')try{w.showAll()}catch(_){ }if(gs){gs.value=val;if(typeof w.onSearchInput==='function')try{w.onSearchInput(val)}catch(_){ }gs.focus()}return}
+    if(cmd.indexOf('ask:')===0){var msg=cmd.slice(4);if(typeof w.showAI==='function')try{w.showAI()}catch(_){ }setTimeout(function(){var input=q('#ai-input')||q('.ai-input');if(input){input.value=msg;input.focus()}},120);return}
+    var map={home:'showHome',all:'showAll',trade:'showTrade',ai:'showAI',wishlist:'showWishlist',updates:'showUpdates',history:'showHistory',inventory:'showInventory',ideas:'showIdeas',custom:'showCustomSerial'};
+    var fn=map[cmd];if(fn&&typeof w[fn]==='function'){try{w[fn]()}catch(e){console.error('V159 command failed',cmd,e)}}
+  }
+  function bind(){
+    var cmdBtn=q('#mbz-v82-command-button');if(cmdBtn&&!cmdBtn.__mbzV159){cmdBtn.__mbzV159=true;cmdBtn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette()},true)}
+    var input=q('#mbz-v82-palette-input');if(input&&!input.__mbzV159){input.__mbzV159=true;input.addEventListener('input',function(){setTimeout(renderPalette,0)},true);input.addEventListener('keydown',function(e){if(e.key==='Enter'){var first=q('#mbz-v82-palette-results [data-v159-cmd]');if(first){e.preventDefault();run(first.dataset.v159Cmd)}}},true)}
+    renderPalette();
+  }
+  w.addEventListener('click',function(e){
+    var item=e.target&&e.target.closest?e.target.closest('[data-v159-cmd],#mbz-v93-leaderboards-tab,[data-v93-palette]'):null;
+    if(!item)return;
+    var cmd=item.dataset&&item.dataset.v159Cmd;
+    var txt=String(item.textContent||'').toLowerCase();
+    if(!cmd&&(item.id==='mbz-v93-leaderboards-tab'||item.hasAttribute('data-v93-palette')||txt.includes('leaderboard')))cmd='leaderboards';
+    if(!cmd)return;
+    e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();run(cmd);
+  },true);
+  w.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette()}},true);
+  var mo=new MutationObserver(function(){bind();if(q('#mbz-v82-palette.show'))renderPalette()});
+  function boot(){bind();try{mo.observe(d.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']})}catch(_){ }try{d.title='MadeByZebra — Value List · V159 Command Palette Fix'}catch(_){ }}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  w.addEventListener('load',function(){[80,260,700,1400].forEach(function(ms){setTimeout(bind,ms)})},{once:true,passive:true});
+})();
+</script>
+<!-- ========================= /V159 COMMAND PALETTE ROUTER FIX ========================= -->
+
 </body>
 </html>
