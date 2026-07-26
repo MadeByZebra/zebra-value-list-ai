@@ -1,7 +1,7 @@
 declare const process: { env: Record<string, string | undefined> };
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 35;
 
 type AnyRecord = Record<string, any>;
 type CustomSerialRecord = {
@@ -20,6 +20,16 @@ type ProviderResult = {
   attempts: AnyRecord[];
 };
 
+type ColorResolution = {
+  family: "Core" | "Cyberfly";
+  code?: string;
+  candidate?: string;
+  candidates: string[];
+  safe: boolean;
+  reason: string;
+  source: "tag" | "partial-tag+visual" | "visual" | "unknown";
+};
+
 function errorJson(message: string, status = 500, extra: AnyRecord = {}) {
   return Response.json({ error: message, ...extra }, { status });
 }
@@ -28,13 +38,17 @@ function unique(values: string[]) {
   return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
 }
 
-function parseModels(...values: Array<string | undefined>) {
-  return unique(values.flatMap((value) => String(value || "").split(",")))
-    .filter((model) => !/image|imagen|tts|audio|video/i.test(model));
+function modelList(...values: Array<string | undefined>) {
+  return unique(values.flatMap((value) => String(value || "").split(","))).filter(
+    (model) => !/image|imagen|tts|audio|video/i.test(model)
+  );
 }
 
 function parseJson(raw: string): AnyRecord | any[] | null {
-  const clean = raw.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  const clean = raw
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/, "");
 
   try {
     return JSON.parse(clean);
@@ -77,15 +91,16 @@ function normalizeFamily(value: unknown) {
   );
 }
 
-function familyFrom(value: unknown) {
+function familyFrom(value: unknown): "Core" | "Cyberfly" | "" {
   const text = normalize(value);
   if (/\b(?:cyberfly|cyber fly|cf)\b/.test(text)) return "Cyberfly";
   if (/\bcore\b/.test(text)) return "Core";
   return "";
 }
 
+const COLOR_CODES = ["BLK", "BLU", "RED", "PUR", "PNK", "GRN", "YLW", "ORG"];
 const COLOR_ALIASES: Record<string, string[]> = {
-  BLK: ["blk", "black", "dark"],
+  BLK: ["blk", "black"],
   BLU: ["blu", "blue", "cyan"],
   RED: ["red"],
   PUR: ["pur", "purple", "violet"],
@@ -95,29 +110,82 @@ const COLOR_ALIASES: Record<string, string[]> = {
   ORG: ["org", "orn", "orange"],
 };
 
-function colorFrom(value: unknown) {
-  const text = normalize(value);
-  const compact = text.replace(/\s+/g, "");
+function normalizeColorCode(value: unknown) {
+  const raw = String(value || "")
+    .toUpperCase()
+    .replace(/^#/, "")
+    .replace(/\s+/g, "")
+    .replace(/0/g, "O");
+  if (raw === "ORN") return "ORG";
+  return COLOR_CODES.includes(raw) ? raw : "";
+}
 
-  for (const [code, aliases] of Object.entries(COLOR_ALIASES)) {
-    if (
-      aliases.some(
-        (alias) =>
-          new RegExp(`(^|\\s)${alias}($|\\s)`).test(text) || compact.includes(alias)
-      )
-    ) {
-      return code;
-    }
+function visibleText(value: AnyRecord | unknown) {
+  if (value && typeof value === "object") {
+    const object = value as AnyRecord;
+    return [
+      object.visibleText,
+      object.tagText,
+      object.visibleTag,
+      object.text,
+      object.label,
+      object.visibleName,
+      object.baseName,
+      object.name,
+      object.glove,
+      object.customSerialText,
+    ]
+      .filter(Boolean)
+      .join(" ");
+  }
+  return String(value || "");
+}
+
+function explicitColorTag(value: AnyRecord) {
+  const text = [
+    value.tagText,
+    value.visibleTag,
+    value.visibleText,
+    value.text,
+    value.label,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toUpperCase()
+    .replace(/0/g, "O");
+
+  const spaced = text.match(/#\s*([A-Z])\s*([A-Z])\s*([A-Z])(?:\b|[^A-Z])/);
+  if (spaced) {
+    return normalizeColorCode(`${spaced[1]}${spaced[2]}${spaced[3]}`);
   }
 
-  const raw = String(value || "").toUpperCase().replace(/0/g, "O");
-  const tag = raw.match(/#\s*([A-Z](?:\s*[A-Z]){0,4})/);
-  if (!tag) return "";
-  const short = tag[1].replace(/\s+/g, "");
-  if (short === "B") return "";
-  if (short === "P") return "";
-  if (["BLK", "BLU", "RED", "PUR", "PNK", "GRN", "YLW", "ORG", "ORN"].includes(short)) {
-    return short === "ORN" ? "ORG" : short;
+  const compact = text.match(/#\s*(BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\b/);
+  return compact ? normalizeColorCode(compact[1]) : "";
+}
+
+function partialColorTag(value: AnyRecord) {
+  const text = [value.tagText, value.visibleTag, value.visibleText, value.text]
+    .filter(Boolean)
+    .join(" ")
+    .toUpperCase()
+    .replace(/0/g, "O");
+
+  if (explicitColorTag(value)) return "";
+  const match = text.match(/#\s*([BPGYRO])(?:\b|[^A-Z])/);
+  return match ? match[1] : "";
+}
+
+function inferredVisualColor(value: AnyRecord) {
+  const direct = normalizeColorCode(
+    value.visualColorCode || value.visualColor || value.colorCode || value.color
+  );
+  if (direct) return direct;
+
+  const text = normalize(value.visualColorName || value.colorName || "");
+  for (const code of COLOR_CODES) {
+    if (COLOR_ALIASES[code].some((alias) => new RegExp(`(^|\\s)${alias}($|\\s)`).test(text))) {
+      return code;
+    }
   }
   return "";
 }
@@ -136,20 +204,11 @@ function numericSerial(value: AnyRecord | string) {
   );
   if (Number.isFinite(direct) && direct > 0) return direct;
 
-  const text = String(
-    object.visibleText ||
-      object.text ||
-      object.label ||
-      object.visibleName ||
-      value ||
-      ""
-  );
-
+  const text = visibleText(value);
   const match =
     text.match(/#\s*(\d+)/i) ||
     text.match(/\bserial\s*#?\s*(\d+)/i) ||
     text.match(/\b(\d+)\s*\/\s*\d+\b/);
-
   return match ? Number(match[1]) : 0;
 }
 
@@ -157,11 +216,7 @@ function serialTotal(value: AnyRecord | string) {
   const object = typeof value === "object" && value ? value : {};
   const direct = Number(object.serialTotal ?? object.total ?? 0);
   if (Number.isFinite(direct) && direct > 0) return direct;
-
-  const text = String(
-    object.visibleText || object.text || object.label || value || ""
-  );
-  const match = text.match(/(?:#\s*)?\d+\s*\/\s*(\d+)/i);
+  const match = visibleText(value).match(/(?:#\s*)?\d+\s*\/\s*(\d+)/i);
   return match ? Number(match[1]) : 0;
 }
 
@@ -182,28 +237,7 @@ function customNormalized(value: unknown) {
     .trim();
 }
 
-function readText(value: unknown) {
-  if (value && typeof value === "object") {
-    const object = value as AnyRecord;
-    return [
-      object.visibleText,
-      object.text,
-      object.label,
-      object.visibleName,
-      object.baseName,
-      object.name,
-      object.glove,
-      object.candidate,
-      object.visibleTag,
-      object.customSerialText,
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-  return String(value || "");
-}
-
-function coerceConfidence(value: unknown, fallback = 0) {
+function confidence(value: unknown, fallback = 0) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
   return Math.max(0, Math.min(100, number));
@@ -226,18 +260,18 @@ async function callTokenBay(args: {
     : `${args.baseUrl}/v1/chat/completions`;
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models) {
+  for (const model of args.models.slice(0, 2)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
-      for (const image of args.images.slice(0, 10)) {
+      for (const image of args.images.slice(0, 8)) {
         content.push({
           type: "image_url",
-          image_url: { url: image, detail: "high" },
+          image_url: { url: image, detail: "auto" },
         });
       }
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 54000);
+      const timer = setTimeout(() => controller.abort(), 26000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -249,12 +283,19 @@ async function callTokenBay(args: {
           model,
           messages: [{ role: "user", content }],
           temperature: 0,
-          max_tokens: 6000,
+          max_tokens: 3200,
         }),
       });
       clearTimeout(timer);
 
-      const data: AnyRecord = await response.json().catch(() => ({}));
+      const rawBody = await response.text();
+      let data: AnyRecord = {};
+      try {
+        data = rawBody ? JSON.parse(rawBody) : {};
+      } catch {
+        data = { raw: rawBody };
+      }
+
       attempts.push({
         provider: "TokenBay Gemini",
         model,
@@ -270,15 +311,7 @@ async function callTokenBay(args: {
             .join("")
         : String(messageContent || data?.output_text || "");
       const parsed = parseJson(raw);
-      if (parsed) {
-        return {
-          parsed,
-          raw,
-          provider: "TokenBay Gemini",
-          model,
-          attempts,
-        };
-      }
+      if (parsed) return { parsed, raw, provider: "TokenBay Gemini", model, attempts };
     } catch (error: any) {
       attempts.push({
         provider: "TokenBay Gemini",
@@ -289,13 +322,7 @@ async function callTokenBay(args: {
     }
   }
 
-  return {
-    parsed: null,
-    raw: "",
-    provider: "TokenBay Gemini",
-    model: "",
-    attempts,
-  };
+  return { parsed: null, raw: "", provider: "TokenBay Gemini", model: "", attempts };
 }
 
 async function callGoogle(args: {
@@ -306,21 +333,19 @@ async function callGoogle(args: {
 }): Promise<ProviderResult> {
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models) {
+  for (const model of args.models.slice(0, 1)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
-      for (const image of args.images.slice(0, 10)) {
+      for (const image of args.images.slice(0, 8)) {
         const part = imageDataPart(image);
         if (part) parts.push(part);
       }
 
       const endpoint =
         `https://generativelanguage.googleapis.com/v1beta/models/` +
-        `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(
-          args.apiKey
-        )}`;
+        `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(args.apiKey)}`;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 54000);
+      const timer = setTimeout(() => controller.abort(), 26000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -329,14 +354,21 @@ async function callGoogle(args: {
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 6000,
+            maxOutputTokens: 3200,
             responseMimeType: "application/json",
           },
         }),
       });
       clearTimeout(timer);
 
-      const data: AnyRecord = await response.json().catch(() => ({}));
+      const rawBody = await response.text();
+      let data: AnyRecord = {};
+      try {
+        data = rawBody ? JSON.parse(rawBody) : {};
+      } catch {
+        data = { raw: rawBody };
+      }
+
       attempts.push({
         provider: "Google Gemini",
         model,
@@ -349,15 +381,7 @@ async function callGoogle(args: {
         .map((part: AnyRecord) => part?.text || "")
         .join("");
       const parsed = parseJson(raw);
-      if (parsed) {
-        return {
-          parsed,
-          raw,
-          provider: "Google Gemini",
-          model,
-          attempts,
-        };
-      }
+      if (parsed) return { parsed, raw, provider: "Google Gemini", model, attempts };
     } catch (error: any) {
       attempts.push({
         provider: "Google Gemini",
@@ -368,13 +392,7 @@ async function callGoogle(args: {
     }
   }
 
-  return {
-    parsed: null,
-    raw: "",
-    provider: "Google Gemini",
-    model: "",
-    attempts,
-  };
+  return { parsed: null, raw: "", provider: "Google Gemini", model: "", attempts };
 }
 
 export async function POST(req: Request) {
@@ -383,7 +401,7 @@ export async function POST(req: Request) {
     const images = (Array.isArray(body.images) ? body.images : [])
       .map((image: unknown) => String(image || ""))
       .filter((image: string) => /^data:image\/[a-z0-9.+-]+;base64,/i.test(image))
-      .slice(0, 10);
+      .slice(0, 8);
 
     const allowedNames = unique(
       (Array.isArray(body.gloveNames) ? body.gloveNames : []).map((name: unknown) =>
@@ -408,40 +426,28 @@ export async function POST(req: Request) {
     if (!allowedNames.length) return errorJson("No glove database names sent.", 400);
 
     const prompt = `
-You are a precise inventory-card scanner for Roblox Boxing League.
-There are ${images.length} inventory screenshot image(s). Scan EVERY visible glove card in EVERY image, row by row, left to right.
-Do not stop after the first glove. Do not merge duplicate cards. One visible card = one detection object.
+Scan every visible Roblox Boxing League inventory card in all ${images.length} screenshot(s). One card must produce one detection, including duplicate cards.
 
-READ FOR EACH CARD:
-1. The glove family/name printed below the icon.
-2. Any color hashtag printed on the icon, including cropped tags.
-3. Any numeric serial such as #30, #30/400, SERIAL #30, or 30/400.
-4. Any custom serial text or symbol such as #TIME, #AMMO, #SIGMA, #-999999, a lock, trophy, skull, or other non-numeric custom marker.
+For every card read:
+- visible glove name below the icon
+- exact visible hashtag text
+- numeric serial such as #30 or #30/400
+- known custom serial text/symbol
 
-COLORED CORE AND CYBERFLY:
-- Core and Cyberfly/CF can have BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG/ORN.
-- Use the visible #tag when readable.
-- When the tag is cut off, use the actual glove/accent color ONLY for Core and Cyberfly:
-  blue/cyan=BLU, green=GRN, purple=PUR, pink/magenta=PNK, yellow=YLW, orange=ORG, red=RED, black/dark=BLK.
-- A partly visible #B can mean BLU or BLK; decide from the glove color. A partly visible #P can mean PUR or PNK; decide from the glove color.
-- Never apply these color rules to unrelated gloves.
+IMPORTANT COLOR RULES FOR CORE AND CYBERFLY ONLY:
+- Valid colors: BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG/ORN.
+- Return tagText as the exact characters actually visible. Never complete a cropped tag. Example: if only #B is visible, return "#B", not #BLU or #BLK.
+- Return visualColorCode separately from the actual glove/accent color.
+- If tagText is fully readable, it is stronger evidence than visual color.
+- If tagText is partial or absent, lower colorConfidence. Do not guess.
+- BLU is blue/cyan, BLK is black/dark, PUR is purple, PNK is pink/magenta, GRN green, YLW yellow, ORG orange, RED red.
 
-NUMERIC SERIALS:
-- Read the exact number and total when shown.
-- The server will map the number to the correct allowed bracket, so return the family and number accurately.
-- Never guess an unreadable number.
+SERIAL RULES:
+- Return exact serialNumber and serialTotal when readable.
+- Never invent unreadable digits.
+- Custom serials must only match the supplied custom serial database.
 
-CUSTOM SERIALS:
-- A custom serial is non-standard text, a symbol, zero, or a special negative number tied to a glove.
-- Match only to the supplied Custom serial database.
-- Never convert a custom serial into a normal numeric bracket.
-
-CONFIDENCE:
-- 95-100: name and tag/serial clearly readable.
-- 82-94: strong visual/text evidence.
-- Below 82: place it in review and explain what is unclear.
-
-Return JSON only using this exact structure:
+Return JSON only:
 {
   "detections": [
     {
@@ -449,22 +455,20 @@ Return JSON only using this exact structure:
       "cardIndex": 1,
       "visibleName": "Cyberfly",
       "visibleText": "Cyberfly #BLU",
-      "colorCode": "BLU",
+      "tagText": "#BLU",
+      "visualColorCode": "BLU",
+      "colorConfidence": 98,
       "serialType": "none",
       "serialNumber": null,
       "serialTotal": null,
       "customSerialText": "",
       "candidate": "Cyberfly [BLU]",
-      "confidence": 97,
-      "reason": "blue tag and blue glove"
+      "confidence": 98,
+      "reason": "full #BLU tag readable"
     }
   ],
-  "notes": "short scan summary"
+  "notes": "short summary"
 }
-
-Every card must be its own detections[] entry, including duplicate glove cards.
-Only use exact candidate names from Allowed glove names when a standard/color/numeric serial candidate is known.
-For custom serials, candidate may be empty; provide visibleName and customSerialText instead.
 
 Allowed glove names:
 ${JSON.stringify(allowedNames)}
@@ -473,14 +477,14 @@ Custom serial database:
 ${JSON.stringify(customSerialRecords)}
 `.trim();
 
-    const tokenBayKey =
-      process.env.TOKENBAY_GEMINI_API_KEY || process.env.TOKENBAY_API_KEY;
-    const tokenBayModels = parseModels(
-      process.env.TOKENBAY_GEMINI_MODELS,
+    const fastModels = modelList(
+      process.env.TOKENBAY_GEMINI_MODEL_FAST,
       process.env.TOKENBAY_GEMINI_MODEL,
       process.env.TOKENBAY_GEMINI_MODEL_BACKUP,
-      process.env.TOKENBAY_GEMINI_MODEL_FAST
+      process.env.TOKENBAY_GEMINI_MODELS
     );
+    const tokenBayKey =
+      process.env.TOKENBAY_GEMINI_API_KEY || process.env.TOKENBAY_API_KEY;
     const baseUrl = String(
       process.env.TOKENBAY_BASE_URL || "https://api.tokenbay.com"
     ).replace(/\/+$/, "");
@@ -488,11 +492,11 @@ ${JSON.stringify(customSerialRecords)}
     const attempts: AnyRecord[] = [];
     let result: ProviderResult | null = null;
 
-    if (tokenBayKey && tokenBayModels.length) {
+    if (tokenBayKey && fastModels.length) {
       const tokenBay = await callTokenBay({
         apiKey: tokenBayKey,
         baseUrl,
-        models: tokenBayModels,
+        models: fastModels,
         images,
         prompt,
       });
@@ -502,10 +506,10 @@ ${JSON.stringify(customSerialRecords)}
 
     if (!result) {
       const googleKey = process.env.GEMINI_API_KEY;
-      const googleModels = parseModels(
-        process.env.GEMINI_MODELS,
+      const googleModels = modelList(
         process.env.GEMINI_MODEL,
-        process.env.GEMINI_MODEL_BACKUP
+        process.env.GEMINI_MODEL_BACKUP,
+        process.env.GEMINI_MODELS
       );
       if (googleKey && googleModels.length) {
         const google = await callGoogle({
@@ -527,47 +531,122 @@ ${JSON.stringify(customSerialRecords)}
 
     const exactMap = new Map(allowedNames.map((name) => [normalize(name), name]));
     const exactName = (value: unknown) => exactMap.get(normalize(value)) || null;
-
     const allowedEntries = allowedNames.map((name) => ({
       name,
       family: normalizeFamily(name),
       range: parseRange(name),
     }));
 
-    function coloredCandidate(value: AnyRecord) {
-      const raw = readText(value);
-      const family = familyFrom(
-        value.family || value.baseName || value.visibleName || value.name || raw
-      );
-      const code = String(
-        value.colorCode || value.color || value.tag || colorFrom(raw)
-      )
-        .toUpperCase()
-        .replace(/^#/, "")
-        .replace("ORN", "ORG");
+    function colorVariantNames(family: "Core" | "Cyberfly", code: string) {
+      if (family === "Core") {
+        return code === "ORG" ? ["Core [ORN]", "Core [ORG]"] : [`Core [${code}]`];
+      }
+      return code === "ORG"
+        ? ["Cyberfly [ORG]", "Cyberfly [ORN]"]
+        : [`Cyberfly [${code}]`];
+    }
 
-      if (!family || !code) return null;
-      const candidates =
-        family === "Core"
-          ? code === "ORG"
-            ? ["Core [ORN]", "Core [ORG]"]
-            : [`Core [${code}]`]
-          : code === "ORG"
-          ? ["Cyberfly [ORG]", "Cyberfly [ORN]"]
-          : [`Cyberfly [${code}]`];
-
-      for (const candidate of candidates) {
-        const hit = exactName(candidate);
-        if (hit) return { candidate: hit, family, colorCode: code };
+    function exactVariant(family: "Core" | "Cyberfly", code: string) {
+      for (const name of colorVariantNames(family, code)) {
+        const hit = exactName(name);
+        if (hit) return hit;
       }
       return null;
+    }
+
+    function partialCandidates(family: "Core" | "Cyberfly", partial: string) {
+      const codes =
+        partial === "B"
+          ? ["BLK", "BLU"]
+          : partial === "P"
+          ? ["PNK", "PUR"]
+          : partial === "G"
+          ? ["GRN"]
+          : partial === "Y"
+          ? ["YLW"]
+          : partial === "R"
+          ? ["RED"]
+          : partial === "O"
+          ? ["ORG"]
+          : COLOR_CODES;
+      return unique(codes.map((code) => exactVariant(family, code) || "").filter(Boolean));
+    }
+
+    function resolveColor(value: AnyRecord): ColorResolution | null {
+      const family = familyFrom(
+        value.family || value.baseName || value.visibleName || value.name || visibleText(value)
+      );
+      if (!family) return null;
+
+      const fullTag = explicitColorTag(value);
+      const partialTag = partialColorTag(value);
+      const visual = inferredVisualColor(value);
+      const overall = confidence(value.confidence, 0);
+      const colorConf = confidence(value.colorConfidence, overall);
+
+      if (fullTag) {
+        const candidate = exactVariant(family, fullTag);
+        return {
+          family,
+          code: fullTag,
+          candidate: candidate || undefined,
+          candidates: candidate ? [candidate] : [],
+          safe: Boolean(candidate) && overall >= 78,
+          reason: candidate
+            ? `full visible #${fullTag} tag used`
+            : `#${fullTag} is not in the glove database`,
+          source: "tag",
+        };
+      }
+
+      if (partialTag) {
+        const candidates = partialCandidates(family, partialTag);
+        const visualCandidate = visual ? exactVariant(family, visual) : null;
+        const visualFits = visualCandidate && candidates.includes(visualCandidate);
+        const safe = Boolean(visualFits) && colorConf >= 97 && overall >= 94;
+        return {
+          family,
+          code: safe ? visual : undefined,
+          candidate: safe && visualCandidate ? visualCandidate : undefined,
+          candidates,
+          safe,
+          reason: safe
+            ? `cropped #${partialTag} tag agrees with very clear ${visual} glove color`
+            : `cropped #${partialTag} tag is ambiguous; choose the correct color`,
+          source: "partial-tag+visual",
+        };
+      }
+
+      if (visual) {
+        const candidate = exactVariant(family, visual);
+        const safe = Boolean(candidate) && colorConf >= 98 && overall >= 96;
+        return {
+          family,
+          code: safe ? visual : undefined,
+          candidate: safe && candidate ? candidate : undefined,
+          candidates: candidate ? [candidate] : partialCandidates(family, ""),
+          safe,
+          reason: safe
+            ? `no readable tag; very high-confidence ${visual} visual color used`
+            : `tag was unreadable and visual color was not certain enough`,
+          source: "visual",
+        };
+      }
+
+      return {
+        family,
+        candidates: partialCandidates(family, ""),
+        safe: false,
+        reason: "Core/Cyberfly detected but color tag and glove color were unclear",
+        source: "unknown",
+      };
     }
 
     function numericSerialCandidate(value: AnyRecord) {
       const serial = numericSerial(value);
       if (!serial) return null;
       const rawFamily = normalizeFamily(
-        value.baseName || value.visibleName || value.name || readText(value)
+        value.baseName || value.visibleName || value.name || visibleText(value)
       );
       if (!rawFamily) return null;
 
@@ -598,7 +677,7 @@ ${JSON.stringify(customSerialRecords)}
     }
 
     function customSerialCandidate(value: AnyRecord) {
-      const raw = readText(value);
+      const raw = visibleText(value);
       const familyText = String(
         value.baseName || value.visibleName || value.name || value.glove || raw
       );
@@ -618,13 +697,10 @@ ${JSON.stringify(customSerialRecords)}
           (family === recordFamily ||
             family.includes(recordFamily) ||
             recordFamily.includes(family));
-        if (!familyMatches) return false;
+        if (!familyMatches || !record.custom) return false;
 
-        const custom = record.custom;
-        if (!custom) return false;
-        const fingerprint = customFingerprint(custom);
-        const normalizedCustom = customNormalized(custom);
-
+        const fingerprint = customFingerprint(record.custom);
+        const normalizedCustom = customNormalized(record.custom);
         if (statedFingerprint && statedFingerprint === fingerprint) return true;
         if (statedNormalized && normalizedCustom && statedNormalized === normalizedCustom) {
           return true;
@@ -637,8 +713,7 @@ ${JSON.stringify(customSerialRecords)}
       if (matches.length !== 1) return null;
       const record = matches[0];
       const label = `${record.glove} [CUSTOM: ${record.custom || "blank"}]`;
-
-      const sameFamilyStandard = allowedEntries.filter((entry) => {
+      const sameFamily = allowedEntries.filter((entry) => {
         const recordFamily = normalizeFamily(record.glove);
         return (
           entry.family === recordFamily ||
@@ -646,24 +721,26 @@ ${JSON.stringify(customSerialRecords)}
           recordFamily.includes(entry.family)
         );
       });
-      const noRange = sameFamilyStandard.filter((entry) => !entry.range);
-      const baseCandidate = noRange.length === 1 ? noRange[0].name : null;
-
-      return { record, label, baseCandidate };
+      const plain = sameFamily.filter((entry) => !entry.range);
+      return {
+        record,
+        label,
+        baseCandidate: plain.length === 1 ? plain[0].name : null,
+      };
     }
 
-    function candidateSuggestions(value: AnyRecord) {
-      const raw = normalize(value.visibleName || value.baseName || readText(value));
+    function suggestions(value: AnyRecord) {
+      const raw = normalize(value.visibleName || value.baseName || visibleText(value));
       if (!raw) return [];
-
       const direct = allowedEntries
         .filter(
           (entry) =>
-            entry.family === raw || entry.family.includes(raw) || raw.includes(entry.family)
+            entry.family === raw ||
+            entry.family.includes(raw) ||
+            raw.includes(entry.family)
         )
         .map((entry) => entry.name);
       if (direct.length) return unique(direct).slice(0, 12);
-
       const tokens = raw.split(" ").filter((token) => token.length >= 3);
       return allowedEntries
         .filter((entry) => tokens.some((token) => normalize(entry.name).includes(token)))
@@ -673,22 +750,9 @@ ${JSON.stringify(customSerialRecords)}
 
     const parsed = result.parsed;
     const root: AnyRecord = Array.isArray(parsed) ? { detections: parsed } : parsed;
-    let rawDetections: AnyRecord[] = Array.isArray(root?.detections)
+    const rawDetections: AnyRecord[] = Array.isArray(root?.detections)
       ? root.detections
       : [];
-
-    if (!rawDetections.length) {
-      const legacy: AnyRecord[] = [];
-      for (const item of Array.isArray(root?.confirmed) ? root.confirmed : []) {
-        legacy.push(typeof item === "string" ? { candidate: item, visibleText: item } : item);
-      }
-      for (const item of Array.isArray(root?.colored) ? root.colored : []) legacy.push(item);
-      for (const item of Array.isArray(root?.serials) ? root.serials : []) legacy.push(item);
-      for (const item of Array.isArray(root?.customSerials) ? root.customSerials : []) {
-        legacy.push({ ...item, serialType: "custom" });
-      }
-      rawDetections = legacy;
-    }
 
     const items: AnyRecord[] = [];
     const confirmed = new Set<string>();
@@ -703,131 +767,135 @@ ${JSON.stringify(customSerialRecords)}
         detection && typeof detection === "object"
           ? detection
           : { visibleText: String(detection || "") };
-      const visibleText = readText(value);
-      const confidence = coerceConfidence(value.confidence, 70);
+      const text = visibleText(value);
+      const conf = confidence(value.confidence, 65);
       const serialType = String(value.serialType || "").toLowerCase();
-      const exact = exactName(value.candidate || value.name || value.glove || value.visibleName);
       const custom =
         serialType === "custom" || value.customSerialText || value.custom
           ? customSerialCandidate(value)
-          : customSerialCandidate(value);
+          : null;
       const serial = custom ? null : numericSerialCandidate(value);
-      const color = !custom && !serial ? coloredCandidate(value) : null;
-      const candidate = serial?.candidate || color?.candidate || exact || null;
+      const color = !custom && !serial ? resolveColor(value) : null;
+
+      let candidate: string | null = null;
+      let kind = "unknown";
+      let status = "review";
+      let reason = String(value.reason || "");
+      let candidates: string[] = [];
+
+      if (custom) {
+        kind = "custom";
+        status = conf >= 88 ? "confirmed" : "review";
+        reason = reason || "custom serial database match";
+      } else if (serial) {
+        kind = "serial";
+        candidate = serial.candidate;
+        candidates = [serial.candidate];
+        status = conf >= 84 ? "confirmed" : "review";
+        reason = reason || "numeric serial mapped to database range";
+      } else if (color) {
+        kind = "colored";
+        candidate = color.candidate || null;
+        candidates = color.candidates;
+        status = color.safe ? "confirmed" : "review";
+        reason = color.reason;
+      } else {
+        const exact = exactName(value.candidate || value.name || value.glove || value.visibleName);
+        const exactLooksColored = exact ? /\[(?:BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\]/i.test(exact) : false;
+        if (exact && !exactLooksColored) {
+          kind = "standard";
+          candidate = exact;
+          candidates = [exact];
+          status = conf >= 84 ? "confirmed" : "review";
+          reason = reason || "exact glove database match";
+        } else {
+          candidates = suggestions(value);
+          reason = reason || "glove name, color, or serial was uncertain";
+        }
+      }
+
       const item: AnyRecord = {
         imageIndex: Number(value.imageIndex || 1) || 1,
         cardIndex: Number(value.cardIndex || index + 1) || index + 1,
         visibleName: String(value.visibleName || value.baseName || value.name || ""),
-        visibleText,
-        confidence,
-        reason: String(value.reason || ""),
-        colorCode: color?.colorCode || String(value.colorCode || ""),
+        visibleText: text,
+        tagText: String(value.tagText || value.visibleTag || ""),
+        visualColorCode: inferredVisualColor(value),
+        confidence: conf,
+        reason,
+        candidate,
+        status,
+        kind,
         serialNumber: serial?.serialNumber || numericSerial(value) || undefined,
         serialTotal: serial?.serialTotal || serialTotal(value) || undefined,
-        candidate,
-        status: "review",
-        kind: "unknown",
       };
 
       if (custom) {
-        item.kind = "custom";
         item.customSerialText = custom.record.custom;
         item.customLabel = custom.label;
         item.customRecord = custom.record;
         item.baseCandidate = custom.baseCandidate;
-        item.status = confidence >= 82 ? "confirmed" : "review";
         customSerials.push({
           imageIndex: item.imageIndex,
           cardIndex: item.cardIndex,
-          visibleText,
+          visibleText: text,
           glove: custom.record.glove,
           custom: custom.record.custom,
           label: custom.label,
           baseCandidate: custom.baseCandidate,
-          confidence,
-          reason: item.reason || "custom serial database match",
-          status: item.status,
+          confidence: conf,
+          reason,
+          status,
         });
       } else if (serial) {
-        item.kind = "serial";
-        item.status = confidence >= 78 ? "confirmed" : "review";
         serials.push({
           imageIndex: item.imageIndex,
           cardIndex: item.cardIndex,
           baseName: item.visibleName,
-          visibleText,
+          visibleText: text,
           serial: serial.serialNumber,
           total: serial.serialTotal,
           candidate: serial.candidate,
-          confidence,
-          reason: item.reason || "numeric serial range match",
-          status: item.status,
+          confidence: conf,
+          reason,
+          status,
         });
       } else if (color) {
-        item.kind = "colored";
-        item.status = confidence >= 82 ? "confirmed" : "review";
         colored.push({
           imageIndex: item.imageIndex,
           cardIndex: item.cardIndex,
           family: color.family,
-          colorCode: color.colorCode,
-          visibleText,
-          candidate: color.candidate,
-          confidence,
-          reason: item.reason || "colored family match",
-          status: item.status,
+          tagText: item.tagText,
+          visualColorCode: item.visualColorCode,
+          colorCode: color.code || "",
+          visibleText: text,
+          candidate: color.candidate || null,
+          candidates: color.candidates,
+          confidence: conf,
+          reason,
+          source: color.source,
+          status,
         });
-      } else if (candidate) {
-        item.kind = "standard";
-        item.status = confidence >= 82 ? "confirmed" : "review";
       }
 
-      if (item.status === "confirmed" && candidate) {
+      if (status === "confirmed" && candidate) {
         confirmed.add(candidate);
         counts[candidate] = (counts[candidate] || 0) + 1;
-      } else if (item.status === "review") {
+      } else if (status === "review") {
         review.push({
           imageIndex: item.imageIndex,
           cardIndex: item.cardIndex,
-          text: visibleText || item.visibleName || `Card ${index + 1}`,
-          candidates: candidate ? [candidate] : candidateSuggestions(value),
-          confidence,
-          reason:
-            item.reason ||
-            (custom
-              ? "custom serial is not clear enough"
-              : serial
-              ? "numeric serial is not clear enough"
-              : color
-              ? "color/tag is not clear enough"
-              : "glove name is uncertain"),
-          kind: item.kind,
+          text: text || item.visibleName || `Card ${index + 1}`,
+          candidates: unique(candidates).slice(0, 12),
+          confidence: conf,
+          reason,
+          kind,
           customLabel: item.customLabel,
         });
       }
 
       items.push(item);
     });
-
-    for (const legacyReview of Array.isArray(root?.review) ? root.review : []) {
-      const value =
-        legacyReview && typeof legacyReview === "object"
-          ? legacyReview
-          : { text: String(legacyReview || "") };
-      review.push({
-        imageIndex: Number(value.imageIndex || 1) || 1,
-        cardIndex: Number(value.cardIndex || 0) || undefined,
-        text: String(value.text || value.visibleText || value.read || "uncertain"),
-        candidates: unique(
-          (Array.isArray(value.candidates) ? value.candidates : [])
-            .map((candidate: unknown) => exactName(candidate) || "")
-            .filter(Boolean)
-        ).slice(0, 12),
-        confidence: coerceConfidence(value.confidence, 50),
-        reason: String(value.reason || "model requested review"),
-        kind: String(value.kind || "unknown"),
-      });
-    }
 
     return Response.json({
       items,
@@ -841,7 +909,7 @@ ${JSON.stringify(customSerialRecords)}
       imageCount: images.length,
       notes:
         root?.notes ||
-        `Scanned ${images.length} image(s) and processed ${items.length} visible card detection(s).`,
+        `Fast scan processed ${items.length} card(s). Ambiguous colors remain in Needs Review.`,
       provider: result.provider,
       model: result.model,
       attempts,
