@@ -533,7 +533,8 @@ READING RULES:
 - tagText must preserve complete or partial tags exactly, such as #BLK or #B.
 - visualColorCode may be BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG only when visually supported.
 - Never complete a cropped hashtag and never invent serial digits.
-- For Core and Cyberfly, report the family and visible color evidence; the server will keep them in Needs Review.
+- Treat every colored Core/Cyberfly card as its own glove slot. Example: Core #GRN, Core #BLU, and Core #RED are THREE separate detections and THREE separate glove variants.
+- For Core and Cyberfly, report the family plus exact tag/color evidence. A clear full color tag may be auto-saved as the exact colored variant; uncertain colors remain in Needs Review.
 
 Return compact JSON only:
 {
@@ -765,8 +766,10 @@ Return compact JSON only:
       if (fullTag) {
         const candidate = exactVariant(family, fullTag);
         const visualCandidate = visual ? exactVariant(family, visual) : null;
-        const visualDisagrees = Boolean(visual && visual !== fullTag);
-        const safe = Boolean(candidate) && !visualDisagrees && overall >= 80;
+        const visualDisagrees = Boolean(
+          visual && visual !== fullTag && colorConf >= 90
+        );
+        const safe = Boolean(candidate) && !visualDisagrees && overall >= 72;
         return {
           family,
           code: fullTag,
@@ -789,13 +792,23 @@ Return compact JSON only:
       if (partialTag) {
         const candidates = partialCandidates(family, partialTag);
         const visualCandidate = visual ? exactVariant(family, visual) : null;
+        const visualCompatible = Boolean(
+          visualCandidate && candidates.includes(visualCandidate)
+        );
+        const safe = Boolean(
+          visualCandidate && visualCompatible && overall >= 90 && colorConf >= 92
+        );
         return {
           family,
+          code: safe ? visual : undefined,
+          candidate: safe && visualCandidate ? visualCandidate : undefined,
           candidates: unique(
             [visualCandidate || "", ...candidates].filter(Boolean)
           ),
-          safe: false,
-          reason: visual
+          safe,
+          reason: safe
+            ? `cropped #${partialTag} tag and high-confidence ${visual} visual color agree`
+            : visual
             ? `cropped #${partialTag} tag; visual color looks ${visual}, so confirm it in Needs Review`
             : `cropped #${partialTag} tag is ambiguous; choose the correct color`,
           source: "partial-tag+visual",
@@ -804,11 +817,16 @@ Return compact JSON only:
 
       if (visual) {
         const candidate = exactVariant(family, visual);
+        const safe = Boolean(candidate && overall >= 90 && colorConf >= 92);
         return {
           family,
+          code: visual,
+          candidate: safe && candidate ? candidate : undefined,
           candidates: candidate ? [candidate] : partialCandidates(family, ""),
-          safe: false,
-          reason: `tag was unreadable; visual color looks ${visual}, so confirm it in Needs Review`,
+          safe,
+          reason: safe
+            ? `high-confidence visible glove color confirmed as ${visual}`
+            : `tag was unreadable; visual color looks ${visual}, so confirm it in Needs Review`,
           source: "visual",
         };
       }
@@ -1000,11 +1018,12 @@ Return compact JSON only:
         reason = reason || "numeric serial mapped to database range";
       } else if (color) {
         kind = "colored";
-        candidate = null;
-        candidates = allFamilyCandidates(color.family);
-        status = "review";
-        reason =
-          `${color.family} detected. Choose plain ${color.family} or the exact color variant yourself.`;
+        candidate = color.safe && color.candidate ? color.candidate : null;
+        candidates = candidate ? [candidate] : allFamilyCandidates(color.family);
+        status = candidate ? "confirmed" : "review";
+        reason = candidate
+          ? `${candidate} detected as a separate colored glove and auto-saved. ${color.reason}`
+          : `${color.family} detected. Choose plain ${color.family} or the exact color variant yourself. ${color.reason}`;
       } else {
         const exact = exactName(value.candidate || value.name || value.glove || value.visibleName);
         const exactLooksColored = exact ? /\[(?:BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\]/i.test(exact) : false;
@@ -1079,8 +1098,8 @@ Return compact JSON only:
           visualColorCode: item.visualColorCode,
           colorCode: color.code || "",
           visibleText: text,
-          candidate: null,
-          candidates: allFamilyCandidates(color.family),
+          candidate,
+          candidates: candidate ? [candidate] : allFamilyCandidates(color.family),
           confidence: conf,
           reason,
           source: color.source,
@@ -1136,7 +1155,7 @@ Return compact JSON only:
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "full-grid-two-pass-accurate-v181",
+      scanMode: "full-grid-two-pass-colored-variants-v182",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");

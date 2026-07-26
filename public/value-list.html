@@ -9204,6 +9204,7 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
   function escAttr(v){return escHtml(v)}
   function loadQty(){try{var x=JSON.parse(localStorage.getItem(QKEY)||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
   function saveQty(map){try{localStorage.setItem(QKEY,JSON.stringify(map||{}))}catch(_){} w.invOwnedQty=map||{}}
+  function lastScan(){try{var x=JSON.parse(localStorage.getItem('mbz_inventory_last_scan_v182')||'{}');return x&&typeof x==='object'?x:{}}catch(_){return {}}}
   function qtyFor(name,map){var n=Number((map||{})[name]);if(Number.isFinite(n)&&n>0)return Math.max(1,Math.round(n));try{return owned.has(name)?1:0}catch(_){return 0}}
   function persist(){try{if(typeof saveOwned==='function')saveOwned()}catch(_){}try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(_){} }
   function fmt(n){if(!Number.isFinite(n))return 'N/A';return n.toLocaleString(undefined,{maximumFractionDigits:2})}
@@ -9279,7 +9280,7 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
     var page=ensurePage();if(!page)return;
     var oldQ=q('#inventory-search'),oldMode=q('#inventory-mode');if(oldQ)state.query=oldQ.value;if(oldMode)state.mode=oldMode.value;
     var map=loadQty(),have=GLOVES.filter(function(g){try{return owned.has(g.n)}catch(_){return false}}),missing=GLOVES.filter(function(g){try{return !owned.has(g.n)}catch(_){return true}}),need=missing.filter(function(g){try{return wishlist.has(g.n)}catch(_){return false}});
-    var stats=summary(have,missing,need,map),source=state.mode==='have'?have:state.mode==='need'?need:state.mode==='all'?GLOVES:missing;
+    var stats=summary(have,missing,need,map),scan=lastScan(),source=state.mode==='have'?have:state.mode==='need'?need:state.mode==='all'?GLOVES:missing;
     var query=state.query.trim().toLowerCase();var list=source.filter(function(g){return !query||(g.n+' '+g.cls+' '+g.t+' '+g.d+' '+g.how).toLowerCase().includes(query)}).sort(function(a,b){return score(b)-score(a)||a.n.localeCompare(b.n)});
     var classes={};missing.forEach(function(g){classes[g.cls]=(classes[g.cls]||0)+1});
     var classPills=Object.keys(classes).sort().map(function(k){return '<span class="inv-count-pill">Class '+escHtml(k)+': '+classes[k]+' missing</span>'}).join('');
@@ -9287,7 +9288,7 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
     page.innerHTML='\
       <div class="page-header"><h1>Your Inventory</h1><p>Add gloves manually or use the scanner. This page tracks quantities, estimated total value, owned gloves, and everything still missing.</p></div>\
       <section class="mbz-v57-manual"><div class="mbz-v57-manual-head"><div><div class="mbz-v57-manual-title">Add gloves manually</div><div class="mbz-v57-manual-sub">Start typing a glove name, select the exact version, choose the quantity, then add it.</div></div></div><div class="mbz-v57-manual-row"><input id="mbz-v57-manual-name" list="mbz-v57-glove-options" autocomplete="off" placeholder="Search exact glove name…"><datalist id="mbz-v57-glove-options">'+options+'</datalist><input id="mbz-v57-manual-qty" type="number" min="1" step="1" value="1" aria-label="Quantity"><button class="sbtn" id="mbz-v57-manual-add" type="button">+ Add to Inventory</button></div></section>\
-      <div class="inv-summary-grid"><div class="inv-summary-card"><div class="inv-summary-num">'+stats.unique+'</div><div class="inv-summary-label">Unique owned</div></div><div class="inv-summary-card"><div class="inv-summary-num">x'+stats.totalQty+'</div><div class="inv-summary-label">Total gloves</div></div><div class="inv-summary-card mbz-v57-total-card"><div class="inv-summary-num">'+fmt(stats.totalCurrency)+' Currency</div><div class="mbz-v57-total-sub">'+fmt(stats.totalBlox)+' Blox · estimated current list value'+(stats.excluded?' · '+stats.excluded+' N/A excluded':'')+'</div><div class="inv-summary-label">Total glove value</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.missing+'</div><div class="inv-summary-label">Missing</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.need+'</div><div class="inv-summary-label">Missing + wishlisted</div></div></div>\
+      <div class="inv-summary-grid"><div class="inv-summary-card"><div class="inv-summary-num">'+stats.unique+'</div><div class="inv-summary-label">Confirmed unique owned</div></div><div class="inv-summary-card"><div class="inv-summary-num">x'+stats.totalQty+'</div><div class="inv-summary-label">Confirmed total gloves</div></div>'+(scan.gloveCount?'<div class="inv-summary-card"><div class="inv-summary-num">x'+scan.gloveCount+'</div><div class="inv-summary-label">Detected in last scan</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+Number(scan.reviewCount||0)+'</div><div class="inv-summary-label">Still needs review</div></div>':'')+'<div class="inv-summary-card mbz-v57-total-card"><div class="inv-summary-num">'+fmt(stats.totalCurrency)+' Currency</div><div class="mbz-v57-total-sub">'+fmt(stats.totalBlox)+' Blox · estimated current list value'+(stats.excluded?' · '+stats.excluded+' N/A excluded':'')+'</div><div class="inv-summary-label">Total glove value</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.missing+'</div><div class="inv-summary-label">Missing</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.need+'</div><div class="inv-summary-label">Missing + wishlisted</div></div></div>      '+(scan.gloveCount&&scan.gloveCount>stats.totalQty?'<div class="inv-warning"><strong>Last scan detected x'+scan.gloveCount+' gloves.</strong> '+stats.totalQty+' are confirmed in Inventory and '+Number(scan.reviewCount||0)+' still need review. Clear colored Core/Cyberfly variants are now saved separately instead of being collapsed into one Core.</div>':'')+'\
       <div class="inv-tab-toolbar"><input id="inventory-search" placeholder="Search owned or missing gloves…" value="'+escAttr(state.query)+'"><select id="inventory-mode" class="sbtn"><option value="missing" '+(state.mode==='missing'?'selected':'')+'>What I am missing</option><option value="have" '+(state.mode==='have'?'selected':'')+'>My owned gloves</option><option value="need" '+(state.mode==='need'?'selected':'')+'>Missing from wishlist</option><option value="all" '+(state.mode==='all'?'selected':'')+'>All database gloves</option></select><button class="sbtn" id="mbz-v57-open-scanner" type="button">Open Scanner</button><button class="sbtn" id="mbz-v57-clear-owned" type="button">Clear Inventory</button></div>\
       <div class="inv-counts">'+classPills+'</div><div class="inv-section-title">Showing '+list.length+' '+(state.mode==='have'?'owned':state.mode==='need'?'wishlisted missing':state.mode==='all'?'database':'missing')+' glove entries</div><div class="inv-missing-list">'+(list.length?list.map(function(g){return row(g,map)}).join(''):'<div class="wl-empty">Nothing to show for this filter.</div>')+'</div>';
     var nameInput=q('#mbz-v57-manual-name',page),qtyInput=q('#mbz-v57-manual-qty',page),addBtn=q('#mbz-v57-manual-add',page),search=q('#inventory-search',page),mode=q('#inventory-mode',page);
@@ -23292,8 +23293,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
     }).join('');
   }
   function coloredRows(data){
-    var rows=data.colored||[];
-    if(!rows.length)return '<div class="mbz-fastscan-empty">No Core or Cyberfly cards were detected in this scan.</div>';
+    var rows=(data.colored||[]).filter(function(x){return x&&x.status!=='confirmed'});
+    if(!rows.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>All clear colored variants were saved separately.</strong></span></div>';
     return rows.map(function(x,index){
       var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
       var inputId='mbz-color-qty-'+index;
@@ -23325,12 +23326,12 @@ html,body{max-width:100%;overflow-x:hidden!important}
     var expected=Number(data.expectedCardCount||detected||0);
     var gloveCount=Number(data.gloveCount||(data.items||[]).reduce(function(t,x){return t+Math.max(1,Number(x.quantity||1))},0));
     var saved=Object.keys(counts).reduce(function(t,k){return t+Number(counts[k]||0)},0);
-    out.innerHTML='<div class="ai-answer"><strong>V181 full-grid scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
+    out.innerHTML='<div class="ai-answer"><strong>V182 colored-variant scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
       '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Census target: '+expected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
-      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every Core/Cyberfly glove stays in Needs Review. No color is preselected. Set the amount you own, then choose plain Core/Cyberfly or any available color.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Clear Core/Cyberfly colors are auto-saved as separate exact gloves—for example GRN, BLU, and RED Core count as three unique gloves. Only unclear colors stay in Needs Review.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
     try{out.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
   }
 
@@ -23361,6 +23362,17 @@ html,body{max-width:100%;overflow-x:hidden!important}
       if(!response.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
       var replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
       var counts=saveConfirmed(data,replace),elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
+      try{
+        localStorage.setItem('mbz_inventory_last_scan_v182',JSON.stringify({
+          at:Date.now(),
+          cardCount:Number(data.cardCount||data.detectionCount||0),
+          expectedCardCount:Number(data.expectedCardCount||data.cardCount||data.detectionCount||0),
+          gloveCount:Number(data.gloveCount||0),
+          reviewCount:Number((data.review||[]).length||0),
+          coloredConfirmed:Number((data.colored||[]).filter(function(x){return x&&x.status==='confirmed'}).length||0),
+          coloredReview:Number((data.colored||[]).filter(function(x){return x&&x.status!=='confirmed'}).length||0)
+        }));
+      }catch(_){}
       if(byId('inv-ocr-text'))byId('inv-ocr-text').value=JSON.stringify(data,null,2);
       render(data,counts,elapsed);
       if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.cardCount||data.detectionCount||0)+' card slots, '+Number(data.gloveCount||0)+' gloves counted, '+Number((data.review||[]).length)+' need review.';
@@ -23375,8 +23387,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V181-full-grid-two-pass');
-    try{d.title='MadeByZebra — Value List · V181'}catch(_){}
+    d.documentElement.setAttribute('data-scanner-version','V182-colored-variants-count-separately');
+    try{d.title='MadeByZebra — Value List · V182'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
