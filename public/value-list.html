@@ -23165,7 +23165,10 @@ html,body{max-width:100%;overflow-x:hidden!important}
     if(replace)clearOwned();
     var qty=loadQty(),counts={};
     (data.items||[]).forEach(function(x){
-      if(x&&x.status==='confirmed'&&x.candidate&&exact(x.candidate))counts[x.candidate]=(counts[x.candidate]||0)+1;
+      if(x&&x.status==='confirmed'&&x.candidate&&exact(x.candidate)){
+        var q=Math.max(1,Math.min(99,Math.floor(Number(x.quantity||1))));
+        counts[x.candidate]=(counts[x.candidate]||0)+q;
+      }
     });
     if(data.counts&&typeof data.counts==='object'){
       Object.keys(data.counts).forEach(function(k){if(exact(k))counts[k]=Math.max(counts[k]||0,Number(data.counts[k]||0))});
@@ -23174,12 +23177,13 @@ html,body{max-width:100%;overflow-x:hidden!important}
     saveQtyMap(qty);
     return counts;
   }
-  function confirm(encoded,button){
+  function confirm(encoded,quantity,button){
     var name=decodeURIComponent(encoded),g=exact(name);if(!g)return;
-    var qty=loadQty();qty[g.n]=Number(qty[g.n]||0)+1;saveQtyMap(qty);
-    if(button){button.textContent='Saved ✓';button.classList.add('added')}
+    var add=Math.max(1,Math.min(99,Math.floor(Number(quantity||1))));
+    var qty=loadQty();qty[g.n]=Number(qty[g.n]||0)+add;saveQtyMap(qty);
+    if(button){button.textContent='Saved x'+add+' ✓';button.classList.add('added')}
   }
-  w.mbzFastScanConfirm=function(encoded,el){confirm(encoded,el)};
+  w.mbzFastScanConfirm=function(encoded,quantity,el){confirm(encoded,quantity,el)};
 
   function fileToSmallData(file){
     return new Promise(function(resolve,reject){
@@ -23207,25 +23211,28 @@ html,body{max-width:100%;overflow-x:hidden!important}
     out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · No automatic cutoff · One Gemini model, then one backup.</div></div>';
   }
   function source(x){return 'Image '+Number(x.imageIndex||1)+(x.cardIndex?' · card '+x.cardIndex:'')}
-  function candidateButtons(cands){
+  function candidateButtons(cands,quantity,suggested){
+    var q=Math.max(1,Math.min(99,Math.floor(Number(quantity||1))));
     return uniq(cands||[]).slice(0,10).map(function(n){
-      return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\',this)">✓ '+esc(n)+'</button>';
+      var likely=suggested&&n===suggested?'Likely · ':'';
+      return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\','+q+',this)">✓ '+likely+esc(n)+' · x'+q+'</button>';
     }).join(' ');
   }
   function reviewRows(review){
     if(!review.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>Needs Review: 0</strong></span> — nothing uncertain was saved.</div>';
     return review.map(function(x){
-      var c=uniq(x.candidates||[]);
-      return '<div class="mbz-fastscan-color-row review"><div><span class="inv-status-review">REVIEW</span><div class="mbz-fastscan-small">'+esc(x.kind||'uncertain')+'</div></div><div>'+esc(x.text||'Unclear card')+'<div class="mbz-fastscan-small">'+esc(x.reason||'Needs confirmation')+'</div></div><div><strong>Choose the correct glove</strong><div class="mbz-fastscan-actions">'+(candidateButtons(c)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div></div>';
+      var c=uniq(x.candidates||[]),q=Math.max(1,Math.min(99,Math.floor(Number(x.quantity||1))));
+      var color=x.visualColorCode?'<div class="mbz-fastscan-small">AI color guess: '+esc(x.visualColorCode)+'</div>':'';
+      return '<div class="mbz-fastscan-color-row review"><div><span class="inv-status-review">REVIEW</span><div class="mbz-fastscan-small">'+esc(x.kind||'uncertain')+' · quantity x'+q+'</div></div><div>'+esc(x.text||'Unclear card')+color+'<div class="mbz-fastscan-small">'+esc(x.reason||'Needs confirmation')+'</div></div><div><strong>Choose the correct glove/color</strong><div class="mbz-fastscan-actions">'+(candidateButtons(c,q,x.suggestedCandidate)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div></div>';
     }).join('');
   }
   function coloredRows(data){
     var rows=data.colored||[];
     if(!rows.length)return '<div class="mbz-fastscan-empty">No colored Core or Cyberfly cards were detected in this scan.</div>';
     return rows.map(function(x){
-      var confirmed=x.status==='confirmed'&&x.candidate;
+      var q=Math.max(1,Math.min(99,Math.floor(Number(x.quantity||1))));
       var candidates=uniq((x.candidates||[]).concat(x.candidate?[x.candidate]:[]));
-      return '<div class="mbz-fastscan-color-row '+(confirmed?'':'review')+'"><div>'+esc(source(x))+'<div class="mbz-fastscan-small">'+esc(x.family||'Colored glove')+'</div></div><div><strong>Tag: '+esc(x.tagText||'(cropped/unreadable)')+'</strong><div class="mbz-fastscan-small">Visual color: '+esc(x.visualColorCode||'?')+'</div></div><div><strong>'+esc(confirmed?x.candidate:'Needs color confirmation')+'</strong><div class="mbz-fastscan-small">'+esc(x.reason||'')+'</div>'+(confirmed?'':'<div class="mbz-fastscan-actions">'+candidateButtons(candidates)+'</div>')+'</div><div>'+(confirmed?'<span class="inv-status-saved">SAVED</span>':'<span class="inv-status-review">REVIEW</span>')+'</div></div>';
+      return '<div class="mbz-fastscan-color-row review"><div>'+esc(source(x))+'<div class="mbz-fastscan-small">'+esc(x.family||'Colored glove')+' · quantity x'+q+'</div></div><div><strong>Tag: '+esc(x.tagText||'(cropped/unreadable)')+'</strong><div class="mbz-fastscan-small">AI color guess: '+esc(x.visualColorCode||'?')+'</div></div><div><strong>Choose the actual color</strong><div class="mbz-fastscan-small">'+esc(x.reason||'Colored gloves always require confirmation.')+'</div><div class="mbz-fastscan-actions">'+candidateButtons(candidates,q,x.suggestedCandidate)+'</div></div><div><span class="inv-status-review">REVIEW</span></div></div>';
     }).join('');
   }
   function savedRows(counts){
@@ -23239,14 +23246,15 @@ html,body{max-width:100%;overflow-x:hidden!important}
   function render(data,counts,elapsed){
     var out=byId('inv-results');if(!out)return;
     var review=(data.review||[]).slice(0,180);
-    var detected=Number(data.detectionCount||(data.items||[]).length||0);
+    var detected=Number(data.cardCount||data.detectionCount||(data.items||[]).length||0);
+    var gloveCount=Number(data.gloveCount||(data.items||[]).reduce(function(t,x){return t+Math.max(1,Number(x.quantity||1))},0));
     var saved=Object.keys(counts).reduce(function(t,k){return t+Number(counts[k]||0)},0);
     out.innerHTML='<div class="ai-answer"><strong>V180 scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
-      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Cards detected: '+detected+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
+      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
-      '<div class="ai-note">Strict color mode: a colored glove is auto-saved only when the complete #TAG is readable and the detected glove color does not conflict. Cropped tags and visual-only guesses always stay in Needs Review.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every colored Core/Cyberfly glove stays in Needs Review; the AI color guess is shown first, but you choose the actual color before its full quantity is added.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
     try{out.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
   }
 
@@ -23279,7 +23287,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
       var counts=saveConfirmed(data,replace),elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
       if(byId('inv-ocr-text'))byId('inv-ocr-text').value=JSON.stringify(data,null,2);
       render(data,counts,elapsed);
-      if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.detectionCount||0)+' cards detected, '+Object.keys(counts).length+' glove types saved, '+Number((data.review||[]).length)+' need review.';
+      if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.cardCount||data.detectionCount||0)+' card slots, '+Number(data.gloveCount||0)+' gloves counted, '+Number((data.review||[]).length)+' need review.';
     }catch(e){
       var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
       var message=String(e&&e.message?e.message:e);
@@ -23291,7 +23299,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V180-no-auto-timeout');
+    d.documentElement.setAttribute('data-scanner-version','V180-quantity-colored-review');
     try{d.title='MadeByZebra — Value List · V180'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

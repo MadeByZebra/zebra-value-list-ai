@@ -243,6 +243,19 @@ function confidence(value: unknown, fallback = 0) {
   return Math.max(0, Math.min(100, number));
 }
 
+function detectedQuantity(value: AnyRecord) {
+  const direct = Number(
+    value.quantity ??
+      value.qty ??
+      value.count ??
+      value.stackCount ??
+      value.visibleQuantity ??
+      1
+  );
+  if (!Number.isFinite(direct)) return 1;
+  return Math.max(1, Math.min(99, Math.floor(direct)));
+}
+
 function imageDataPart(dataUrl: string) {
   const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
   return match ? { inlineData: { mimeType: match[1], data: match[2] } } : null;
@@ -417,10 +430,12 @@ export async function POST(req: Request) {
     const prompt = `
 Analyze all ${images.length} Roblox Boxing League inventory screenshot(s). Detect every visible glove card, including duplicates.
 
-For each card return:
+For each detected card return:
 - imageIndex and cardIndex
+- rowIndex and columnIndex when possible
 - visibleName exactly as read
 - visibleText exactly as read
+- quantity as an integer
 - tagText exactly as visible, including partial tags such as #B
 - visualColorCode only when visually clear: BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG
 - colorConfidence 0-100
@@ -429,11 +444,21 @@ For each card return:
 - confidence 0-100
 - a short reason
 
+STRICT QUANTITY RULES:
+- Scan the entire inventory grid systematically from top-left to bottom-right.
+- Count every visible glove slot, including repeated copies of the same glove.
+- Prefer one detection object per visible card slot with quantity 1.
+- Use quantity greater than 1 only when a single card explicitly shows a stack badge such as x2, x3, or another visible count.
+- Never merge separate repeated card slots into one detection.
+- Never estimate a quantity from memory or from a partially hidden card.
+- A partly visible card still counts as one only when enough of the card is visible to identify that a glove slot exists.
+
 STRICT COLOR RULES FOR CORE AND CYBERFLY:
+- Detect the most likely color and return it in visualColorCode.
 - Never complete a cropped hashtag.
-- A complete readable tag such as #BLU is stronger than visual color.
+- Report the complete or partial tag exactly as visible.
+- Colored Core and Cyberfly cards will always be sent to Needs Review by the server, even when the color appears clear.
 - If the complete tag conflicts with the visual glove color, report both; do not guess.
-- If the tag is partial or absent, return the visible/partial tag and visual color separately with lower confidence.
 
 STRICT SERIAL RULES:
 - Never invent digits or symbols.
@@ -447,6 +472,7 @@ Return JSON only in this shape:
       "cardIndex": 1,
       "visibleName": "Cyberfly",
       "visibleText": "Cyberfly #BLU",
+      "quantity": 1,
       "tagText": "#BLU",
       "visualColorCode": "BLU",
       "colorConfidence": 98,
@@ -556,6 +582,13 @@ Return JSON only in this shape:
         if (hit) return hit;
       }
       return null;
+    }
+
+    function itemCandidateForColorPreview(
+      family: "Core" | "Cyberfly",
+      code: string
+    ) {
+      return code ? exactVariant(family, code) : null;
     }
 
     function partialCandidates(family: "Core" | "Cyberfly", partial: string) {
@@ -801,10 +834,18 @@ Return JSON only in this shape:
         reason = reason || "numeric serial mapped to database range";
       } else if (color) {
         kind = "colored";
-        candidate = color.candidate || null;
-        candidates = color.candidates;
-        status = color.safe ? "confirmed" : "review";
-        reason = color.reason;
+        candidate = null;
+        const visualCandidate = itemCandidateForColorPreview(
+          color.family,
+          inferredVisualColor(value)
+        );
+        candidates = unique(
+          [visualCandidate || "", color.candidate || "", ...color.candidates].filter(Boolean)
+        );
+        status = "review";
+        reason =
+          color.reason +
+          " Colored Core/Cyberfly gloves always require color confirmation.";
       } else {
         const exact = exactName(value.candidate || value.name || value.glove || value.visibleName);
         const exactLooksColored = exact ? /\[(?:BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\]/i.test(exact) : false;
@@ -820,9 +861,13 @@ Return JSON only in this shape:
         }
       }
 
+      const quantity = detectedQuantity(value);
       const item: AnyRecord = {
         imageIndex: Number(value.imageIndex || 1) || 1,
         cardIndex: Number(value.cardIndex || index + 1) || index + 1,
+        rowIndex: Number(value.rowIndex || 0) || undefined,
+        columnIndex: Number(value.columnIndex || 0) || undefined,
+        quantity,
         visibleName: String(value.visibleName || value.baseName || value.name || ""),
         visibleText: text,
         tagText: String(value.tagText || value.visibleTag || ""),
@@ -881,12 +926,15 @@ Return JSON only in this shape:
           reason,
           source: color.source,
           status,
+          quantity,
+          suggestedCandidate:
+            itemCandidateForColorPreview(color.family, item.visualColorCode) || null,
         });
       }
 
       if (status === "confirmed" && candidate) {
         confirmed.add(candidate);
-        counts[candidate] = (counts[candidate] || 0) + 1;
+        counts[candidate] = (counts[candidate] || 0) + quantity;
       } else if (status === "review") {
         review.push({
           imageIndex: item.imageIndex,
@@ -897,6 +945,14 @@ Return JSON only in this shape:
           reason,
           kind,
           customLabel: item.customLabel,
+          quantity,
+          family: color?.family || undefined,
+          visualColorCode: item.visualColorCode || undefined,
+          tagText: item.tagText || undefined,
+          suggestedCandidate:
+            color && item.visualColorCode
+              ? itemCandidateForColorPreview(color.family, item.visualColorCode)
+              : undefined,
         });
       }
 
@@ -912,6 +968,11 @@ Return JSON only in this shape:
       customSerials,
       review: review.slice(0, 300),
       detectionCount: items.length,
+      cardCount: items.length,
+      gloveCount: items.reduce(
+        (total, item) => total + detectedQuantity(item),
+        0
+      ),
       imageCount: images.length,
       notes:
         root?.notes ||
@@ -919,7 +980,7 @@ Return JSON only in this shape:
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "no-auto-timeout-strict-color-v180",
+      scanMode: "quantity-colored-review-v180",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
