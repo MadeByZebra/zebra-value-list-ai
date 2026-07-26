@@ -22626,13 +22626,26 @@ html,body{max-width:100%;overflow-x:hidden!important}
     if(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation()}
     closePalette();
     var tab=realLeaderboardTab();
-    if(!tab)return;
 
-    /* Synchronous on purpose. The authoritative V150 router stores its page
-       state privately and only updates it from the real nav-tab click. */
-    try{tab.click()}catch(_){
-      try{tab.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:w}))}catch(__){}
+    /* Use the real working nav tab first. This keeps the site's private route
+       state synchronized instead of leaving the Home page active. */
+    if(tab){
+      try{tab.click()}catch(_){
+        try{tab.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:w}))}catch(__){}
+      }
+    }else if(typeof w.showLeaderboards==='function'){
+      try{w.showLeaderboards()}catch(_){}
     }
+
+    /* Last-resort repair for older stacked routers: if the tab click was
+       swallowed, call the public leaderboard route once on the next frame. */
+    w.requestAnimationFrame(function(){
+      var page=q('#leaderboards-page');
+      var visible=page&&page.classList.contains('active')&&w.getComputedStyle(page).display!=='none';
+      if(!visible&&typeof w.showLeaderboards==='function'){
+        try{w.showLeaderboards()}catch(_){}
+      }
+    });
   }
 
   function isLeaderboardButton(btn){
@@ -22666,6 +22679,27 @@ html,body{max-width:100%;overflow-x:hidden!important}
     },true);
   }
 
+  function isTypingTarget(target){
+    if(!target)return false;
+    var tag=String(target.tagName||'').toLowerCase();
+    return tag==='input'||tag==='textarea'||tag==='select'||target.isContentEditable||
+      !!(target.closest&&target.closest('[contenteditable="true"],input,textarea,select'));
+  }
+
+  function installLeaderboardShortcut(){
+    if(w.__MBZ_V180_L_SHORTCUT__)return;
+    w.__MBZ_V180_L_SHORTCUT__=true;
+
+    /* Window capture runs before the old V110 document shortcut. That older
+       handler called a stale route and left Home visible. */
+    w.addEventListener('keydown',function(e){
+      if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey)return;
+      if(isTypingTarget(e.target))return;
+      if(norm(e.key)!=='l')return;
+      openLeaderboard(e);
+    },true);
+  }
+
   function patchPalette(){
     queued=false;
     var p=q('#mbz-v170-command-palette');
@@ -22681,13 +22715,20 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
   function boot(){
     patchPalette();
+    installLeaderboardShortcut();
     var root=d.body||d.documentElement;
     if(root&&!root.__mbzV180Observed&&w.MutationObserver){
       root.__mbzV180Observed=true;
       new MutationObserver(queuePatch).observe(root,{childList:true,subtree:true});
     }
     d.addEventListener('input',function(e){if(e.target&&e.target.id==='mbz-v170-cmd-input')queuePatch()},true);
-    try{d.title='MadeByZebra — Value List · V180 Command Leaderboard Final Fix'}catch(_){}
+    try{
+      d.title='MadeByZebra — Value List · V180';
+      d.documentElement.setAttribute('data-madebyzebra-version','V180');
+      qa('.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge').forEach(function(b){
+        if(/V\d+/i.test(b.textContent||''))b.textContent=(b.textContent||'').replace(/V\d+/i,'V180');
+      });
+    }catch(_){}
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
