@@ -23325,7 +23325,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
-      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every Core/Cyberfly glove stays in Needs Review. No color is preselected. Set the amount you own, then choose plain Core/Cyberfly or any available color.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every Core/Cyberfly card stays in Needs Review. Each chosen variant counts separately. Black-tag OCR mistakes such as #TLK, #T1K, #BIK, or #8LK are treated as #BLK, and the BLK choice is always listed. Set the amount you own before choosing each card.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
     try{out.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
   }
 
@@ -23370,7 +23370,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V180-user-set-quantity');
+    d.documentElement.setAttribute('data-scanner-version','V180-BLK-ocr-fix');
     try{d.title='MadeByZebra — Value List · V180'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
