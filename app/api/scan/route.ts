@@ -210,7 +210,7 @@ function coerceConfidence(value: unknown, fallback = 0) {
 }
 
 function imageDataPart(dataUrl: string) {
-  const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/s);
+  const match = dataUrl.match(/^data:([^;]+);base64,([\s\S]+)$/);
   return match ? { inlineData: { mimeType: match[1], data: match[2] } } : null;
 }
 
