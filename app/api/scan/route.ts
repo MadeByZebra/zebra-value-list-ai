@@ -260,18 +260,18 @@ async function callTokenBay(args: {
     : `${args.baseUrl}/v1/chat/completions`;
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 2)) {
+  for (const model of args.models.slice(0, 4)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
       for (const image of args.images.slice(0, 8)) {
         content.push({
           type: "image_url",
-          image_url: { url: image, detail: "auto" },
+          image_url: { url: image },
         });
       }
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 26000);
+      const timer = setTimeout(() => controller.abort(), 18000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -283,7 +283,6 @@ async function callTokenBay(args: {
           model,
           messages: [{ role: "user", content }],
           temperature: 0,
-          max_tokens: 3200,
         }),
       });
       clearTimeout(timer);
@@ -333,7 +332,7 @@ async function callGoogle(args: {
 }): Promise<ProviderResult> {
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 1)) {
+  for (const model of args.models.slice(0, 3)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
       for (const image of args.images.slice(0, 8)) {
@@ -345,7 +344,7 @@ async function callGoogle(args: {
         `https://generativelanguage.googleapis.com/v1beta/models/` +
         `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(args.apiKey)}`;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 26000);
+      const timer = setTimeout(() => controller.abort(), 18000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -355,7 +354,6 @@ async function callGoogle(args: {
           generationConfig: {
             temperature: 0,
             maxOutputTokens: 3200,
-            responseMimeType: "application/json",
           },
         }),
       });
@@ -477,10 +475,15 @@ Custom serial database:
 ${JSON.stringify(customSerialRecords)}
 `.trim();
 
+    // Put proven vision-capable chat models first. The previous route only tried
+    // the first two configured names, so it could fail before reaching a model
+    // that actually accepts image input.
     const fastModels = modelList(
-      process.env.TOKENBAY_GEMINI_MODEL_FAST,
+      "gemini-2.5-flash",
+      "gemini-2.5-pro",
       process.env.TOKENBAY_GEMINI_MODEL,
       process.env.TOKENBAY_GEMINI_MODEL_BACKUP,
+      process.env.TOKENBAY_GEMINI_MODEL_FAST,
       process.env.TOKENBAY_GEMINI_MODELS
     );
     const tokenBayKey =
@@ -507,6 +510,8 @@ ${JSON.stringify(customSerialRecords)}
     if (!result) {
       const googleKey = process.env.GEMINI_API_KEY;
       const googleModels = modelList(
+        "gemini-2.5-flash",
+        "gemini-2.5-pro",
         process.env.GEMINI_MODEL,
         process.env.GEMINI_MODEL_BACKUP,
         process.env.GEMINI_MODELS
@@ -524,9 +529,22 @@ ${JSON.stringify(customSerialRecords)}
     }
 
     if (!result || !result.parsed) {
-      return errorJson("All configured vision models failed or returned invalid JSON.", 502, {
-        attempts,
-      });
+      const summary = attempts
+        .slice(0, 8)
+        .map((attempt) => {
+          const provider = String(attempt.provider || "vision provider");
+          const model = String(attempt.model || "unknown model");
+          const status = String(attempt.status || "failed");
+          const message = String(attempt.message || "no error message").slice(0, 180);
+          return `${provider} / ${model} (${status}): ${message}`;
+        })
+        .join(" | ");
+
+      return errorJson(
+        `Vision scan failed. ${summary || "No usable Gemini provider was configured."}`,
+        502,
+        { attempts }
+      );
     }
 
     const exactMap = new Map(allowedNames.map((name) => [normalize(name), name]));
