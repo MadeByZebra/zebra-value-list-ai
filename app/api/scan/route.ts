@@ -1,7 +1,7 @@
 declare const process: { env: Record<string, string | undefined> };
 
 export const runtime = "nodejs";
-export const maxDuration = 35;
+export const maxDuration = 25;
 
 type AnyRecord = Record<string, any>;
 type CustomSerialRecord = {
@@ -260,7 +260,7 @@ async function callTokenBay(args: {
     : `${args.baseUrl}/v1/chat/completions`;
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 4)) {
+  for (const model of args.models.slice(0, 1)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
       for (const image of args.images.slice(0, 8)) {
@@ -271,7 +271,7 @@ async function callTokenBay(args: {
       }
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 18000);
+      const timer = setTimeout(() => controller.abort(), 10000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -332,7 +332,7 @@ async function callGoogle(args: {
 }): Promise<ProviderResult> {
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 3)) {
+  for (const model of args.models.slice(0, 1)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
       for (const image of args.images.slice(0, 8)) {
@@ -344,7 +344,7 @@ async function callGoogle(args: {
         `https://generativelanguage.googleapis.com/v1beta/models/` +
         `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(args.apiKey)}`;
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 18000);
+      const timer = setTimeout(() => controller.abort(), 10000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -480,10 +480,9 @@ ${JSON.stringify(customSerialRecords)}
     // that actually accepts image input.
     const fastModels = modelList(
       "gemini-2.5-flash",
-      "gemini-2.5-pro",
+      process.env.TOKENBAY_GEMINI_MODEL_FAST,
       process.env.TOKENBAY_GEMINI_MODEL,
       process.env.TOKENBAY_GEMINI_MODEL_BACKUP,
-      process.env.TOKENBAY_GEMINI_MODEL_FAST,
       process.env.TOKENBAY_GEMINI_MODELS
     );
     const tokenBayKey =
@@ -511,7 +510,6 @@ ${JSON.stringify(customSerialRecords)}
       const googleKey = process.env.GEMINI_API_KEY;
       const googleModels = modelList(
         "gemini-2.5-flash",
-        "gemini-2.5-pro",
         process.env.GEMINI_MODEL,
         process.env.GEMINI_MODEL_BACKUP,
         process.env.GEMINI_MODELS
@@ -604,15 +602,24 @@ ${JSON.stringify(customSerialRecords)}
 
       if (fullTag) {
         const candidate = exactVariant(family, fullTag);
+        const visualCandidate = visual ? exactVariant(family, visual) : null;
+        const visualDisagrees = Boolean(visual && visual !== fullTag);
+        const safe = Boolean(candidate) && !visualDisagrees && overall >= 80;
         return {
           family,
           code: fullTag,
-          candidate: candidate || undefined,
-          candidates: candidate ? [candidate] : [],
-          safe: Boolean(candidate) && overall >= 78,
-          reason: candidate
-            ? `full visible #${fullTag} tag used`
-            : `#${fullTag} is not in the glove database`,
+          candidate: safe && candidate ? candidate : undefined,
+          candidates: unique(
+            [candidate || "", visualCandidate || ""].filter(Boolean)
+          ),
+          safe,
+          reason: !candidate
+            ? `#${fullTag} is not in the glove database`
+            : visualDisagrees
+            ? `visible #${fullTag} tag conflicts with detected ${visual} glove color`
+            : safe
+            ? `full visible #${fullTag} tag confirmed`
+            : `full #${fullTag} tag was read, but confidence was too low`,
           source: "tag",
         };
       }
@@ -620,16 +627,14 @@ ${JSON.stringify(customSerialRecords)}
       if (partialTag) {
         const candidates = partialCandidates(family, partialTag);
         const visualCandidate = visual ? exactVariant(family, visual) : null;
-        const visualFits = visualCandidate && candidates.includes(visualCandidate);
-        const safe = Boolean(visualFits) && colorConf >= 97 && overall >= 94;
         return {
           family,
-          code: safe ? visual : undefined,
-          candidate: safe && visualCandidate ? visualCandidate : undefined,
-          candidates,
-          safe,
-          reason: safe
-            ? `cropped #${partialTag} tag agrees with very clear ${visual} glove color`
+          candidates: unique(
+            [visualCandidate || "", ...candidates].filter(Boolean)
+          ),
+          safe: false,
+          reason: visual
+            ? `cropped #${partialTag} tag; visual color looks ${visual}, so confirm it in Needs Review`
             : `cropped #${partialTag} tag is ambiguous; choose the correct color`,
           source: "partial-tag+visual",
         };
@@ -637,16 +642,11 @@ ${JSON.stringify(customSerialRecords)}
 
       if (visual) {
         const candidate = exactVariant(family, visual);
-        const safe = Boolean(candidate) && colorConf >= 98 && overall >= 96;
         return {
           family,
-          code: safe ? visual : undefined,
-          candidate: safe && candidate ? candidate : undefined,
           candidates: candidate ? [candidate] : partialCandidates(family, ""),
-          safe,
-          reason: safe
-            ? `no readable tag; very high-confidence ${visual} visual color used`
-            : `tag was unreadable and visual color was not certain enough`,
+          safe: false,
+          reason: `tag was unreadable; visual color looks ${visual}, so confirm it in Needs Review`,
           source: "visual",
         };
       }
@@ -931,6 +931,7 @@ ${JSON.stringify(customSerialRecords)}
       provider: result.provider,
       model: result.model,
       attempts,
+      scanMode: "fast-strict-color-v180",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
