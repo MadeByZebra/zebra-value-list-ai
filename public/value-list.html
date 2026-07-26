@@ -23204,7 +23204,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   }
   function live(out,title,line,elapsed){
     if(!out)return;
-    out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · Fast mode uses one Gemini model, then one backup only.</div></div>';
+    out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · No automatic cutoff · One Gemini model, then one backup.</div></div>';
   }
   function source(x){return 'Image '+Number(x.imageIndex||1)+(x.cardIndex?' · card '+x.cardIndex:'')}
   function candidateButtons(cands){
@@ -23264,17 +23264,15 @@ html,body{max-width:100%;overflow-x:hidden!important}
       }
       timer=setInterval(function(){
         var sec=Math.floor((Date.now()-started)/1000);
-        var line=sec<5?'Reading glove names and complete color tags…':sec<11?'Checking serials, custom serials, and multiple cards…':'Still scanning; the request will stop automatically if the provider is too slow.';
+        var line=sec<5?'Reading glove names and complete color tags…':sec<11?'Checking serials, custom serials, and multiple cards…':'Still scanning — there is no automatic scanner cutoff. Keep this page open.';
         if(status)status.textContent=line+' '+sec+'s';
         live(out,'AI scan running…',line,sec);
       },1000);
 
-      var controller=new AbortController(),kill=setTimeout(function(){controller.abort()},30000);
       var response=await fetch('/api/scan',{
-        method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,
-        body:JSON.stringify({images:images,gloveNames:gloveList().map(function(g){return g.n}),customSerials:customList(),multiple:true,fast:true,strictColors:true})
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({images:images,gloveNames:gloveList().map(function(g){return g.n}),customSerials:customList(),multiple:true,fast:true,strictColors:true,noAutoTimeout:true})
       });
-      clearTimeout(kill);
       var data=await response.json().catch(function(){return{error:'The scanner returned an unreadable response.'}});
       if(!response.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
       var replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
@@ -23284,8 +23282,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
       if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.detectionCount||0)+' cards detected, '+Object.keys(counts).length+' glove types saved, '+Number((data.review||[]).length)+' need review.';
     }catch(e){
       var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
-      var message=e&&e.name==='AbortError'?'Scan stopped after 30 seconds. Try one screenshot at a time.':String(e&&e.message?e.message:e);
-      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed after '+elapsed+'s.</strong><br>'+esc(message)+'<div class="ai-note">Use one clear screenshot at a time, or paste the glove names into Smart Scan Text.</div></div>';
+      var message=String(e&&e.message?e.message:e);
+      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed after '+elapsed+'s.</strong><br>'+esc(message)+'<div class="ai-note">This version does not stop the scan automatically. A failure here came from the provider, network, or hosting service.</div></div>';
       if(status)status.textContent='Scan failed after '+elapsed+'s.';
     }finally{
       if(timer)clearInterval(timer);
@@ -23293,7 +23291,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V180-fast-clear-strict');
+    d.documentElement.setAttribute('data-scanner-version','V180-no-auto-timeout');
     try{d.title='MadeByZebra — Value List · V180'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

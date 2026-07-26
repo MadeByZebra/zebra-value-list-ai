@@ -1,7 +1,7 @@
 declare const process: { env: Record<string, string | undefined> };
 
 export const runtime = "nodejs";
-export const maxDuration = 25;
+export const maxDuration = 300;
 
 type AnyRecord = Record<string, any>;
 type CustomSerialRecord = {
@@ -263,30 +263,25 @@ async function callTokenBay(args: {
   for (const model of args.models.slice(0, 1)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
-      for (const image of args.images.slice(0, 8)) {
+      for (const image of args.images.slice(0, 4)) {
         content.push({
           type: "image_url",
           image_url: { url: image },
         });
       }
 
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${args.apiKey}`,
         },
-        signal: controller.signal,
         body: JSON.stringify({
           model,
           messages: [{ role: "user", content }],
           temperature: 0,
         }),
       });
-      clearTimeout(timer);
-
       const rawBody = await response.text();
       let data: AnyRecord = {};
       try {
@@ -335,7 +330,7 @@ async function callGoogle(args: {
   for (const model of args.models.slice(0, 1)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
-      for (const image of args.images.slice(0, 8)) {
+      for (const image of args.images.slice(0, 4)) {
         const part = imageDataPart(image);
         if (part) parts.push(part);
       }
@@ -343,22 +338,18 @@ async function callGoogle(args: {
       const endpoint =
         `https://generativelanguage.googleapis.com/v1beta/models/` +
         `${encodeURIComponent(model)}:generateContent?key=${encodeURIComponent(args.apiKey)}`;
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
         body: JSON.stringify({
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 3200,
+            maxOutputTokens: 1800,
+            responseMimeType: "application/json",
           },
         }),
       });
-      clearTimeout(timer);
-
       const rawBody = await response.text();
       let data: AnyRecord = {};
       try {
@@ -399,7 +390,7 @@ export async function POST(req: Request) {
     const images = (Array.isArray(body.images) ? body.images : [])
       .map((image: unknown) => String(image || ""))
       .filter((image: string) => /^data:image\/[a-z0-9.+-]+;base64,/i.test(image))
-      .slice(0, 8);
+      .slice(0, 4);
 
     const allowedNames = unique(
       (Array.isArray(body.gloveNames) ? body.gloveNames : []).map((name: unknown) =>
@@ -424,28 +415,31 @@ export async function POST(req: Request) {
     if (!allowedNames.length) return errorJson("No glove database names sent.", 400);
 
     const prompt = `
-Scan every visible Roblox Boxing League inventory card in all ${images.length} screenshot(s). One card must produce one detection, including duplicate cards.
+Analyze all ${images.length} Roblox Boxing League inventory screenshot(s). Detect every visible glove card, including duplicates.
 
-For every card read:
-- visible glove name below the icon
-- exact visible hashtag text
-- numeric serial such as #30 or #30/400
-- known custom serial text/symbol
+For each card return:
+- imageIndex and cardIndex
+- visibleName exactly as read
+- visibleText exactly as read
+- tagText exactly as visible, including partial tags such as #B
+- visualColorCode only when visually clear: BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG
+- colorConfidence 0-100
+- serialNumber and serialTotal when readable
+- customSerialText exactly as visible
+- confidence 0-100
+- a short reason
 
-IMPORTANT COLOR RULES FOR CORE AND CYBERFLY ONLY:
-- Valid colors: BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG/ORN.
-- Return tagText as the exact characters actually visible. Never complete a cropped tag. Example: if only #B is visible, return "#B", not #BLU or #BLK.
-- Return visualColorCode separately from the actual glove/accent color.
-- If tagText is fully readable, it is stronger evidence than visual color.
-- If tagText is partial or absent, lower colorConfidence. Do not guess.
-- BLU is blue/cyan, BLK is black/dark, PUR is purple, PNK is pink/magenta, GRN green, YLW yellow, ORG orange, RED red.
+STRICT COLOR RULES FOR CORE AND CYBERFLY:
+- Never complete a cropped hashtag.
+- A complete readable tag such as #BLU is stronger than visual color.
+- If the complete tag conflicts with the visual glove color, report both; do not guess.
+- If the tag is partial or absent, return the visible/partial tag and visual color separately with lower confidence.
 
-SERIAL RULES:
-- Return exact serialNumber and serialTotal when readable.
-- Never invent unreadable digits.
-- Custom serials must only match the supplied custom serial database.
+STRICT SERIAL RULES:
+- Never invent digits or symbols.
+- Return custom serial text exactly as seen.
 
-Return JSON only:
+Return JSON only in this shape:
 {
   "detections": [
     {
@@ -460,19 +454,12 @@ Return JSON only:
       "serialNumber": null,
       "serialTotal": null,
       "customSerialText": "",
-      "candidate": "Cyberfly [BLU]",
       "confidence": 98,
-      "reason": "full #BLU tag readable"
+      "reason": "complete tag readable"
     }
   ],
   "notes": "short summary"
 }
-
-Allowed glove names:
-${JSON.stringify(allowedNames)}
-
-Custom serial database:
-${JSON.stringify(customSerialRecords)}
 `.trim();
 
     // Put proven vision-capable chat models first. The previous route only tried
@@ -494,7 +481,28 @@ ${JSON.stringify(customSerialRecords)}
     const attempts: AnyRecord[] = [];
     let result: ProviderResult | null = null;
 
-    if (tokenBayKey && fastModels.length) {
+    const googleKey = process.env.GEMINI_API_KEY;
+    const googleModels = modelList(
+      "gemini-2.5-flash",
+      process.env.GEMINI_MODEL,
+      process.env.GEMINI_MODEL_BACKUP,
+      process.env.GEMINI_MODELS
+    );
+
+    // Direct Google is normally faster and more reliable for image input.
+    if (googleKey && googleModels.length) {
+      const google = await callGoogle({
+        apiKey: googleKey,
+        models: googleModels,
+        images,
+        prompt,
+      });
+      attempts.push(...google.attempts);
+      if (google.parsed) result = google;
+    }
+
+    // TokenBay is a fallback only, so a slow proxy does not delay every scan.
+    if (!result && tokenBayKey && fastModels.length) {
       const tokenBay = await callTokenBay({
         apiKey: tokenBayKey,
         baseUrl,
@@ -504,26 +512,6 @@ ${JSON.stringify(customSerialRecords)}
       });
       attempts.push(...tokenBay.attempts);
       if (tokenBay.parsed) result = tokenBay;
-    }
-
-    if (!result) {
-      const googleKey = process.env.GEMINI_API_KEY;
-      const googleModels = modelList(
-        "gemini-2.5-flash",
-        process.env.GEMINI_MODEL,
-        process.env.GEMINI_MODEL_BACKUP,
-        process.env.GEMINI_MODELS
-      );
-      if (googleKey && googleModels.length) {
-        const google = await callGoogle({
-          apiKey: googleKey,
-          models: googleModels,
-          images,
-          prompt,
-        });
-        attempts.push(...google.attempts);
-        if (google.parsed) result = google;
-      }
     }
 
     if (!result || !result.parsed) {
@@ -931,7 +919,7 @@ ${JSON.stringify(customSerialRecords)}
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "fast-strict-color-v180",
+      scanMode: "no-auto-timeout-strict-color-v180",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
