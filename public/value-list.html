@@ -23236,11 +23236,15 @@ html,body{max-width:100%;overflow-x:hidden!important}
         img.onerror=function(){resolve(original)};
         img.onload=function(){
           try{
-            var max=820,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+            // V181: 820px/.62 JPEG erased small glove names on full inventory screenshots.
+            // Keep enough resolution for every row while still reducing upload size.
+            var max=1800,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
             var scale=Math.min(1,max/Math.max(iw,ih)),cw=Math.max(1,Math.round(iw*scale)),ch=Math.max(1,Math.round(ih*scale));
             var c=d.createElement('canvas');c.width=cw;c.height=ch;
-            var ctx=c.getContext('2d',{alpha:false});ctx.fillStyle='#111';ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
-            resolve(c.toDataURL('image/jpeg',.62));
+            var ctx=c.getContext('2d',{alpha:false});
+            ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+            ctx.fillStyle='#111';ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
+            resolve(c.toDataURL('image/jpeg',.88));
           }catch(e){resolve(original)}
         };
         img.src=original;
@@ -23250,7 +23254,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   }
   function live(out,title,line,elapsed){
     if(!out)return;
-    out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · No automatic cutoff · One Gemini model, then one backup.</div></div>';
+    out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · Grid census + full row-by-row read + completeness retry.</div></div>';
   }
   function source(x){return 'Image '+Number(x.imageIndex||1)+(x.cardIndex?' · card '+x.cardIndex:'')}
   function quantityControl(inputId,quantity){
@@ -23318,10 +23322,11 @@ html,body{max-width:100%;overflow-x:hidden!important}
     var out=byId('inv-results');if(!out)return;
     var review=(data.review||[]).slice(0,180);
     var detected=Number(data.cardCount||data.detectionCount||(data.items||[]).length||0);
+    var expected=Number(data.expectedCardCount||detected||0);
     var gloveCount=Number(data.gloveCount||(data.items||[]).reduce(function(t,x){return t+Math.max(1,Number(x.quantity||1))},0));
     var saved=Object.keys(counts).reduce(function(t,k){return t+Number(counts[k]||0)},0);
-    out.innerHTML='<div class="ai-answer"><strong>V180 scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
-      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
+    out.innerHTML='<div class="ai-answer"><strong>V181 full-grid scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
+      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Census target: '+expected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
@@ -23334,7 +23339,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     if(!files.length){if(status)status.textContent='Choose one or more screenshots first.';return}
     var chosen=files.slice(0,4),started=Date.now(),timer=null;
     try{
-      live(out,'Preparing screenshots…','Shrinking images so the scan is faster.',0);
+      live(out,'Preparing screenshots…','Preserving readable detail across every inventory row.',0);
       var images=[];
       for(var i=0;i<chosen.length;i++){
         if(status)status.textContent='Preparing image '+(i+1)+' of '+chosen.length+'…';
@@ -23343,7 +23348,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
       }
       timer=setInterval(function(){
         var sec=Math.floor((Date.now()-started)/1000);
-        var line=sec<5?'Reading glove names and complete color tags…':sec<11?'Checking serials, custom serials, and multiple cards…':'Still scanning — there is no automatic scanner cutoff. Keep this page open.';
+        var line=sec<5?'Counting every visible card slot first…':sec<12?'Reading every row, duplicate, tag, and serial…':'Verifying the result did not stop early or miss lower rows…';
         if(status)status.textContent=line+' '+sec+'s';
         live(out,'AI scan running…',line,sec);
       },1000);
@@ -23370,8 +23375,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V180-stable-rollback-BLK-fix');
-    try{d.title='MadeByZebra — Value List · V180'}catch(_){}
+    d.documentElement.setAttribute('data-scanner-version','V181-full-grid-two-pass');
+    try{d.title='MadeByZebra — Value List · V181'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();

@@ -284,7 +284,7 @@ async function callTokenBay(args: {
   for (const model of args.models.slice(0, 1)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
-      for (const image of args.images.slice(0, 4)) {
+      for (const image of args.images.slice(0, 8)) {
         content.push({
           type: "image_url",
           image_url: { url: image },
@@ -301,6 +301,7 @@ async function callTokenBay(args: {
           model,
           messages: [{ role: "user", content }],
           temperature: 0,
+          max_tokens: 10000,
         }),
       });
       const rawBody = await response.text();
@@ -351,7 +352,7 @@ async function callGoogle(args: {
   for (const model of args.models.slice(0, 1)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
-      for (const image of args.images.slice(0, 4)) {
+      for (const image of args.images.slice(0, 8)) {
         const part = imageDataPart(image);
         if (part) parts.push(part);
       }
@@ -366,7 +367,7 @@ async function callGoogle(args: {
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 1800,
+            maxOutputTokens: 10000,
             responseMimeType: "application/json",
           },
         }),
@@ -411,7 +412,7 @@ export async function POST(req: Request) {
     const images = (Array.isArray(body.images) ? body.images : [])
       .map((image: unknown) => String(image || ""))
       .filter((image: string) => /^data:image\/[a-z0-9.+-]+;base64,/i.test(image))
-      .slice(0, 4);
+      .slice(0, 8);
 
     const allowedNames = unique(
       (Array.isArray(body.gloveNames) ? body.gloveNames : []).map((name: unknown) =>
@@ -435,66 +436,131 @@ export async function POST(req: Request) {
     if (!images.length) return errorJson("No valid images sent.", 400);
     if (!allowedNames.length) return errorJson("No glove database names sent.", 400);
 
-    const prompt = `
-Analyze all ${images.length} Roblox Boxing League inventory screenshot(s). Detect every visible glove card, including duplicates.
+    const censusPrompt = `
+Count every visible Roblox Boxing League glove inventory CARD SLOT in all ${images.length} screenshot(s).
 
-For each detected card return:
-- imageIndex and cardIndex
-- rowIndex and columnIndex when possible
-- visibleName exactly as read
-- visibleText exactly as read
-- quantity as an integer
-- tagText exactly as visible, including partial tags such as #B
-- visualColorCode only when visually clear: BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG
-- colorConfidence 0-100
-- serialNumber and serialTotal when readable
-- customSerialText exactly as visible
-- confidence 0-100
-- a short reason
+This is a geometry/counting pass only:
+- Inspect the entire inventory grid from top-left to bottom-right.
+- Count every visible rectangular glove card slot, including duplicates and low-confidence/unreadable cards.
+- Count a partially visible card when enough of its rectangle is visible to know a slot exists.
+- Ignore navigation, search results, filters, buttons, headings, and non-inventory UI.
+- Do not return a sample. Do not stop after the first row or after six cards.
+- For each image, report rowCounts: the number of visible card slots in each visual row.
 
-STRICT QUANTITY RULES:
-- Scan the entire inventory grid systematically from top-left to bottom-right.
-- Count every visible glove slot, including repeated copies of the same glove.
-- Prefer one detection object per visible card slot with quantity 1.
-- Use quantity greater than 1 only when a single card explicitly shows a stack badge such as x2, x3, or another visible count.
-- Never merge separate repeated card slots into one detection.
-- Never estimate a quantity from memory or from a partially hidden card.
-- A partly visible card still counts as one only when enough of the card is visible to identify that a glove slot exists.
-
-STRICT COLOR RULES FOR CORE AND CYBERFLY:
-- Detect the most likely color and return it in visualColorCode.
-- Never complete a cropped hashtag.
-- Report the complete or partial tag exactly as visible.
-- Colored Core and Cyberfly cards will always be sent to Needs Review by the server, even when the color appears clear.
-- If the complete tag conflicts with the visual glove color, report both; do not guess.
-
-STRICT SERIAL RULES:
-- Never invent digits or symbols.
-- Return custom serial text exactly as seen.
-
-Return JSON only in this shape:
+Return JSON only:
 {
+  "images": [
+    {"imageIndex": 1, "rowCounts": [4,4,4], "totalVisibleCardSlots": 12}
+  ],
+  "totalVisibleCardSlots": 12
+}
+`.trim();
+
+    function censusTargets(parsed: AnyRecord | any[] | null) {
+      const root: AnyRecord = parsed && !Array.isArray(parsed) ? parsed : {};
+      const rows = Array.isArray(root.images) ? root.images : [];
+      const byImage = rows.map((entry: AnyRecord, index: number) => {
+        const rowCounts = Array.isArray(entry?.rowCounts)
+          ? entry.rowCounts.map((value: unknown) => Math.max(0, Math.floor(Number(value) || 0)))
+          : [];
+        const total = Math.max(
+          0,
+          Math.floor(Number(entry?.totalVisibleCardSlots ?? entry?.total ?? 0) || 0),
+          rowCounts.reduce((sum: number, value: number) => sum + value, 0)
+        );
+        return { imageIndex: Number(entry?.imageIndex || index + 1) || index + 1, rowCounts, total };
+      });
+      const summed = byImage.reduce((sum: number, entry: AnyRecord) => sum + Number(entry.total || 0), 0);
+      const total = Math.max(
+        summed,
+        Math.floor(Number(root.totalVisibleCardSlots ?? root.total ?? 0) || 0)
+      );
+      return { byImage, total };
+    }
+
+    function detectionCount(parsed: AnyRecord | any[] | null) {
+      if (Array.isArray(parsed)) return parsed.length;
+      return Array.isArray((parsed as AnyRecord)?.detections)
+        ? (parsed as AnyRecord).detections.length
+        : 0;
+    }
+
+    function declaredSlotCount(parsed: AnyRecord | any[] | null) {
+      if (!parsed || Array.isArray(parsed)) return 0;
+      return Math.max(
+        0,
+        Math.floor(
+          Number(
+            (parsed as AnyRecord).totalVisibleCardSlots ??
+              (parsed as AnyRecord).cardCount ??
+              (parsed as AnyRecord).detectionCount ??
+              0
+          ) || 0
+        )
+      );
+    }
+
+    function detailedPrompt(census: ReturnType<typeof censusTargets>, retryNote = "") {
+      const targets = census.byImage.length
+        ? census.byImage
+            .map((entry: AnyRecord) =>
+              `Image ${entry.imageIndex}: ${entry.total} card slots` +
+              (entry.rowCounts.length ? `, rows [${entry.rowCounts.join(", ")}]` : "")
+            )
+            .join("\n")
+        : "No reliable census target was available; independently count every card slot first.";
+
+      return `
+Analyze all ${images.length} Roblox Boxing League inventory screenshot(s). Detect EVERY visible glove card slot, including duplicates and unreadable cards.
+
+CARD-SLOT CENSUS TARGET:
+${targets}
+Total target: ${census.total || "count it yourself"} visible card slots.
+${retryNote}
+
+NON-NEGOTIABLE COMPLETENESS RULES:
+- Scan the entire inventory grid systematically, row by row, left to right.
+- Return exactly one detection object per visible card slot whenever a census target is supplied.
+- Never return only the clearest cards, only unique glove names, or a representative sample.
+- Never stop after six cards or after the first row.
+- Separate repeated copies into separate objects. Do not merge duplicate card slots.
+- If a card exists but its name is unreadable, STILL return that slot with visibleName "UNKNOWN", visibleText as much as can be read, confidence 0-40, and reason "unreadable card slot".
+- Use quantity greater than 1 only when one card visibly shows an xN stack badge. Separate cards always remain separate detections.
+- Preserve imageIndex, rowIndex, and columnIndex so every slot can be audited.
+
+READING RULES:
+- visibleName and visibleText must reflect only what is actually visible.
+- tagText must preserve complete or partial tags exactly, such as #BLK or #B.
+- visualColorCode may be BLK, BLU, RED, PUR, PNK, GRN, YLW, ORG only when visually supported.
+- Never complete a cropped hashtag and never invent serial digits.
+- For Core and Cyberfly, report the family and visible color evidence; the server will keep them in Needs Review.
+
+Return compact JSON only:
+{
+  "totalVisibleCardSlots": 12,
   "detections": [
     {
       "imageIndex": 1,
       "cardIndex": 1,
+      "rowIndex": 1,
+      "columnIndex": 1,
       "visibleName": "Cyberfly",
       "visibleText": "Cyberfly #BLU",
       "quantity": 1,
       "tagText": "#BLU",
       "visualColorCode": "BLU",
       "colorConfidence": 98,
-      "serialType": "none",
       "serialNumber": null,
       "serialTotal": null,
       "customSerialText": "",
       "confidence": 98,
-      "reason": "complete tag readable"
+      "reason": "tag readable"
     }
   ],
-  "notes": "short summary"
+  "notes": "complete row-by-row scan"
 }
-`.trim();
+`;
+    }
 
     // Put proven vision-capable chat models first. The previous route only tried
     // the first two configured names, so it could fail before reaching a model
@@ -514,6 +580,7 @@ Return JSON only in this shape:
 
     const attempts: AnyRecord[] = [];
     let result: ProviderResult | null = null;
+    let census: ReturnType<typeof censusTargets> = { byImage: [], total: 0 };
 
     const googleKey = process.env.GEMINI_API_KEY;
     const googleModels = modelList(
@@ -523,30 +590,86 @@ Return JSON only in this shape:
       process.env.GEMINI_MODELS
     );
 
-    // Direct Google is normally faster and more reliable for image input.
-    if (googleKey && googleModels.length) {
-      const google = await callGoogle({
+    async function runGoogleFullScan() {
+      if (!googleKey || !googleModels.length) return null;
+      const counted = await callGoogle({
         apiKey: googleKey,
         models: googleModels,
         images,
-        prompt,
+        prompt: censusPrompt,
       });
-      attempts.push(...google.attempts);
-      if (google.parsed) result = google;
+      attempts.push(...counted.attempts);
+      census = censusTargets(counted.parsed);
+
+      let detailed = await callGoogle({
+        apiKey: googleKey,
+        models: googleModels,
+        images,
+        prompt: detailedPrompt(census),
+      });
+      attempts.push(...detailed.attempts);
+
+      const firstCount = detectionCount(detailed.parsed);
+      const expectedCount = Math.max(census.total, declaredSlotCount(detailed.parsed));
+      if (detailed.parsed && (expectedCount > firstCount || (firstCount > 0 && firstCount <= 6))) {
+        const retry = await callGoogle({
+          apiKey: googleKey,
+          models: googleModels,
+          images,
+          prompt: detailedPrompt(
+            census,
+            `RETRY REQUIRED: the previous answer returned only ${firstCount} detections${expectedCount ? ` for an expected ${expectedCount} slots` : " and may have stopped early"}. Re-scan all rows and return every visible slot.`
+          ),
+        });
+        attempts.push(...retry.attempts);
+        if (detectionCount(retry.parsed) > firstCount) detailed = retry;
+      }
+      return detailed.parsed ? detailed : null;
     }
 
-    // TokenBay is a fallback only, so a slow proxy does not delay every scan.
-    if (!result && tokenBayKey && fastModels.length) {
-      const tokenBay = await callTokenBay({
+    async function runTokenBayFullScan() {
+      if (!tokenBayKey || !fastModels.length) return null;
+      const counted = await callTokenBay({
         apiKey: tokenBayKey,
         baseUrl,
         models: fastModels,
         images,
-        prompt,
+        prompt: censusPrompt,
       });
-      attempts.push(...tokenBay.attempts);
-      if (tokenBay.parsed) result = tokenBay;
+      attempts.push(...counted.attempts);
+      census = censusTargets(counted.parsed);
+
+      let detailed = await callTokenBay({
+        apiKey: tokenBayKey,
+        baseUrl,
+        models: fastModels,
+        images,
+        prompt: detailedPrompt(census),
+      });
+      attempts.push(...detailed.attempts);
+
+      const firstCount = detectionCount(detailed.parsed);
+      const expectedCount = Math.max(census.total, declaredSlotCount(detailed.parsed));
+      if (detailed.parsed && (expectedCount > firstCount || (firstCount > 0 && firstCount <= 6))) {
+        const retry = await callTokenBay({
+          apiKey: tokenBayKey,
+          baseUrl,
+          models: fastModels,
+          images,
+          prompt: detailedPrompt(
+            census,
+            `RETRY REQUIRED: the previous answer returned only ${firstCount} detections${expectedCount ? ` for an expected ${expectedCount} slots` : " and may have stopped early"}. Re-scan all rows and return every visible slot.`
+          ),
+        });
+        attempts.push(...retry.attempts);
+        if (detectionCount(retry.parsed) > firstCount) detailed = retry;
+      }
+      return detailed.parsed ? detailed : null;
     }
+
+    // Two-pass scan: first count the grid, then read every counted slot.
+    result = await runGoogleFullScan();
+    if (!result) result = await runTokenBayFullScan();
 
     if (!result || !result.parsed) {
       const summary = attempts
@@ -807,9 +930,34 @@ Return JSON only in this shape:
 
     const parsed = result.parsed;
     const root: AnyRecord = Array.isArray(parsed) ? { detections: parsed } : parsed;
+    census.total = Math.max(census.total, declaredSlotCount(root));
     const rawDetections: AnyRecord[] = Array.isArray(root?.detections)
-      ? root.detections
+      ? [...root.detections]
       : [];
+
+    // Never silently report a six-card partial scan when the census found more slots.
+    // Missing/unreadable slots stay visible in Needs Review instead of disappearing.
+    const expectedByImage = census.byImage.length
+      ? census.byImage
+      : [{ imageIndex: 1, total: census.total || rawDetections.length, rowCounts: [] }];
+    for (const expected of expectedByImage) {
+      const imageIndex = Number(expected.imageIndex || 1) || 1;
+      const have = rawDetections.filter(
+        (item: AnyRecord) => Number(item?.imageIndex || 1) === imageIndex
+      ).length;
+      const missing = Math.max(0, Number(expected.total || 0) - have);
+      for (let index = 0; index < missing; index += 1) {
+        rawDetections.push({
+          imageIndex,
+          cardIndex: have + index + 1,
+          visibleName: "UNKNOWN",
+          visibleText: "Unread card slot counted by grid census",
+          quantity: 1,
+          confidence: 0,
+          reason: "card slot was counted but its glove text was unreadable",
+        });
+      }
+    }
 
     const items: AnyRecord[] = [];
     const confirmed = new Set<string>();
@@ -975,6 +1123,8 @@ Return JSON only in this shape:
       review: review.slice(0, 300),
       detectionCount: items.length,
       cardCount: items.length,
+      expectedCardCount: census.total || items.length,
+      censusByImage: census.byImage,
       gloveCount: items.reduce(
         (total, item) => total + detectedQuantity(item),
         0
@@ -982,11 +1132,11 @@ Return JSON only in this shape:
       imageCount: images.length,
       notes:
         root?.notes ||
-        `Fast scan processed ${items.length} card(s). Ambiguous colors remain in Needs Review.`,
+        `Full-grid scan processed ${items.length} card slot(s). Ambiguous or unreadable slots remain in Needs Review.`,
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "stable-rollback-with-BLK-fix-v180",
+      scanMode: "full-grid-two-pass-accurate-v181",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
