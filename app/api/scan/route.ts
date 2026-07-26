@@ -100,20 +100,7 @@ function familyFrom(value: unknown): "Core" | "Cyberfly" | "" {
 
 const COLOR_CODES = ["BLK", "BLU", "RED", "PUR", "PNK", "GRN", "YLW", "ORG"];
 const COLOR_ALIASES: Record<string, string[]> = {
-  BLK: [
-    "blk",
-    "black",
-    "blck",
-    "blak",
-    "bik",
-    "b1k",
-    "8lk",
-    "tlk",
-    "t1k",
-    "blk",
-    "dark",
-    "charcoal",
-  ],
+  BLK: ["blk", "black", "blck", "blak", "bik", "b1k", "8lk", "tlk", "t1k"],
   BLU: ["blu", "blue", "cyan"],
   RED: ["red"],
   PUR: ["pur", "purple", "violet"],
@@ -132,20 +119,8 @@ function normalizeColorCode(value: unknown) {
 
   if (raw === "ORN") return "ORG";
 
-  // Common OCR mistakes for the black tag #BLK.
   if (
-    [
-      "BLK",
-      "BLACK",
-      "BLCK",
-      "BLAK",
-      "BIK",
-      "B1K",
-      "8LK",
-      "TLK",
-      "T1K",
-      "BK",
-    ].includes(raw)
+    ["BLK", "BLACK", "BLCK", "BLAK", "BIK", "B1K", "8LK", "TLK", "T1K", "BK"].includes(raw)
   ) {
     return "BLK";
   }
@@ -187,15 +162,12 @@ function explicitColorTag(value: AnyRecord) {
     .toUpperCase()
     .replace(/0/g, "O");
 
-  const spaced = text.match(/#\s*([A-Z0-9])\s*([A-Z0-9])\s*([A-Z0-9])(?:\b|[^A-Z0-9])/);
+  const spaced = text.match(/#\s*([A-Z])\s*([A-Z])\s*([A-Z])(?:\b|[^A-Z])/);
   if (spaced) {
-    const normalized = normalizeColorCode(
-      `${spaced[1]}${spaced[2]}${spaced[3]}`
-    );
-    if (normalized) return normalized;
+    return normalizeColorCode(`${spaced[1]}${spaced[2]}${spaced[3]}`);
   }
 
-  const compact = text.match(/#\s*([A-Z0-9]{2,5})\b/);
+  const compact = text.match(/#\s*(BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\b/);
   return compact ? normalizeColorCode(compact[1]) : "";
 }
 
@@ -207,9 +179,8 @@ function partialColorTag(value: AnyRecord) {
     .replace(/0/g, "O");
 
   if (explicitColorTag(value)) return "";
-  const match = text.match(/#\s*([BTPGYRO])(?:\b|[^A-Z0-9])/);
-  if (!match) return "";
-  return match[1] === "T" ? "B" : match[1];
+  const match = text.match(/#\s*([BPGYRO])(?:\b|[^A-Z])/);
+  return match ? match[1] : "";
 }
 
 function inferredVisualColor(value: AnyRecord) {
@@ -310,7 +281,7 @@ async function callTokenBay(args: {
     : `${args.baseUrl}/v1/chat/completions`;
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 2)) {
+  for (const model of args.models.slice(0, 1)) {
     try {
       const content: AnyRecord[] = [{ type: "text", text: args.prompt }];
       for (const image of args.images.slice(0, 4)) {
@@ -377,7 +348,7 @@ async function callGoogle(args: {
 }): Promise<ProviderResult> {
   const attempts: AnyRecord[] = [];
 
-  for (const model of args.models.slice(0, 2)) {
+  for (const model of args.models.slice(0, 1)) {
     try {
       const parts: AnyRecord[] = [{ text: args.prompt }];
       for (const image of args.images.slice(0, 4)) {
@@ -395,7 +366,7 @@ async function callGoogle(args: {
           contents: [{ role: "user", parts }],
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 5000,
+            maxOutputTokens: 1800,
             responseMimeType: "application/json",
           },
         }),
@@ -465,9 +436,7 @@ export async function POST(req: Request) {
     if (!allowedNames.length) return errorJson("No glove database names sent.", 400);
 
     const prompt = `
-Analyze all ${images.length} Roblox Boxing League inventory screenshot(s).
-
-First, count every visible glove card slot in each image. Then identify every slot one by one from top-left to bottom-right. Repeated names and different colored variants are separate gloves.
+Analyze all ${images.length} Roblox Boxing League inventory screenshot(s). Detect every visible glove card, including duplicates.
 
 For each detected card return:
 - imageIndex and cardIndex
@@ -484,15 +453,13 @@ For each detected card return:
 - a short reason
 
 STRICT QUANTITY RULES:
-- Scan the full inventory grid systematically from top-left to bottom-right, row by row.
-- Return imageCounts with the exact visible card-slot count for each image before identifying names.
-- Return one detection object for every visible card slot.
-- Three separate colored Core cards such as #GRN, #BLU, and #RED are three detections and three gloves.
-- Repeated copies are separate detections. Never merge separate slots just because their names match.
-- quantity must be 1 for a normal card slot.
-- Use quantity greater than 1 only when that same card visibly shows a stack badge such as x2 or x3.
-- A card whose name cannot be read must still be returned with visibleName "UNKNOWN" so the slot is not lost.
-- Partly visible edge cards count when a real glove slot is visibly present.
+- Scan the entire inventory grid systematically from top-left to bottom-right.
+- Count every visible glove slot, including repeated copies of the same glove.
+- Prefer one detection object per visible card slot with quantity 1.
+- Use quantity greater than 1 only when a single card explicitly shows a stack badge such as x2, x3, or another visible count.
+- Never merge separate repeated card slots into one detection.
+- Never estimate a quantity from memory or from a partially hidden card.
+- A partly visible card still counts as one only when enough of the card is visible to identify that a glove slot exists.
 
 STRICT COLOR RULES FOR CORE AND CYBERFLY:
 - Detect the most likely color and return it in visualColorCode.
@@ -507,9 +474,6 @@ STRICT SERIAL RULES:
 
 Return JSON only in this shape:
 {
-  "imageCounts": [
-    { "imageIndex": 1, "visibleCardCount": 15 }
-  ],
   "detections": [
     {
       "imageIndex": 1,
@@ -536,11 +500,10 @@ Return JSON only in this shape:
     // the first two configured names, so it could fail before reaching a model
     // that actually accepts image input.
     const fastModels = modelList(
-      "gemini-2.5-pro",
       "gemini-2.5-flash",
-      process.env.TOKENBAY_GEMINI_MODEL_BACKUP,
-      process.env.TOKENBAY_GEMINI_MODEL,
       process.env.TOKENBAY_GEMINI_MODEL_FAST,
+      process.env.TOKENBAY_GEMINI_MODEL,
+      process.env.TOKENBAY_GEMINI_MODEL_BACKUP,
       process.env.TOKENBAY_GEMINI_MODELS
     );
     const tokenBayKey =
@@ -554,10 +517,9 @@ Return JSON only in this shape:
 
     const googleKey = process.env.GEMINI_API_KEY;
     const googleModels = modelList(
-      "gemini-2.5-pro",
       "gemini-2.5-flash",
-      process.env.GEMINI_MODEL_BACKUP,
       process.env.GEMINI_MODEL,
+      process.env.GEMINI_MODEL_BACKUP,
       process.env.GEMINI_MODELS
     );
 
@@ -632,21 +594,10 @@ Return JSON only in this shape:
 
     function allFamilyCandidates(family: "Core" | "Cyberfly") {
       const plain = exactName(family);
-      const orderedCodes = [
-        "BLK",
-        "BLU",
-        "RED",
-        "PNK",
-        "PUR",
-        "GRN",
-        "YLW",
-        "ORG",
-      ];
-
       return unique(
         [
           plain || "",
-          ...orderedCodes.map((code) => exactVariant(family, code) || ""),
+          ...COLOR_CODES.map((code) => exactVariant(family, code) || ""),
         ].filter(Boolean)
       );
     }
@@ -837,7 +788,7 @@ Return JSON only in this shape:
 
     function suggestions(value: AnyRecord) {
       const raw = normalize(value.visibleName || value.baseName || visibleText(value));
-      if (!raw || raw === "unknown" || raw === "unreadable") return [];
+      if (!raw) return [];
       const direct = allowedEntries
         .filter(
           (entry) =>
@@ -859,16 +810,6 @@ Return JSON only in this shape:
     const rawDetections: AnyRecord[] = Array.isArray(root?.detections)
       ? root.detections
       : [];
-
-    const imageCounts: AnyRecord[] = Array.isArray(root?.imageCounts)
-      ? root.imageCounts
-      : [];
-    const reportedCardCount = imageCounts.reduce((total, entry) => {
-      const count = Number(
-        entry?.visibleCardCount ?? entry?.cardCount ?? entry?.count ?? 0
-      );
-      return total + (Number.isFinite(count) && count > 0 ? Math.floor(count) : 0);
-    }, 0);
 
     const items: AnyRecord[] = [];
     const confirmed = new Set<string>();
@@ -1024,38 +965,6 @@ Return JSON only in this shape:
       items.push(item);
     });
 
-    const identifiedSlotCount = items.reduce(
-      (total, item) => total + detectedQuantity(item),
-      0
-    );
-    const missingSlotCount = Math.max(0, reportedCardCount - identifiedSlotCount);
-
-    for (let index = 0; index < missingSlotCount; index += 1) {
-      const placeholder = {
-        imageIndex: 0,
-        cardIndex: identifiedSlotCount + index + 1,
-        visibleName: "UNKNOWN",
-        visibleText: "Unidentified visible glove slot",
-        quantity: 1,
-        confidence: 0,
-        status: "review",
-        kind: "unknown-slot",
-        candidate: null,
-        candidates: [],
-        reason:
-          "The AI counted this visible glove slot but could not safely read its name. Choose it manually in Needs Review.",
-      };
-      items.push(placeholder);
-      review.push({
-        text: placeholder.visibleText,
-        candidates: [],
-        confidence: 0,
-        reason: placeholder.reason,
-        kind: placeholder.kind,
-        quantity: 1,
-      });
-    }
-
     return Response.json({
       items,
       confirmed: Array.from(confirmed),
@@ -1065,16 +974,11 @@ Return JSON only in this shape:
       customSerials,
       review: review.slice(0, 300),
       detectionCount: items.length,
-      cardCount: Math.max(
-        reportedCardCount,
-        items.reduce((total, item) => total + detectedQuantity(item), 0)
+      cardCount: items.length,
+      gloveCount: items.reduce(
+        (total, item) => total + detectedQuantity(item),
+        0
       ),
-      gloveCount: Math.max(
-        reportedCardCount,
-        items.reduce((total, item) => total + detectedQuantity(item), 0)
-      ),
-      reportedCardCount,
-      unidentifiedSlotCount: missingSlotCount,
       imageCount: images.length,
       notes:
         root?.notes ||
@@ -1082,7 +986,7 @@ Return JSON only in this shape:
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "accurate-count-BLK-ocr-fix-v180",
+      scanMode: "stable-rollback-with-BLK-fix-v180",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
