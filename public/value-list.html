@@ -23117,6 +23117,21 @@ html,body{max-width:100%;overflow-x:hidden!important}
   .mbz-fastscan-color-row.review{border-color:color-mix(in srgb,#facc15 35%,var(--border))}
   .mbz-fastscan-small{font:10px 'DM Mono',monospace;color:var(--text-dim);margin-top:3px;overflow-wrap:anywhere}
   .mbz-fastscan-actions{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+  .mbz-fastscan-qty-wrap{
+    display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:9px 0 7px;
+    padding:8px 9px;border:1px solid var(--border);border-radius:10px;background:var(--surface3)
+  }
+  .mbz-fastscan-qty-label{font:600 11px 'DM Mono',monospace;color:var(--text-muted)}
+  .mbz-fastscan-qty{
+    width:72px;padding:7px 8px;border:1px solid var(--border2);border-radius:8px;
+    background:var(--surface);color:var(--text);font:700 13px 'DM Mono',monospace;text-align:center
+  }
+  .mbz-fastscan-qty-step{
+    width:30px;height:30px;border:1px solid var(--border2);border-radius:8px;
+    background:var(--surface2);color:var(--text);font-weight:800;cursor:pointer
+  }
+  .mbz-fastscan-qty-step:hover{border-color:var(--accent);box-shadow:0 0 12px var(--glow)}
+  .mbz-fastscan-choice-row.saved-choice{opacity:.72}
   @media(max-width:760px){.mbz-fastscan-color-row{grid-template-columns:1fr}}
 </style>
 <script id="mbz-v180-fast-clear-scanner-script">
@@ -23177,13 +23192,40 @@ html,body{max-width:100%;overflow-x:hidden!important}
     saveQtyMap(qty);
     return counts;
   }
-  function confirm(encoded,quantity,button){
-    var name=decodeURIComponent(encoded),g=exact(name);if(!g)return;
-    var add=Math.max(1,Math.min(99,Math.floor(Number(quantity||1))));
-    var qty=loadQty();qty[g.n]=Number(qty[g.n]||0)+add;saveQtyMap(qty);
-    if(button){button.textContent='Saved x'+add+' ✓';button.classList.add('added')}
+  function chosenQty(inputId,fallback){
+    var input=byId(inputId);
+    var value=input?Number(input.value):Number(fallback||1);
+    if(!Number.isFinite(value))value=Number(fallback||1);
+    value=Math.max(1,Math.min(999,Math.floor(value)));
+    if(input)input.value=String(value);
+    return value;
   }
-  w.mbzFastScanConfirm=function(encoded,quantity,el){confirm(encoded,quantity,el)};
+  w.mbzFastScanQtyStep=function(inputId,delta){
+    var input=byId(inputId);if(!input)return;
+    input.value=String(Math.max(1,Math.min(999,chosenQty(inputId,1)+Number(delta||0))));
+  };
+  function confirm(encoded,inputId,button){
+    var name=decodeURIComponent(encoded),g=exact(name);if(!g)return;
+    var add=chosenQty(inputId,1);
+    var qty=loadQty();qty[g.n]=Number(qty[g.n]||0)+add;saveQtyMap(qty);
+    if(button){
+      button.textContent='Saved x'+add+' ✓';
+      button.classList.add('added');
+      var row=button.closest('.mbz-fastscan-choice-row');
+      if(row){
+        row.classList.add('saved-choice');
+        row.querySelectorAll('.mbz-fastscan-actions button').forEach(function(b){
+          b.disabled=true;
+        });
+        var input=row.querySelector('.mbz-fastscan-qty');
+        if(input)input.disabled=true;
+        row.querySelectorAll('.mbz-fastscan-qty-step').forEach(function(b){
+          b.disabled=true;
+        });
+      }
+    }
+  }
+  w.mbzFastScanConfirm=function(encoded,inputId,el){confirm(encoded,inputId,el)};
 
   function fileToSmallData(file){
     return new Promise(function(resolve,reject){
@@ -23211,28 +23253,57 @@ html,body{max-width:100%;overflow-x:hidden!important}
     out.innerHTML='<div class="ai-answer mbz-fastscan-live"><strong>'+esc(title)+'</strong><div class="mbz-fastscan-bar"><i></i></div><div>'+esc(line)+'</div><div class="mbz-fastscan-small">Elapsed: '+elapsed+'s · No automatic cutoff · One Gemini model, then one backup.</div></div>';
   }
   function source(x){return 'Image '+Number(x.imageIndex||1)+(x.cardIndex?' · card '+x.cardIndex:'')}
-  function candidateButtons(cands,quantity,suggested){
-    var q=Math.max(1,Math.min(99,Math.floor(Number(quantity||1))));
-    return uniq(cands||[]).slice(0,10).map(function(n){
-      var likely=suggested&&n===suggested?'Likely · ':'';
-      return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\','+q+',this)">✓ '+likely+esc(n)+' · x'+q+'</button>';
+  function quantityControl(inputId,quantity){
+    var q=Math.max(1,Math.min(999,Math.floor(Number(quantity||1))));
+    return '<div class="mbz-fastscan-qty-wrap">'+
+      '<span class="mbz-fastscan-qty-label">Amount you own:</span>'+
+      '<button type="button" class="mbz-fastscan-qty-step" onclick="mbzFastScanQtyStep(\''+inputId+'\',-1)">−</button>'+
+      '<input id="'+inputId+'" class="mbz-fastscan-qty" type="number" min="1" max="999" step="1" value="'+q+'" inputmode="numeric">'+
+      '<button type="button" class="mbz-fastscan-qty-step" onclick="mbzFastScanQtyStep(\''+inputId+'\',1)">+</button>'+
+      '<span class="mbz-fastscan-small">Change this before choosing the glove.</span>'+
+    '</div>';
+  }
+  function candidateButtons(cands,inputId){
+    return uniq(cands||[]).slice(0,12).map(function(n){
+      var label=(n==='Core'||n==='Cyberfly')?n+' (uncolored)':n;
+      return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\',\''+inputId+'\',this)">✓ '+esc(label)+'</button>';
     }).join(' ');
   }
   function reviewRows(review){
-    if(!review.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>Needs Review: 0</strong></span> — nothing uncertain was saved.</div>';
-    return review.map(function(x){
-      var c=uniq(x.candidates||[]),q=Math.max(1,Math.min(99,Math.floor(Number(x.quantity||1))));
-      var color=x.visualColorCode?'<div class="mbz-fastscan-small">AI color guess: '+esc(x.visualColorCode)+'</div>':'';
-      return '<div class="mbz-fastscan-color-row review"><div><span class="inv-status-review">REVIEW</span><div class="mbz-fastscan-small">'+esc(x.kind||'uncertain')+' · quantity x'+q+'</div></div><div>'+esc(x.text||'Unclear card')+color+'<div class="mbz-fastscan-small">'+esc(x.reason||'Needs confirmation')+'</div></div><div><strong>Choose the correct glove/color</strong><div class="mbz-fastscan-actions">'+(candidateButtons(c,q,x.suggestedCandidate)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div></div>';
+    var rows=(review||[]).filter(function(x){return x.kind!=='colored'});
+    if(!rows.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>Other Needs Review: 0</strong></span> — no other uncertain gloves.</div>';
+    return rows.map(function(x,index){
+      var c=uniq(x.candidates||[]);
+      var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
+      var inputId='mbz-review-qty-'+index;
+      return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row">'+
+        '<div><span class="inv-status-review">REVIEW</span><div class="mbz-fastscan-small">'+esc(x.kind||'uncertain')+' · scanner counted x'+q+'</div></div>'+
+        '<div>'+esc(x.text||'Unclear card')+'<div class="mbz-fastscan-small">'+esc(x.reason||'Needs confirmation')+'</div></div>'+
+        '<div><strong>Choose the correct glove</strong>'+
+          quantityControl(inputId,q)+
+          '<div class="mbz-fastscan-actions">'+(candidateButtons(c,inputId)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div>'+
+        '</div>'+
+        '<div>'+Math.round(Number(x.confidence||0))+'%</div>'+
+      '</div>';
     }).join('');
   }
   function coloredRows(data){
     var rows=data.colored||[];
-    if(!rows.length)return '<div class="mbz-fastscan-empty">No colored Core or Cyberfly cards were detected in this scan.</div>';
-    return rows.map(function(x){
-      var q=Math.max(1,Math.min(99,Math.floor(Number(x.quantity||1))));
-      var candidates=uniq((x.candidates||[]).concat(x.candidate?[x.candidate]:[]));
-      return '<div class="mbz-fastscan-color-row review"><div>'+esc(source(x))+'<div class="mbz-fastscan-small">'+esc(x.family||'Colored glove')+' · quantity x'+q+'</div></div><div><strong>Tag: '+esc(x.tagText||'(cropped/unreadable)')+'</strong><div class="mbz-fastscan-small">AI color guess: '+esc(x.visualColorCode||'?')+'</div></div><div><strong>Choose the actual color</strong><div class="mbz-fastscan-small">'+esc(x.reason||'Colored gloves always require confirmation.')+'</div><div class="mbz-fastscan-actions">'+candidateButtons(candidates,q,x.suggestedCandidate)+'</div></div><div><span class="inv-status-review">REVIEW</span></div></div>';
+    if(!rows.length)return '<div class="mbz-fastscan-empty">No Core or Cyberfly cards were detected in this scan.</div>';
+    return rows.map(function(x,index){
+      var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
+      var inputId='mbz-color-qty-'+index;
+      var candidates=uniq(x.candidates||[]);
+      return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row">'+
+        '<div>'+esc(source(x))+'<div class="mbz-fastscan-small">'+esc(x.family||'Core/Cyberfly')+' · scanner counted x'+q+'</div></div>'+
+        '<div><strong>Visible tag: '+esc(x.tagText||'none')+'</strong><div class="mbz-fastscan-small">No color is preselected.</div></div>'+
+        '<div><strong>Choose plain or the exact color</strong>'+
+          '<div class="mbz-fastscan-small">Choose '+esc(x.family||'the glove')+' (uncolored) when there is no color indication.</div>'+
+          quantityControl(inputId,q)+
+          '<div class="mbz-fastscan-actions">'+candidateButtons(candidates,inputId)+'</div>'+
+        '</div>'+
+        '<div><span class="inv-status-review">REVIEW</span></div>'+
+      '</div>';
     }).join('');
   }
   function savedRows(counts){
@@ -23254,7 +23325,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
-      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every colored Core/Cyberfly glove stays in Needs Review; the AI color guess is shown first, but you choose the actual color before its full quantity is added.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Every Core/Cyberfly glove stays in Needs Review. No color is preselected. Set the amount you own, then choose plain Core/Cyberfly or any available color.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
     try{out.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
   }
 
@@ -23299,7 +23370,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V180-quantity-colored-review');
+    d.documentElement.setAttribute('data-scanner-version','V180-user-set-quantity');
     try{d.title='MadeByZebra — Value List · V180'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();

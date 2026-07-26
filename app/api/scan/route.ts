@@ -584,6 +584,16 @@ Return JSON only in this shape:
       return null;
     }
 
+    function allFamilyCandidates(family: "Core" | "Cyberfly") {
+      const plain = exactName(family);
+      return unique(
+        [
+          plain || "",
+          ...COLOR_CODES.map((code) => exactVariant(family, code) || ""),
+        ].filter(Boolean)
+      );
+    }
+
     function itemCandidateForColorPreview(
       family: "Core" | "Cyberfly",
       code: string
@@ -835,17 +845,10 @@ Return JSON only in this shape:
       } else if (color) {
         kind = "colored";
         candidate = null;
-        const visualCandidate = itemCandidateForColorPreview(
-          color.family,
-          inferredVisualColor(value)
-        );
-        candidates = unique(
-          [visualCandidate || "", color.candidate || "", ...color.candidates].filter(Boolean)
-        );
+        candidates = allFamilyCandidates(color.family);
         status = "review";
         reason =
-          color.reason +
-          " Colored Core/Cyberfly gloves always require color confirmation.";
+          `${color.family} detected. Choose plain ${color.family} or the exact color variant yourself.`;
       } else {
         const exact = exactName(value.candidate || value.name || value.glove || value.visibleName);
         const exactLooksColored = exact ? /\[(?:BLK|BLU|RED|PUR|PNK|GRN|YLW|ORG|ORN)\]/i.test(exact) : false;
@@ -920,15 +923,13 @@ Return JSON only in this shape:
           visualColorCode: item.visualColorCode,
           colorCode: color.code || "",
           visibleText: text,
-          candidate: color.candidate || null,
-          candidates: color.candidates,
+          candidate: null,
+          candidates: allFamilyCandidates(color.family),
           confidence: conf,
           reason,
           source: color.source,
           status,
           quantity,
-          suggestedCandidate:
-            itemCandidateForColorPreview(color.family, item.visualColorCode) || null,
         });
       }
 
@@ -940,19 +941,16 @@ Return JSON only in this shape:
           imageIndex: item.imageIndex,
           cardIndex: item.cardIndex,
           text: text || item.visibleName || `Card ${index + 1}`,
-          candidates: unique(candidates).slice(0, 12),
+          candidates: color
+            ? allFamilyCandidates(color.family)
+            : unique(candidates).slice(0, 12),
           confidence: conf,
           reason,
           kind,
           customLabel: item.customLabel,
           quantity,
           family: color?.family || undefined,
-          visualColorCode: item.visualColorCode || undefined,
           tagText: item.tagText || undefined,
-          suggestedCandidate:
-            color && item.visualColorCode
-              ? itemCandidateForColorPreview(color.family, item.visualColorCode)
-              : undefined,
         });
       }
 
@@ -980,7 +978,7 @@ Return JSON only in this shape:
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "quantity-colored-review-v180",
+      scanMode: "all-color-user-choice-v180",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");
