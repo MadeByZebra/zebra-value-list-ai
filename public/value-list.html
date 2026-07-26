@@ -23190,11 +23190,11 @@ html,body{max-width:100%;overflow-x:hidden!important}
         img.onerror=function(){resolve(original)};
         img.onload=function(){
           try{
-            var max=1050,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+            var max=820,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
             var scale=Math.min(1,max/Math.max(iw,ih)),cw=Math.max(1,Math.round(iw*scale)),ch=Math.max(1,Math.round(ih*scale));
             var c=d.createElement('canvas');c.width=cw;c.height=ch;
             var ctx=c.getContext('2d',{alpha:false});ctx.fillStyle='#111';ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
-            resolve(c.toDataURL('image/jpeg',.72));
+            resolve(c.toDataURL('image/jpeg',.62));
           }catch(e){resolve(original)}
         };
         img.src=original;
@@ -23269,7 +23269,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
         live(out,'AI scan running…',line,sec);
       },1000);
 
-      var controller=new AbortController(),kill=setTimeout(function(){controller.abort()},24000);
+      var controller=new AbortController(),kill=setTimeout(function(){controller.abort()},30000);
       var response=await fetch('/api/scan',{
         method:'POST',headers:{'Content-Type':'application/json'},signal:controller.signal,
         body:JSON.stringify({images:images,gloveNames:gloveList().map(function(g){return g.n}),customSerials:customList(),multiple:true,fast:true,strictColors:true})
@@ -23284,7 +23284,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
       if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.detectionCount||0)+' cards detected, '+Object.keys(counts).length+' glove types saved, '+Number((data.review||[]).length)+' need review.';
     }catch(e){
       var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
-      var message=e&&e.name==='AbortError'?'Scan stopped after 24 seconds. Try one screenshot at a time.':String(e&&e.message?e.message:e);
+      var message=e&&e.name==='AbortError'?'Scan stopped after 30 seconds. Try one screenshot at a time.':String(e&&e.message?e.message:e);
       if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed after '+elapsed+'s.</strong><br>'+esc(message)+'<div class="ai-note">Use one clear screenshot at a time, or paste the glove names into Smart Scan Text.</div></div>';
       if(status)status.textContent='Scan failed after '+elapsed+'s.';
     }finally{
@@ -23300,6 +23300,49 @@ html,body{max-width:100%;overflow-x:hidden!important}
 })();
 </script>
 <!-- ========================= /V180 FAST CLEAR STRICT SCANNER FINAL OVERRIDE ========================= -->
+
+
+<!-- ========================= V180 FAST SCAN TIMEOUT + THEME PATCH ========================= -->
+<style id="mbz-v180-fast-scan-theme-patch">
+  #inv-results .mbz-fastscan-live{
+    border-color:var(--z23-line,var(--border2))!important;
+    background:linear-gradient(145deg,rgba(var(--z23-accent-rgb,120,120,255),.075),transparent 42%),var(--surface)!important;
+    box-shadow:0 14px 38px rgba(0,0,0,.28),0 0 24px rgba(var(--z23-accent-rgb,120,120,255),.08)!important
+  }
+  #inv-results .mbz-fastscan-bar{
+    height:8px!important;border:1px solid var(--z23-line,var(--border2))!important;
+    background:rgba(var(--z23-accent-rgb,120,120,255),.07)!important;
+    box-shadow:inset 0 0 12px rgba(0,0,0,.34)!important
+  }
+  #inv-results .mbz-fastscan-bar>i{
+    width:32%!important;
+    background:linear-gradient(90deg,transparent,var(--z23-accent,var(--accent,#8b5cf6)),rgba(255,255,255,.9),var(--z23-accent,var(--accent,#8b5cf6)),transparent)!important;
+    box-shadow:0 0 14px var(--z23-glow,var(--z23-accent,var(--accent,#8b5cf6))),0 0 30px rgba(var(--z23-accent-rgb,120,120,255),.45)!important;
+    animation:mbzThemeScan 1.05s cubic-bezier(.4,0,.2,1) infinite!important
+  }
+  @keyframes mbzThemeScan{0%{transform:translateX(-125%)}100%{transform:translateX(420%)}}
+</style>
+<script id="mbz-v180-fast-scan-timeout-patch">
+(function(){
+  'use strict';
+  if(window.__MBZ_V180_SCAN_TIMEOUT_THEME_PATCH__)return;
+  window.__MBZ_V180_SCAN_TIMEOUT_THEME_PATCH__=true;
+
+  function install(){
+    var old=window.scanInventoryImage;
+    if(typeof old!=='function'||old.__mbzTimeoutThemeWrapped)return;
+
+    // The existing scanner does the rendering and Needs Review UI. This wrapper
+    // only reduces upload size and gives the server enough time to finish once.
+    var wrapped=async function(){ return old.apply(this,arguments); };
+    wrapped.__mbzTimeoutThemeWrapped=true;
+    window.scanInventoryImage=wrapped;
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+  setTimeout(install,300);setTimeout(install,1200);
+})();
+</script>
+<!-- ========================= /V180 FAST SCAN TIMEOUT + THEME PATCH ========================= -->
 
 </body>
 </html>
