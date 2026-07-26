@@ -46,7 +46,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra — Value List · V93 Leaderboards</title>
+<title>MadeByZebra — Value List · V180 Command Leaderboard Final Fix</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
@@ -14108,7 +14108,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
     tab.classList.remove('mbz-v97-tab-press');void tab.offsetWidth;tab.classList.add('mbz-v97-tab-press');
     w.setTimeout(function(){tab.classList.remove('mbz-v97-tab-press')},420);
   }
-  function schedule(){w.setTimeout(animatePage,0);w.setTimeout(animatePage,70)}
+  function schedule(){}
   d.addEventListener('click',function(e){
     var tab=e.target&&e.target.closest?e.target.closest('#nav-tabs .ntab,#mbz-credits-tab-v67,.mbz-v67-credits-tab'):null;
     if(!tab)return;
@@ -21625,366 +21625,1075 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
 <!-- ========================= /V158 ========================= -->
 
 
+<style id="mbz-v170-final-stability-style">
+/* ========================= V170 FINAL STABILITY REPAIR ========================= */
+html,body{max-width:100%;overflow-x:hidden!important}
+#nav-tabs,.nav-tabs{
+  display:flex!important;
+  flex-wrap:nowrap!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  touch-action:pan-x!important;
+  scrollbar-width:thin!important;
+  gap:5px!important;
+}
+#nav-tabs::-webkit-scrollbar,.nav-tabs::-webkit-scrollbar{height:5px!important;display:block!important}
+#nav-tabs::-webkit-scrollbar-thumb,.nav-tabs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:999px}
+#nav-tabs .ntab,.nav-tabs .ntab{flex:0 0 auto!important;white-space:nowrap!important;pointer-events:auto!important}
+@media(max-width:1040px){
+  nav{height:auto!important;min-height:64px!important;flex-wrap:wrap!important;padding:10px 14px!important;gap:8px!important}
+  #nav-tabs,.nav-tabs{order:9!important;flex:1 0 100%!important;width:100%!important;margin-top:4px!important}
+  .nav-right{margin-left:auto!important}
+}
+@media(max-width:720px){
+  nav{padding:9px 10px!important}
+  .nav-right{order:8!important;flex:1 0 100%!important;width:100%!important;display:flex!important;justify-content:stretch!important}
+  .sb{flex:1 1 auto!important;min-width:0!important}.sb input,.sb input:focus{width:100%!important;min-width:0!important}
+  #nav-tabs .ntab,.nav-tabs .ntab{font-size:12px!important;margin:0 7px!important;padding:9px 3px!important;border-radius:0!important;border:none!important;border-bottom:1.5px solid transparent!important;min-height:34px!important;text-align:center!important}
+  main{width:100%!important;max-width:100%!important;padding-left:12px!important;padding-right:12px!important}
+}
+#mbz-v170-command-palette{position:fixed;inset:0;z-index:2147483600;display:none;align-items:flex-start;justify-content:center;padding:clamp(64px,10vh,110px) 14px 20px;background:rgba(0,0,0,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+#mbz-v170-command-palette.show{display:flex!important}
+.mbz-v170-cmd-card{width:min(760px,100%);max-height:min(680px,calc(100vh - 90px));display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--border2);border-radius:24px;background:var(--surface);box-shadow:0 34px 110px rgba(0,0,0,.7)}
+.mbz-v170-cmd-head{display:flex;gap:10px;align-items:center;padding:14px;border-bottom:1px solid var(--border)}
+.mbz-v170-cmd-head span{font:11px 'DM Mono',monospace;color:var(--text-dim);border:1px solid var(--border2);background:var(--surface2);border-radius:9px;padding:5px 8px;white-space:nowrap}
+.mbz-v170-cmd-head input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border2);border-radius:999px;color:var(--text);padding:12px 14px;font:14px 'Inter',sans-serif;outline:none}
+#mbz-v170-cmd-close{width:34px;height:34px;border-radius:999px;border:1px solid var(--border2);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:18px;line-height:1}
+.mbz-v170-cmd-results{padding:8px;overflow:auto}.mbz-v170-cmd-item{width:100%;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;text-align:left;padding:11px 12px;border:0;border-radius:14px;background:transparent;color:var(--text);cursor:pointer;font-family:'Inter',sans-serif;transform:none!important;box-shadow:none!important}.mbz-v170-cmd-item:hover,.mbz-v170-cmd-item.active{background:var(--surface2)!important}.mbz-v170-cmd-icon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;border:1px solid var(--border2);background:var(--accent-bg);font:10px 'DM Mono',monospace;color:var(--text)}.mbz-v170-cmd-item b{display:block;font-size:13.5px;color:var(--text)}.mbz-v170-cmd-item small{display:block;margin-top:3px;font:10.5px 'DM Mono',monospace;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mbz-v170-cmd-item em{font:10px 'DM Mono',monospace;color:var(--text-dim);font-style:normal}
+#mbz-v82-palette.show,#mbz-v169-palette.show{display:none!important;pointer-events:none!important}
+#leaderboards-page .mbz-v170-lb{padding:0 0 90px}#leaderboards-page .mbz-v170-lb-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-radius:24px;margin-bottom:14px;padding:22px}#leaderboards-page .mbz-v93-title{font-size:clamp(30px,5vw,54px);line-height:1;margin:0 0 8px}#leaderboards-page .mbz-v93-sub{max-width:820px;color:var(--text-muted);line-height:1.6}.mbz-v170-lb-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.mbz-v170-lb-tools input{min-width:min(260px,100%);background:var(--surface2);border:1px solid var(--border2);border-radius:999px;color:var(--text);padding:10px 13px;outline:none}#leaderboards-page .mbz-v93-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}#leaderboards-page .mbz-v93-podium-card{border:1px solid var(--border2);background:var(--surface);border-radius:20px;padding:15px;min-width:0}#leaderboards-page .mbz-v93-rank{font:11px 'DM Mono',monospace;color:var(--text-dim);margin-bottom:8px}#leaderboards-page .mbz-v93-user{font:700 15px 'Space Grotesk',sans-serif;color:var(--text)}#leaderboards-page .mbz-v93-score{font:12px 'DM Mono',monospace;color:var(--text-muted);margin-top:7px}#leaderboards-page .mbz-v93-table-wrap{overflow:auto;border:1px solid var(--border2);border-radius:22px;background:var(--surface)}#leaderboards-page .mbz-v93-table{width:100%;min-width:780px;border-collapse:collapse}#leaderboards-page .mbz-v93-table th{font:10px 'DM Mono',monospace;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;background:var(--surface2)}#leaderboards-page .mbz-v93-table th,#leaderboards-page .mbz-v93-table td{padding:12px 14px;border-bottom:1px solid var(--border)}#leaderboards-page .mbz-v93-name{display:inline-flex;align-items:center;gap:9px;vertical-align:middle;color:var(--text)}#leaderboards-page .mbz-v93-name small{display:block;font:10px 'DM Mono',monospace;color:var(--text-dim);margin-top:3px}#leaderboards-page .mbz-v93-score-cell{font:700 13px 'DM Mono',monospace;color:var(--text)}#leaderboards-page .mbz-v93-rep{font:10px 'DM Mono',monospace;color:var(--text-muted);border:1px solid var(--border2);background:var(--surface2);border-radius:999px;padding:4px 8px}#leaderboards-page .mbz-v93-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);border-radius:999px;padding:6px 10px;font:11px 'Inter',sans-serif;text-decoration:none;cursor:pointer;margin:2px;white-space:nowrap}.mbz-v170-avatar-fallback,.mbz-v170-podium-fallback{display:inline-grid;place-items:center;border-radius:11px;border:1px solid var(--border2);background:var(--accent-bg);color:var(--text);font:800 9px 'Space Grotesk',sans-serif;flex:0 0 auto}.mbz-v170-avatar-fallback{width:32px;height:32px}.mbz-v170-podium-fallback{width:46px;height:46px;margin-right:8px}@media(max-width:720px){#leaderboards-page .mbz-v93-podium{grid-template-columns:1fr}#leaderboards-page .mbz-v170-lb-hero{padding:18px 14px}.mbz-v170-lb-tools{width:100%}.mbz-v170-lb-tools input{flex:1 1 100%}}
+#home-page .z39-showroom-visual{min-height:320px!important;transform-origin:50% 50%!important}#home-page .z39-showroom-visual .z39-model{min-width:220px!important;min-height:220px!important;transform-origin:50% 50%!important}html.mbz-v138-showroom-open #mbz-v138-stage-mount .z39-showroom-visual{transform:translate3d(var(--mbz-v141-pan-x,0px),var(--mbz-v141-pan-y,0px),0) scale(1)!important;max-width:min(82dvh,calc(100% - 56px),980px)!important}#mbz-v138-stage-mount .z39-showroom-visual .z39-model{min-width:260px!important;min-height:260px!important}
+/* ========================= /V170 FINAL STABILITY REPAIR ========================= */
 
-<!-- ========================= V159 COMMAND PALETTE ROUTER FIX ========================= -->
-<style id="mbz-v159-command-palette-fix-style">
-  /* V159: make the command palette reliable, readable, and actually useful. */
-  .mbz-v159-palette-help{padding:8px 10px 9px;color:var(--text-dim);font:10px 'DM Mono',monospace;letter-spacing:.04em;line-height:1.55;border-bottom:1px solid var(--border);margin-bottom:4px}
-  .mbz-v159-palette-tag{font:10px 'DM Mono',monospace;color:var(--text-dim);border:1px solid var(--border2);border-radius:999px;padding:3px 8px;background:var(--surface2);white-space:nowrap}
-  .mbz-v159-palette-item{position:relative;overflow:hidden}
-  .mbz-v159-palette-item::after{content:'';position:absolute;inset:0;background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.07) 45%,transparent 70%);translate:-120% 0;pointer-events:none;transition:translate .42s cubic-bezier(.16,1,.3,1)}
-  .mbz-v159-palette-item:hover::after,.mbz-v159-palette-item.active::after{translate:120% 0}
-  .mbz-v159-palette-empty{padding:24px 14px;color:var(--text-dim);font-size:13px;text-align:center}
-  .mbz-v159-lb-page{padding:8px 0 88px;max-width:1280px;margin:0 auto}
-  .mbz-v159-lb-hero{border:1px solid var(--border2);background:linear-gradient(135deg,var(--surface),rgba(255,255,255,.035));border-radius:var(--radius-lg);padding:24px;margin-bottom:14px;box-shadow:var(--shadow-sm);position:relative;overflow:hidden}
-  .mbz-v159-lb-hero::before{content:'';position:absolute;inset:-40% -20%;background:radial-gradient(circle at 20% 10%,rgba(255,255,255,.09),transparent 32%);pointer-events:none}
-  .mbz-v159-lb-hero>*{position:relative;z-index:1}
-  .mbz-v159-lb-hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,56px);line-height:.95;margin:0 0 10px;letter-spacing:-.045em}
-  .mbz-v159-lb-hero p{color:var(--text-muted);line-height:1.65;max-width:840px;font-size:13px}
-  .mbz-v159-lb-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center}
-  .mbz-v159-lb-tools input{flex:1;min-width:220px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:999px;padding:10px 13px;outline:none;font:13px 'Inter',sans-serif}
-  .mbz-v159-lb-card{border:1px solid var(--border2);background:var(--surface);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
-  .mbz-v159-lb-table{width:100%;border-collapse:collapse;font-size:13px}
-  .mbz-v159-lb-table th{font-family:'DM Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;text-align:left;background:var(--surface2)}
-  .mbz-v159-lb-table td,.mbz-v159-lb-table th{padding:12px 14px;border-bottom:1px solid var(--border)}
-  .mbz-v159-lb-table tr:hover td{background:var(--surface2)}
-  .mbz-v159-lb-table small{display:block;color:var(--text-dim);font-family:'DM Mono',monospace;font-size:10px;margin-top:3px}
-  .mbz-v159-rank{width:86px;font-family:'DM Mono',monospace;color:var(--text);font-weight:700}
-  .mbz-v159-score{font-family:'DM Mono',monospace;color:var(--text);font-weight:700}
-  .mbz-v159-lb-table a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--border2)}
-  @media(max-width:720px){
-    .mbz-v82-palette{padding:74px 10px 14px!important}.mbz-v82-palette-card{max-height:calc(100vh - 92px)!important;border-radius:18px!important}
-    .mbz-v82-palette-item{grid-template-columns:32px minmax(0,1fr) auto!important;padding:11px 9px!important}.mbz-v82-palette-name{font-size:13px!important}.mbz-v82-palette-note{font-size:9.5px!important}
-    .mbz-v159-lb-hero{padding:18px 14px}.mbz-v159-lb-card{overflow-x:auto}.mbz-v159-lb-table{min-width:640px}.mbz-v159-lb-tools input{min-width:0;flex-basis:100%}
-  }
 </style>
-<script id="mbz-v159-command-palette-fix-script">
+<script id="mbz-v170-final-stability-script">
 (function(){
   'use strict';
-  if(window.__MBZ_V159_COMMAND_FIX__)return;window.__MBZ_V159_COMMAND_FIX__=true;
-  var d=document,w=window;
-  function q(s,r){return (r||d).querySelector(s)}
-  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
-  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  function closePalette(){var p=q('#mbz-v82-palette');if(p){p.classList.remove('show');p.setAttribute('aria-hidden','true')}}
-  function scrollTop(){try{w.scrollTo({top:0,behavior:'smooth'})}catch(_){try{w.scrollTo(0,0)}catch(__){}}}
+  if(window.__MBZ_V170_FINAL_REPAIR__) return;
+  window.__MBZ_V170_FINAL_REPAIR__ = true;
 
-  var leaderboardEntries=[
-    [1,'mx2hz',933],[2,'telepmor',932],[3,'BaconagirlPx',923],[4,'vanillabunnypuff',913],[5,'YiBerlinX',900],
-    [6,'Zub_Zero3000',899],[7,'MemeEqual101',897],[8,'Xhschshsixm1',881],[9,'Solodites',869],[10,'partyintherave',865],
-    [11,'theiazas',862],[12,'LaggyBott',857],[13,'MarlenouTheFlashou',856],[14,'josidini',848],[15,'Monstrosity123456',836],
-    [16,'o8x1ghPyCz4abRvh67x',826],[17,'Idolyyx',819],[18,'VincentxTo0t',817],[19,'AekazeSz',817],[20,'JULIOUwUq2',813]
+  var d = document, w = window;
+  var routeLock = false;
+  var activeCmdIndex = 0;
+  var lastRoute = 'home';
+
+  function q(sel, root){ return (root || d).querySelector(sel); }
+  function qa(sel, root){ return Array.prototype.slice.call((root || d).querySelectorAll(sel)); }
+  function norm(v){ return String(v == null ? '' : v).replace(/\s+/g,' ').trim().toLowerCase(); }
+  function esc(v){ return String(v == null ? '' : v).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function page(id){ return d.getElementById(id); }
+  function safe(fn){ try{ return fn(); }catch(_){ return undefined; } }
+  function body(){ return d.body || d.documentElement; }
+
+  var PAGE_IDS = [
+    'home-page','tier-page','class-page','custom-serial-page','trade-page','history-page',
+    'updates-page','wishlist-page','ai-page','inventory-page','leaderboards-page',
+    'mbz-v82-ideas-page','mbz-v138-builder-page'
   ];
-  function savedLeaderboard(){
-    try{
-      var keys=['mbz_v93_collection_leaderboard','mbz-v93-collection-leaderboard','mbzCollectionLeaderboard'];
-      for(var i=0;i<keys.length;i++){
-        var raw=localStorage.getItem(keys[i]);if(!raw)continue;
-        var st=JSON.parse(raw);if(st&&Array.isArray(st.entries)&&st.entries.length){
-          return st.entries.slice(0,100).map(function(x,j){return {rank:x.rank||j+1,username:x.username||x.name||('Player'+(j+1)),score:x.score||x.total||0,reputation:x.reputation||x.note||'saved board'}})
-        }
-      }
-    }catch(_){ }
-    return leaderboardEntries.map(function(x){return {rank:x[0],username:x[1],score:x[2],reputation:'fallback board'}})
-  }
-  function ensurePage(id,cls){
-    var main=q('main')||d.body,el=q('#'+id);
-    if(!el){el=d.createElement('div');el.id=id;el.className=cls||'all-page';main.appendChild(el)}
-    return el;
-  }
-  function hardHideNon(page){
-    qa('main > *').forEach(function(el){
-      if(el===page||el.tagName==='SCRIPT'||el.tagName==='STYLE'||/badge/i.test(el.className||''))return;
-      el.classList.remove('active');el.setAttribute('aria-hidden','true');el.style.display='none';
+  var TIER_SET = {x:'X',ss:'SS',s:'S',a:'A',b:'B',c:'C',d:'D'};
+
+  function clearBrokenModes(){
+    var b = body();
+    ['mbz-v94-leaderboards-open','mbz-v82-ideas-open','mbz-v59-inventory-only','mbz-v57-inventory-view','mbz-v138-builder-open'].forEach(function(c){ b.classList.remove(c); });
+    ['mbzRoute','mbzV170Route'].forEach(function(k){ try{ delete b.dataset[k]; }catch(_){} });
+    qa('.mbz-v82-palette.show,.mbz-v82-idea-modal.show,#mbz-v169-palette.show,#mbz-v170-command-palette.show').forEach(function(el){
+      if(el.id !== 'mbz-v170-command-palette') el.classList.remove('show');
     });
-    page.classList.add('active');page.style.display='block';page.removeAttribute('aria-hidden');
+    var fab = q('#trade-fab');
+    if(fab) fab.classList.remove('hide');
+    var fbar = q('#fbar');
+    if(fbar) fbar.classList.remove('open');
   }
-  function setActiveTab(label){
-    label=String(label||'').toLowerCase();
-    qa('#nav-tabs .ntab,.nav-tabs .ntab').forEach(function(tab){
-      var t=String(tab.textContent||'').trim().toLowerCase();
-      var on=(label==='leaderboards'?(t==='leaderboards'||tab.id==='mbz-v93-leaderboards-tab'):t===label);
-      tab.classList.toggle('active',on);if(on){tab.setAttribute('aria-current','page');try{tab.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}}else tab.removeAttribute('aria-current');
-    })
+
+  function allPages(){
+    var out = [];
+    PAGE_IDS.forEach(function(id){ var el = page(id); if(el && out.indexOf(el) < 0) out.push(el); });
+    qa('main > .all-page, main > .trade-page, main > .updates-page, main > .wishlist-page').forEach(function(el){ if(out.indexOf(el) < 0) out.push(el); });
+    return out;
   }
-  function renderLeaderboard(){
-    var page=ensurePage('leaderboards-page','all-page');
-    var root=q('#mbz-v93-leaderboards-root',page);if(!root){root=d.createElement('div');root.id='mbz-v93-leaderboards-root';page.appendChild(root)}
-    var entries=savedLeaderboard();
-    var rows=entries.map(function(x){
-      var rank=Number(x.rank)||0,medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'#'+rank;
-      return '<tr data-user="'+esc(x.username)+'"><td class="mbz-v159-rank">'+medal+'</td><td><strong>'+esc(x.username)+'</strong><small>'+esc(x.reputation||'unverified')+'</small></td><td class="mbz-v159-score">'+esc(x.score)+'</td><td><a target="_blank" rel="noopener noreferrer" href="https://www.roblox.com/search/users?keyword='+encodeURIComponent(x.username)+'">Open Roblox</a></td></tr>';
+
+  function showOnly(id){
+    var target = page(id);
+    if(!target) return;
+    allPages().forEach(function(el){
+      var on = el === target;
+      el.classList.toggle('active', on);
+      el.setAttribute('aria-hidden', on ? 'false' : 'true');
+      el.style.setProperty('display', on ? 'block' : 'none', 'important');
+      if(on) el.removeAttribute('hidden');
+    });
+    target.classList.add('active');
+    target.style.setProperty('display','block','important');
+    target.removeAttribute('aria-hidden');
+    safe(function(){ (d.scrollingElement || d.documentElement).scrollTop = 0; });
+  }
+
+  function tabRouteText(tab){
+    var t = norm(tab && tab.textContent);
+    if(!t) return null;
+    if(t === 'home') return {name:'home'};
+    if(t === 'ai helper' || t === 'ai') return {name:'ai'};
+    if(t === 'all' || t === 'all gloves') return {name:'all'};
+    if(TIER_SET[t]) return {name:'tier', arg:TIER_SET[t]};
+    if(t === 'class' || t === 'class index') return {name:'class'};
+    if(t.indexOf('custom') >= 0) return {name:'custom'};
+    if(t.indexOf('trade') >= 0) return {name:'trade'};
+    if(t.indexOf('history') >= 0) return {name:'history'};
+    if(t.indexOf('update') >= 0 || t.indexOf('changelog') >= 0) return {name:'updates'};
+    if(t.indexOf('wish') >= 0) return {name:'wishlist'};
+    if(t.indexOf('inventory') >= 0 || t.indexOf('owned') >= 0) return {name:'inventory'};
+    if(t.indexOf('idea') >= 0) return {name:'ideas'};
+    if(t.indexOf('leader') >= 0 || t.indexOf('board') >= 0) return {name:'leaderboards'};
+    return null;
+  }
+
+  function activeTab(route, arg){
+    var label = route === 'tier' ? String(arg || '').toLowerCase() : route;
+    qa('#nav-tabs .ntab,#nav-tabs .mbz-v67-credits-tab').forEach(function(tab){
+      var rt = tabRouteText(tab);
+      var on = false;
+      if(rt){
+        if(route === 'tier') on = rt.name === 'tier' && norm(rt.arg) === norm(arg);
+        else on = rt.name === route;
+      }
+      tab.classList.toggle('active', !!on);
+      if(on) tab.setAttribute('aria-current','page'); else tab.removeAttribute('aria-current');
+    });
+  }
+
+  function callOld(name, args){
+    var fn = w[name];
+    if(typeof fn !== 'function') return false;
+    safe(function(){ fn.apply(w, args || []); });
+    return true;
+  }
+
+  function route(name, arg){
+    if(routeLock) return;
+    routeLock = true;
+    lastRoute = name;
+    try{
+      closePalette();
+      clearBrokenModes();
+      body().dataset.mbzV170Route = name;
+
+      if(name === 'leaderboards'){
+        var openedFullBoard = false;
+        if(typeof w.showLeaderboards === 'function'){
+          safe(function(){ w.showLeaderboards(); openedFullBoard = true; });
+        }
+        if(!openedFullBoard) renderLeaderboards();
+        activeTab('leaderboards');
+        return;
+      }
+
+      if(name === 'home'){
+        callOld('showHome');
+        if(page('home-page') && !(page('home-page').innerText || '').trim()) callOld('renderHome');
+        showOnly('home-page'); activeTab('home');
+      }else if(name === 'ai'){
+        callOld('showAI'); showOnly('ai-page'); activeTab('ai');
+      }else if(name === 'all'){
+        callOld('showAll'); showOnly('tier-page'); activeTab('all');
+      }else if(name === 'tier'){
+        callOld('showTier',[arg || 'X']); showOnly('tier-page'); activeTab('tier',arg || 'X');
+      }else if(name === 'class'){
+        callOld('showClassPage',[arg]); showOnly('class-page'); activeTab('class');
+      }else if(name === 'custom'){
+        callOld('showCustomSerial'); showOnly('custom-serial-page'); activeTab('custom');
+      }else if(name === 'trade'){
+        callOld('showTrade'); showOnly('trade-page'); activeTab('trade'); var fab=q('#trade-fab'); if(fab) fab.classList.add('hide');
+      }else if(name === 'history'){
+        callOld('showHistory'); showOnly('history-page'); activeTab('history');
+      }else if(name === 'updates'){
+        callOld('showUpdates'); showOnly('updates-page'); activeTab('updates');
+      }else if(name === 'wishlist'){
+        callOld('showWishlist'); showOnly('wishlist-page'); activeTab('wishlist');
+      }else if(name === 'inventory'){
+        if(!callOld('showInventory')) callOld('showAI');
+        if(page('inventory-page')) showOnly('inventory-page'); else showOnly('ai-page');
+        activeTab('inventory');
+      }else if(name === 'ideas'){
+        if(callOld('showIdeas') && page('mbz-v82-ideas-page')) showOnly('mbz-v82-ideas-page');
+        activeTab('ideas');
+      }
+
+      setTimeout(function(){
+        clearBrokenModes();
+        if(name === 'leaderboards') return;
+        var id = name === 'home' ? 'home-page' : name === 'all' || name === 'tier' ? 'tier-page' : name === 'custom' ? 'custom-serial-page' : name === 'ideas' ? 'mbz-v82-ideas-page' : name + '-page';
+        if(name === 'ai') id = 'ai-page';
+        if(page(id)) showOnly(id);
+        activeTab(name,arg);
+      }, 60);
+    }finally{
+      routeLock = false;
+    }
+  }
+
+  function ensureNavTabs(){
+    var tabs = q('#nav-tabs');
+    if(!tabs) return;
+    tabs.style.setProperty('overflow-x','auto','important');
+    tabs.style.setProperty('overflow-y','hidden','important');
+    tabs.style.setProperty('-webkit-overflow-scrolling','touch','important');
+    tabs.style.setProperty('touch-action','pan-x','important');
+    qa('.ntab',tabs).forEach(function(t){ t.style.setProperty('flex','0 0 auto','important'); });
+    if(!qa('.ntab',tabs).some(function(t){ return /leader/i.test(t.textContent || ''); })){
+      var btn = d.createElement('button');
+      btn.type = 'button';
+      btn.className = 'ntab ntab-special';
+      btn.id = 'mbz-v170-leaderboards-tab';
+      btn.textContent = 'Leaderboards';
+      var trade = qa('.ntab',tabs).find(function(t){ return /trade/i.test(t.textContent || ''); });
+      tabs.insertBefore(btn, trade || null);
+    }
+  }
+
+  function parseStoredBoard(){
+    var fallback = [
+      [1,'mx2hz',933],[2,'telepmor',932],[3,'BaconagirlPx',923],[4,'vanillabunnypuff',913],[5,'YiBerlinX',900],
+      [6,'Zub_Zero3000',899],[7,'MemeEqual101',897],[8,'Xhschshsixm1',881],[9,'Solodites',869],[10,'partyintherave',865],
+      [11,'theiazas',862],[12,'LaggyBott',857],[13,'MarlenouTheFlashou',856],[14,'josidini',848],[15,'Monstrosity123456',836],
+      [16,'o8x1ghPyCz4abRvh67x',826],[17,'Idolyyx',819],[18,'VincentxTo0t',817],[19,'AekazeSz',817],[20,'JULIOUwUq2',813]
+    ].map(function(x){ return {rank:x[0],username:x[1],score:x[2],reputation:'unverified'}; });
+    return safe(function(){
+      var raw = localStorage.getItem('mbz_v93_collection_leaderboard');
+      var st = raw ? JSON.parse(raw) : null;
+      if(st && Array.isArray(st.entries) && st.entries.length){
+        return st.entries.slice(0,100).map(function(x,i){
+          return {rank:Number(x.rank || i+1), username:String(x.username || ('Player'+(i+1))), displayName:x.displayName || '', score:Number(x.score || 0), profileUrl:x.profileUrl || '', reputation:x.reputation || 'unverified', highestGlove:x.highestGlove || '', notableCount:x.notableCount};
+        });
+      }
+      return fallback;
+    }) || fallback;
+  }
+
+  function initials(user){
+    return String(user || '?').replace(/[^a-z0-9_]/ig,'').slice(0,2).toUpperCase() || '?';
+  }
+
+  function profileUrl(x){
+    return x.profileUrl || ('https://www.roblox.com/search/users?keyword=' + encodeURIComponent(x.username));
+  }
+
+  function renderLeaderboards(){
+    clearBrokenModes();
+    var main = q('main') || d.body;
+    var p = page('leaderboards-page');
+    if(!p){ p = d.createElement('div'); p.id = 'leaderboards-page'; p.className = 'all-page'; main.appendChild(p); }
+    var entries = parseStoredBoard();
+    var top3 = entries.slice(0,3);
+    var rows = entries.map(function(x){
+      var medal = x.rank === 1 ? '🥇' : x.rank === 2 ? '🥈' : x.rank === 3 ? '🥉' : '#' + x.rank;
+      var name = esc(x.displayName || x.username);
+      var note = esc(x.reputation || 'unverified');
+      return '<tr data-user="'+esc(x.username)+'">'+
+        '<td class="mbz-v93-rank-cell">'+medal+'</td>'+
+        '<td><span class="mbz-v93-name"><span class="mbz-v170-avatar-fallback">'+esc(initials(x.username))+'</span><span><strong>'+name+'</strong><small>@'+esc(x.username)+'</small></span></span></td>'+
+        '<td class="mbz-v93-score-cell">'+esc(x.score)+'</td>'+
+        '<td><span class="mbz-v93-rep">'+note+'</span></td>'+
+        '<td><button type="button" class="mbz-v93-btn" data-v170-profile="'+esc(x.username)+'">Profile</button> <a class="mbz-v93-btn" target="_blank" rel="noopener noreferrer" href="'+esc(profileUrl(x))+'">Roblox</a></td>'+
+      '</tr>';
     }).join('');
-    root.innerHTML='<section class="mbz-v159-lb-page"><div class="mbz-v159-lb-hero"><h1>Collection Leaderboards</h1><p>Weekly Boxing League collector ranking. This version opens directly from the command palette and will not accidentally route to Ideas Lab.</p><div class="mbz-v159-lb-tools"><input id="mbz-v159-lb-search" placeholder="Search player…"><button class="sbtn" data-v159-cmd="home">Home</button><button class="sbtn" data-v159-cmd="ideas">Ideas Lab</button></div></div><div class="mbz-v159-lb-card"><table class="mbz-v159-lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Profile</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
-    var input=q('#mbz-v159-lb-search',root),tbody=q('tbody',root);if(input&&tbody){input.addEventListener('input',function(){var term=this.value.toLowerCase().trim();qa('tr',tbody).forEach(function(tr){tr.style.display=(tr.textContent||'').toLowerCase().includes(term)?'':'none'})})}
-    d.body.classList.add('mbz-v94-leaderboards-open');d.body.classList.remove('mbz-v82-ideas-open');d.body.dataset.mbzRoute='leaderboards';
-    hardHideNon(page);setActiveTab('leaderboards');scrollTop();
+    var podium = top3.map(function(x){
+      return '<article class="mbz-v93-podium-card" data-user="'+esc(x.username)+'"><div class="mbz-v93-rank">#'+esc(x.rank)+'</div><div class="mbz-v93-user"><span class="mbz-v170-podium-fallback">'+esc(initials(x.username))+'</span><span>'+esc(x.displayName || x.username)+'</span></div><div class="mbz-v93-score">'+esc(x.score)+' pts</div></article>';
+    }).join('');
+    p.innerHTML = '<section class="mbz-v170-lb mbz-v93-shell" id="mbz-v93-leaderboards-root">'+
+      '<div class="mbz-v93-panel mbz-v170-lb-hero"><div><div class="sec-title">Stable Page</div><h1 class="mbz-v93-title">Collection Leaderboards</h1><p class="mbz-v93-sub">Top Boxing League collectors. This renderer bypasses the old broken command-palette route but keeps leaderboard avatars/profile buttons.</p></div><div class="mbz-v170-lb-tools"><input id="mbz-v170-lb-search" placeholder="Search player…"><button type="button" class="sbtn" id="mbz-v170-lb-top">Top 20</button><button type="button" class="sbtn" id="mbz-v170-lb-all">Top 100</button></div></div>'+
+      '<div class="mbz-v93-podium">'+podium+'</div>'+
+      '<div class="mbz-v93-table-wrap"><table class="mbz-v93-table"><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Rep</th><th>Links</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      '</section>';
+    var search = q('#mbz-v170-lb-search',p), tbody = q('tbody',p);
+    if(search && tbody){ search.addEventListener('input',function(){ var term = norm(this.value); qa('tr',tbody).forEach(function(tr){ tr.style.display = !term || norm(tr.textContent).indexOf(term) >= 0 ? '' : 'none'; }); }); }
+    var topBtn = q('#mbz-v170-lb-top',p), allBtn = q('#mbz-v170-lb-all',p);
+    if(topBtn) topBtn.onclick = function(){ qa('tbody tr',p).forEach(function(tr,i){ tr.style.display = i < 20 ? '' : 'none'; }); };
+    if(allBtn) allBtn.onclick = function(){ qa('tbody tr',p).forEach(function(tr){ tr.style.display = ''; }); };
+    showOnly('leaderboards-page');
+    activeTab('leaderboards');
+    body().dataset.mbzV170Route = 'leaderboards';
+    setTimeout(function(){ safe(function(){ w.dispatchEvent(new Event('resize')); }); }, 40);
   }
-  w.MBZOpenLeaderboardsV159=renderLeaderboard;
-  w.showLeaderboards=function(){renderLeaderboard()};
 
-  function actions(){
-    return [
-      ['Home','Open the full dashboard/home page','home','⌂','PAGE'],
-      ['All Values','Open every glove value','all','A','PAGE'],
-      ['Leaderboards','Open collection rankings','leaderboards','#','PAGE'],
-      ['Trade Calculator','Check win/fair/overpay trades','trade','⇄','PAGE'],
-      ['AI Helper','Ask the site AI about trades and values','ai','AI','PAGE'],
-      ['Inventory Scanner','Open AI scan picture / owned inventory','inventory','▣','PAGE'],
-      ['Wishlist','Open saved wishlist','wishlist','★','PAGE'],
-      ['Changelog / Updates','Open value changes and updates','updates','↻','PAGE'],
-      ['Ideas Lab','Open feature ideas and design experiments','ideas','✦','PAGE'],
-      ['History','Open local history/actions','history','H','PAGE'],
-      ['Custom Serials','Open custom serial glove index','custom','◇','PAGE'],
-      ['Play Boxing League','Open the Roblox game in a new tab','play','▶','LINK'],
-      ['Search M134','Search for M134 variants','search:M134','⌕','ACTION'],
-      ['Search Blackmarket','Search Blackmarket','search:Blackmarket','⌕','ACTION'],
-      ['Top Rising','Ask AI/helper for rising gloves','ask:Show me the best rising gloves and why.','↑','AI'],
-      ['Best Trade Test','Ask AI to test M134 for Blackmarket','ask:Is M134 [1-5] for Blackmarket a good trade?','?','AI']
-    ];
-  }
-  function icon(text){return '<span class="mbz-v82-palette-icon">'+esc(text)+'</span>'}
-  function paletteButton(a){return '<button class="mbz-v82-palette-item mbz-v159-palette-item" type="button" data-v159-cmd="'+esc(a[2])+'">'+icon(a[3])+'<span><span class="mbz-v82-palette-name">'+esc(a[0])+'</span><br><span class="mbz-v82-palette-note">'+esc(a[1])+'</span></span><span class="mbz-v159-palette-tag">'+esc(a[4])+'</span></button>'}
-  function renderPalette(){
-    var p=q('#mbz-v82-palette'),host=q('#mbz-v82-palette-results'),input=q('#mbz-v82-palette-input');if(!p||!host||!p.classList.contains('show'))return;
-    var term=(input&&input.value||'').trim().toLowerCase();
-    var rows=actions().filter(function(a){return !term||a.join(' ').toLowerCase().includes(term)}).slice(0,16).map(paletteButton);
-    var gloves=[];try{gloves=(w.GLOVES||[]).filter(function(g){return term&&String(g.n||'').toLowerCase().includes(term)}).slice(0,8)}catch(_){ }
-    gloves.forEach(function(g){rows.push('<button class="mbz-v82-palette-item mbz-v159-palette-item" type="button" data-v159-cmd="search:'+esc(g.n)+'">'+icon(g.c||'G')+'<span><span class="mbz-v82-palette-name">'+esc(g.n)+'</span><br><span class="mbz-v82-palette-note">'+esc(g.v)+' '+esc(g.u||'Currency')+' · '+esc(g.d||'')+'</span></span><span class="mbz-v159-palette-tag">GLOVE</span></button>')});
-    host.innerHTML='<div class="mbz-v159-palette-help">Type a page, command, glove, or player action. Leaderboards now opens the leaderboard page directly.</div><div class="mbz-v82-palette-group">Command Palette</div>'+(rows.length?rows.join(''):'<div class="mbz-v159-palette-empty">No matching command. Try “leaderboard”, “trade”, “scan”, “M134”, or “wishlist”.</div>');
-  }
-  function openPalette(){
-    var p=q('#mbz-v82-palette');
-    if(!p&&w.MBZV82&&typeof w.MBZV82.openPalette==='function'){try{w.MBZV82.openPalette()}catch(_){ }}
-    p=q('#mbz-v82-palette');if(!p)return;
-    p.classList.add('show');p.setAttribute('aria-hidden','false');
-    var input=q('#mbz-v82-palette-input',p);if(input){input.placeholder='Search pages, actions, gloves…';setTimeout(function(){try{input.focus()}catch(_){ }},10)}
-    setTimeout(renderPalette,0);setTimeout(renderPalette,60);
-  }
-  w.MBZOpenUsefulCommandPaletteV159=openPalette;
-
-  function run(cmd){
-    cmd=String(cmd||'');closePalette();
-    if(cmd==='leaderboards'){renderLeaderboard();return}
-    if(cmd==='play'){w.open('https://www.roblox.com/games/3738091713/Boxing-League#!/game-instances','_blank','noopener,noreferrer');return}
-    if(cmd.indexOf('search:')===0){var val=cmd.slice(7),gs=q('#gsearch');if(typeof w.showAll==='function')try{w.showAll()}catch(_){ }if(gs){gs.value=val;if(typeof w.onSearchInput==='function')try{w.onSearchInput(val)}catch(_){ }gs.focus()}return}
-    if(cmd.indexOf('ask:')===0){var msg=cmd.slice(4);if(typeof w.showAI==='function')try{w.showAI()}catch(_){ }setTimeout(function(){var input=q('#ai-input')||q('.ai-input');if(input){input.value=msg;input.focus()}},120);return}
-    var map={home:'showHome',all:'showAll',trade:'showTrade',ai:'showAI',wishlist:'showWishlist',updates:'showUpdates',history:'showHistory',inventory:'showInventory',ideas:'showIdeas',custom:'showCustomSerial'};
-    var fn=map[cmd];if(fn&&typeof w[fn]==='function'){try{w[fn]()}catch(e){console.error('V159 command failed',cmd,e)}}
-  }
-  function bind(){
-    var cmdBtn=q('#mbz-v82-command-button');if(cmdBtn&&!cmdBtn.__mbzV159){cmdBtn.__mbzV159=true;cmdBtn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette()},true)}
-    var input=q('#mbz-v82-palette-input');if(input&&!input.__mbzV159){input.__mbzV159=true;input.addEventListener('input',function(){setTimeout(renderPalette,0)},true);input.addEventListener('keydown',function(e){if(e.key==='Enter'){var first=q('#mbz-v82-palette-results [data-v159-cmd]');if(first){e.preventDefault();run(first.dataset.v159Cmd)}}},true)}
-    renderPalette();
-  }
-  w.addEventListener('click',function(e){
-    var item=e.target&&e.target.closest?e.target.closest('[data-v159-cmd],#mbz-v93-leaderboards-tab,[data-v93-palette]'):null;
-    if(!item)return;
-    var cmd=item.dataset&&item.dataset.v159Cmd;
-    var txt=String(item.textContent||'').toLowerCase();
-    if(!cmd&&(item.id==='mbz-v93-leaderboards-tab'||item.hasAttribute('data-v93-palette')||txt.includes('leaderboard')))cmd='leaderboards';
-    if(!cmd)return;
-    e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();run(cmd);
-  },true);
-  w.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette()}},true);
-  var mo=new MutationObserver(function(){bind();if(q('#mbz-v82-palette.show'))renderPalette()});
-  function boot(){bind();try{mo.observe(d.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']})}catch(_){ }try{d.title='MadeByZebra — Value List · V159 Command Palette Fix'}catch(_){ }}
-  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  w.addEventListener('load',function(){[80,260,700,1400].forEach(function(ms){setTimeout(bind,ms)})},{once:true,passive:true});
-})();
-</script>
-<!-- ========================= /V159 COMMAND PALETTE ROUTER FIX ========================= -->
-
-
-
-<!-- ========================= V160 SAFE COMMAND PALETTE + LEADERBOARD HARD FIX ========================= -->
-<style id="mbz-v160-safe-command-style">
-  /* V160 disables the older V82/V159 palette overlay because it could trap clicks/scroll. */
-  #mbz-v82-palette{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-  html.mbz-v160-no-old-palette #mbz-v82-palette{display:none!important;visibility:hidden!important;pointer-events:none!important;}
-
-  #mbz-v160-palette{
-    position:fixed; inset:0; z-index:999999; display:none; place-items:start center;
-    padding:78px 14px 24px; background:rgba(0,0,0,.58); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  }
-  #mbz-v160-palette.open{display:grid;}
-  .mbz-v160-card{
-    width:min(760px,calc(100vw - 28px)); max-height:min(74vh,720px); overflow:hidden;
-    border:1px solid var(--border2,rgba(255,255,255,.14)); border-radius:24px;
-    background:linear-gradient(180deg,color-mix(in srgb,var(--surface,#101012) 96%,transparent),color-mix(in srgb,var(--surface2,#151518) 94%,transparent));
-    box-shadow:0 24px 80px rgba(0,0,0,.65), inset 0 1px 0 rgba(255,255,255,.08);
-  }
-  .mbz-v160-top{display:flex;gap:10px;align-items:center;padding:14px;border-bottom:1px solid var(--border,rgba(255,255,255,.08));}
-  .mbz-v160-search{
-    flex:1; min-width:0; background:var(--surface2,#151518); color:var(--text,#f5f5f7);
-    border:1px solid var(--border2,rgba(255,255,255,.14)); border-radius:999px; padding:12px 15px;
-    outline:none; font:500 14px Inter,system-ui,sans-serif;
-  }
-  .mbz-v160-close{border:1px solid var(--border2,rgba(255,255,255,.14)); background:var(--surface2,#151518); color:var(--text,#f5f5f7); border-radius:999px; width:42px; height:42px; cursor:pointer; font-size:20px;}
-  .mbz-v160-results{max-height:calc(min(74vh,720px) - 72px); overflow:auto; padding:8px; overscroll-behavior:contain;}
-  .mbz-v160-group{padding:8px 12px 6px;color:var(--text-dim,#666);font:700 10px 'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;}
-  .mbz-v160-item{
-    width:100%; display:grid; grid-template-columns:38px minmax(0,1fr) auto; gap:11px; align-items:center;
-    border:1px solid transparent; border-radius:16px; background:transparent; color:var(--text,#f5f5f7);
-    padding:10px; text-align:left; cursor:pointer; position:relative; overflow:hidden;
-  }
-  .mbz-v160-item:hover,.mbz-v160-item:focus-visible{background:var(--surface2,#151518); border-color:var(--border2,rgba(255,255,255,.14)); outline:none; transform:translateY(-1px);}
-  .mbz-v160-item::after{content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(100deg,transparent 0%,rgba(255,255,255,.075) 45%,transparent 72%); translate:-120% 0; transition:translate .45s cubic-bezier(.16,1,.3,1)}
-  .mbz-v160-item:hover::after{translate:120% 0;}
-  .mbz-v160-ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:var(--surface3,#1d1d20);border:1px solid var(--border,rgba(255,255,255,.08));font:800 11px 'DM Mono',monospace;color:var(--text,#fff)}
-  .mbz-v160-name{font:700 14px 'Space Grotesk',Inter,sans-serif;color:var(--text,#fff);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mbz-v160-note{font:12px Inter,sans-serif;color:var(--text-muted,#999);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .mbz-v160-tag{font:700 10px 'DM Mono',monospace;color:var(--text-dim,#666);border:1px solid var(--border2,rgba(255,255,255,.14));border-radius:999px;padding:4px 8px;background:var(--surface2,#151518);}
-  .mbz-v160-empty{padding:30px 18px;text-align:center;color:var(--text-muted,#999);font:13px Inter,sans-serif;}
-  .mbz-v160-lb-page{max-width:1280px;margin:0 auto;padding:10px 20px 100px;}
-  .mbz-v160-lb-hero{border:1px solid var(--border2,rgba(255,255,255,.14));border-radius:28px;background:linear-gradient(135deg,var(--surface,#101012),rgba(255,255,255,.035));padding:26px;margin-bottom:16px;box-shadow:var(--shadow-sm,0 8px 30px rgba(0,0,0,.45));}
-  .mbz-v160-lb-hero h1{font-family:'Space Grotesk',Inter,sans-serif;font-size:clamp(34px,5vw,64px);line-height:.92;letter-spacing:-.05em;margin:0 0 10px;}
-  .mbz-v160-lb-hero p{color:var(--text-muted,#999);font-size:13.5px;line-height:1.65;max-width:860px;}
-  .mbz-v160-lb-tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center;}
-  .mbz-v160-lb-tools input{flex:1;min-width:220px;background:var(--surface2,#151518);border:1px solid var(--border2,rgba(255,255,255,.14));border-radius:999px;color:var(--text,#fff);padding:11px 13px;outline:none;}
-  .mbz-v160-lb-card{border:1px solid var(--border2,rgba(255,255,255,.14));background:var(--surface,#101012);border-radius:24px;overflow:auto;box-shadow:var(--shadow-sm,0 8px 30px rgba(0,0,0,.45));}
-  .mbz-v160-lb-table{width:100%;min-width:640px;border-collapse:collapse;}
-  .mbz-v160-lb-table th,.mbz-v160-lb-table td{padding:13px 14px;border-bottom:1px solid var(--border,rgba(255,255,255,.08));text-align:left;}
-  .mbz-v160-lb-table th{font:700 10px 'DM Mono',monospace;color:var(--text-dim,#666);text-transform:uppercase;letter-spacing:.1em;background:var(--surface2,#151518);}
-  .mbz-v160-lb-table td{font-size:13px;color:var(--text-muted,#999);}
-  .mbz-v160-lb-table strong{color:var(--text,#fff);font-weight:700;}
-  .mbz-v160-lb-table small{display:block;margin-top:3px;color:var(--text-dim,#666);font:10px 'DM Mono',monospace;}
-  .mbz-v160-rank,.mbz-v160-score{font:800 12px 'DM Mono',monospace!important;color:var(--text,#fff)!important;}
-  .mbz-v160-lb-table a{color:var(--text,#fff);text-decoration:none;border-bottom:1px solid var(--border2,rgba(255,255,255,.14));}
-  body.mbz-v160-palette-open{overflow:hidden!important;}
-  @media(max-width:640px){
-    #mbz-v160-palette{padding-top:64px;}
-    .mbz-v160-card{border-radius:18px;max-height:78vh;}
-    .mbz-v160-item{grid-template-columns:34px minmax(0,1fr);}
-    .mbz-v160-tag{display:none;}
-    .mbz-v160-note{white-space:normal;font-size:11px;}
-    .mbz-v160-lb-page{padding:8px 12px 90px;}
-    .mbz-v160-lb-hero{padding:18px 14px;border-radius:20px;}
-    .mbz-v160-lb-tools input{min-width:0;flex-basis:100%;}
-  }
-</style>
-<script id="mbz-v160-safe-command-script">
-(function(){
-  'use strict';
-  if(window.__MBZ_V160_SAFE_COMMAND__)return; window.__MBZ_V160_SAFE_COMMAND__=true;
-  var d=document,w=window,root=d.documentElement;
-  root.classList.add('mbz-v160-no-old-palette');
-  function q(s,r){return (r||d).querySelector(s)}
-  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
-  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-  function allGloves(){try{return Array.isArray(w.GLOVES)?w.GLOVES:[]}catch(_){return []}}
-  function closeOldPalette(){
-    qa('#mbz-v82-palette').forEach(function(p){p.classList.remove('show');p.setAttribute('aria-hidden','true');p.style.display='none';p.style.pointerEvents='none';p.style.visibility='hidden';});
-    d.body.classList.remove('mbz-v82-palette-open','palette-open');
-  }
-  function scrollTop(){try{w.scrollTo({top:0,behavior:'smooth'})}catch(_){try{w.scrollTo(0,0)}catch(__){}}}
-  var ACTIONS=[
-    ['Home','Open the full home dashboard','home','⌂','PAGE'],
-    ['All Values','Open the complete glove list','all','A','PAGE'],
-    ['Leaderboards','Open collection/player leaderboards','leaderboards','#','PAGE'],
-    ['Trade Calculator','Check trade win/fair/overpay','trade','⇄','PAGE'],
-    ['AI Helper','Ask AI about values and trades','ai','AI','PAGE'],
-    ['Inventory Scanner','Open AI scanner and owned inventory tools','inventory','▣','PAGE'],
-    ['Wishlist','Open saved wishlist','wishlist','★','PAGE'],
-    ['Changelog','Open value updates','updates','↻','PAGE'],
-    ['Ideas Lab','Open upgrade ideas lab','ideas','✦','PAGE'],
-    ['History','Open saved local history','history','H','PAGE'],
-    ['Custom Serials','Open custom/serial index','custom','◇','PAGE'],
-    ['Play Boxing League','Open the Roblox game','play','▶','LINK'],
-    ['Search Frostbite','Search Frostbite / serial variants','search:Frostbite','⌕','ACTION'],
-    ['Search Nuclear','Search Nuclear serial variants','search:Nuclear','⌕','ACTION'],
-    ['Search Chronos','Search Chronos serial variants','search:Chronos','⌕','ACTION'],
-    ['Search Shrimple','Search Shrimple serial variants','search:Shrimple','⌕','ACTION'],
-    ['Search M134','Search M134 variants','search:M134','⌕','ACTION'],
-    ['Test AI Trade','Ask AI if M134 for Blackmarket is good','ask:Is M134 [1-5] for Blackmarket a good trade?','?','AI']
+  var COMMANDS = [
+    ['Home','Open main home page','home','⌂'],['All Gloves','Browse every value','all','ALL'],['Leaderboards','Open collection leaderboard','leaderboards','#'],
+    ['Trade Calculator','Compare a trade','trade','⇄'],['AI Helper / Scanner','Open AI scanner tools','ai','AI'],['Wishlist','Open saved wishlist','wishlist','★'],
+    ['Inventory','Open owned/missing inventory','inventory','🎒'],['Updates','Open changelog','updates','UP'],['History','Open action history','history','H'],
+    ['Class Index','Open class list','class','C'],['Custom Serials','Open custom serial list','custom','CS'],['Ideas Lab','Open ideas lab','ideas','IDEA'],
+    ['Tier X','Open X tier','tier:X','X'],['Tier SS','Open SS tier','tier:SS','SS'],['Tier S','Open S tier','tier:S','S'],['Tier A','Open A tier','tier:A','A'],['Tier B','Open B tier','tier:B','B'],['Tier C','Open C tier','tier:C','C'],['Tier D','Open D tier','tier:D','D']
   ];
+
   function ensurePalette(){
-    var p=q('#mbz-v160-palette'); if(p)return p;
-    p=d.createElement('div'); p.id='mbz-v160-palette'; p.setAttribute('aria-hidden','true');
-    p.innerHTML='<div class="mbz-v160-card" role="dialog" aria-label="Command Palette"><div class="mbz-v160-top"><input id="mbz-v160-input" class="mbz-v160-search" autocomplete="off" placeholder="Search pages, tools, gloves, serial families…"><button id="mbz-v160-close" class="mbz-v160-close" type="button" aria-label="Close">×</button></div><div id="mbz-v160-results" class="mbz-v160-results"></div></div>';
-    d.body.appendChild(p);
-    p.addEventListener('mousedown',function(e){if(e.target===p)closePalette()},true);
-    q('#mbz-v160-close',p).addEventListener('click',function(e){e.preventDefault();closePalette()},true);
-    q('#mbz-v160-input',p).addEventListener('input',renderPalette,true);
-    q('#mbz-v160-input',p).addEventListener('keydown',function(e){
-      if(e.key==='Enter'){var first=q('[data-v160-cmd]',p); if(first){e.preventDefault();run(first.dataset.v160Cmd)}}
-      if(e.key==='Escape'){e.preventDefault();closePalette()}
-    },true);
-    p.addEventListener('click',function(e){var item=e.target.closest&&e.target.closest('[data-v160-cmd]'); if(!item)return; e.preventDefault();e.stopPropagation();run(item.dataset.v160Cmd);},true);
+    var p = q('#mbz-v170-command-palette');
+    if(!p){ p = d.createElement('div'); p.id = 'mbz-v170-command-palette'; d.body.appendChild(p); }
     return p;
   }
-  function closePalette(){var p=q('#mbz-v160-palette'); if(p){p.classList.remove('open');p.setAttribute('aria-hidden','true');} d.body.classList.remove('mbz-v160-palette-open'); closeOldPalette();}
-  function openPalette(){closeOldPalette(); var p=ensurePalette(); p.classList.add('open'); p.setAttribute('aria-hidden','false'); d.body.classList.add('mbz-v160-palette-open'); renderPalette(); var inp=q('#mbz-v160-input',p); if(inp){inp.value=''; setTimeout(function(){inp.focus()},20)}}
-  w.MBZOpenCommandPaletteV160=openPalette;
-  function itemHTML(cmd,name,note,ico,tag){return '<button type="button" class="mbz-v160-item" data-v160-cmd="'+esc(cmd)+'"><span class="mbz-v160-ico">'+esc(ico||'•')+'</span><span><span class="mbz-v160-name">'+esc(name)+'</span><br><span class="mbz-v160-note">'+esc(note||'')+'</span></span><span class="mbz-v160-tag">'+esc(tag||'')+'</span></button>'}
-  function renderPalette(){
-    var p=ensurePalette(), host=q('#mbz-v160-results',p), inp=q('#mbz-v160-input',p); if(!host)return;
-    var term=String(inp&&inp.value||'').trim().toLowerCase();
-    var rows=[];
-    ACTIONS.forEach(function(a){if(!term||a.join(' ').toLowerCase().indexOf(term)>-1) rows.push(itemHTML(a[2],a[0],a[1],a[3],a[4]));});
-    var gloves=allGloves().filter(function(g){return term && String(g.n||'').toLowerCase().indexOf(term)>-1}).slice(0,12);
-    gloves.forEach(function(g){rows.push(itemHTML('search:'+g.n,g.n,(g.vs||g.v||'')+' · Class '+(g.cls||g.c||'')+' · '+(g.d||''),g.cls||g.c||'G','GLOVE'));});
-    host.innerHTML='<div class="mbz-v160-group">Pages, tools, commands, gloves</div>'+(rows.join('')||'<div class="mbz-v160-empty">No match. Try leaderboard, scanner, trade, Frostbite, Nuclear, Chronos, or Shrimple.</div>');
+
+  function closePalette(){ var p = q('#mbz-v170-command-palette'); if(p) p.classList.remove('show'); }
+  function closeOldPalettes(){ qa('.mbz-v82-palette.show,#mbz-v169-palette.show').forEach(function(p){ p.classList.remove('show'); p.setAttribute('aria-hidden','true'); }); }
+
+  function openPalette(){
+    closeOldPalettes();
+    var p = ensurePalette();
+    p.classList.add('show');
+    p.innerHTML = '<div class="mbz-v170-cmd-card" role="dialog" aria-modal="true"><div class="mbz-v170-cmd-head"><span>⌘K</span><input id="mbz-v170-cmd-input" autocomplete="off" placeholder="Search pages, tiers, players, or gloves…"><button type="button" id="mbz-v170-cmd-close">×</button></div><div id="mbz-v170-cmd-results" class="mbz-v170-cmd-results"></div></div>';
+    var input = q('#mbz-v170-cmd-input',p), close = q('#mbz-v170-cmd-close',p);
+    if(close) close.onclick = closePalette;
+    if(input){
+      input.oninput = drawCommands;
+      input.onkeydown = function(e){
+        var items = qa('.mbz-v170-cmd-item',p);
+        if(e.key === 'ArrowDown'){ e.preventDefault(); activeCmdIndex = Math.min(items.length - 1, activeCmdIndex + 1); markActiveCommand(); }
+        else if(e.key === 'ArrowUp'){ e.preventDefault(); activeCmdIndex = Math.max(0, activeCmdIndex - 1); markActiveCommand(); }
+        else if(e.key === 'Enter'){ e.preventDefault(); var it = items[activeCmdIndex] || items[0]; if(it) runCommand(it.dataset.cmd); }
+        else if(e.key === 'Escape'){ e.preventDefault(); closePalette(); }
+      };
+      activeCmdIndex = 0; drawCommands(); setTimeout(function(){ safe(function(){ input.focus({preventScroll:true}); }); },30);
+    }
   }
-  function hardHideNon(page){
-    var main=q('main')||d.body;
-    qa(':scope > *',main).forEach(function(el){
-      if(el===page||el.tagName==='SCRIPT'||el.tagName==='STYLE'||/badge/i.test(el.className||''))return;
-      el.classList.remove('active');el.setAttribute('aria-hidden','true'); if(['SCRIPT','STYLE'].indexOf(el.tagName)<0)el.style.display='none';
-    });
-    page.style.display='block'; page.classList.add('active'); page.removeAttribute('aria-hidden');
+
+  function gloveList(){ var list = []; safe(function(){ list = (w.GLOVES || GLOVES || []); }); return Array.isArray(list) ? list : []; }
+
+  function drawCommands(){
+    var p = ensurePalette(), input = q('#mbz-v170-cmd-input',p), host = q('#mbz-v170-cmd-results',p);
+    if(!host) return;
+    var term = norm(input && input.value), rows = [];
+    COMMANDS.forEach(function(c){ if(!term || norm(c[0]+' '+c[1]+' '+c[3]).indexOf(term) >= 0) rows.push({type:'PAGE',name:c[0],note:c[1],cmd:c[2],icon:c[3]}); });
+    if(term){
+      gloveList().filter(function(g){ return norm((g.n||'')+' '+(g.t||'')+' '+(g.cls||'')+' '+(g.d||'')+' '+(g.how||'')).indexOf(term) >= 0; }).slice(0,12).forEach(function(g){ rows.push({type:'GLOVE',name:g.n,note:(g.vs || '')+' · Tier '+(g.t || '')+' · Class '+(g.cls || ''),cmd:'glove:'+g.n,icon:g.t || 'G'}); });
+    }
+    host.innerHTML = rows.length ? rows.map(function(r,i){ return '<button type="button" class="mbz-v170-cmd-item '+(i===activeCmdIndex?'active':'')+'" data-cmd="'+esc(r.cmd)+'"><span class="mbz-v170-cmd-icon">'+esc(r.icon)+'</span><span><b>'+esc(r.name)+'</b><small>'+esc(r.note)+'</small></span><em>'+esc(r.type)+'</em></button>'; }).join('') : '<div class="no-res">No command found.</div>';
   }
-  function activateTab(name){
-    name=String(name||'').toLowerCase();
-    qa('.nav-tabs .ntab,#nav-tabs .ntab').forEach(function(tab){var t=String(tab.textContent||'').trim().toLowerCase();var on=(name==='leaderboards'?(t==='leaderboards'||tab.id==='mbz-v93-leaderboards-tab'):t===name);tab.classList.toggle('active',on); if(on){tab.setAttribute('aria-current','page');try{tab.scrollIntoView({inline:'center',block:'nearest',behavior:'smooth'})}catch(_){}}else tab.removeAttribute('aria-current');});
-  }
-  var fallback=[['mx2hz',933],['telepmor',932],['BaconagirlPx',923],['vanillabunnypuff',913],['YiBerlinX',900],['Zub_Zero3000',899],['MemeEqual101',897],['Xhschshsixm1',881],['Solodites',869],['partyintherave',865],['theiazas',862],['LaggyBott',857],['MarlenouTheFlashou',856],['josidini',848],['Monstrosity123456',836],['o8x1ghPyCz4abRvh67x',826],['Idolyyx',819],['VincentxTo0t',817],['AekazeSz',817],['JULIOUwUq2',813]];
-  function leaderboardData(){
-    try{var raw=localStorage.getItem('mbz_v93_collection_leaderboard')||localStorage.getItem('mbz-v93-collection-leaderboard')||localStorage.getItem('mbzCollectionLeaderboard'); if(raw){var st=JSON.parse(raw); if(st&&Array.isArray(st.entries)&&st.entries.length)return st.entries.map(function(x,i){return {rank:x.rank||i+1,user:x.username||x.name||('Player'+(i+1)),score:x.score||x.total||0,note:x.reputation||x.note||'saved'}})}}catch(_){ }
-    return fallback.map(function(x,i){return {rank:i+1,user:x[0],score:x[1],note:'fallback board'}});
-  }
-  function showLeaderboards(){
+
+  function markActiveCommand(){ qa('#mbz-v170-command-palette .mbz-v170-cmd-item').forEach(function(x,i){ x.classList.toggle('active', i === activeCmdIndex); if(i === activeCmdIndex) safe(function(){ x.scrollIntoView({block:'nearest'}); }); }); }
+
+  function runCommand(cmd){
     closePalette();
-    var main=q('main')||d.body; var page=q('#leaderboards-page'); if(!page){page=d.createElement('div');page.id='leaderboards-page';page.className='all-page';main.appendChild(page)}
-    var rootEl=q('#mbz-v160-leaderboards-root',page); if(!rootEl){rootEl=d.createElement('div');rootEl.id='mbz-v160-leaderboards-root';page.innerHTML='';page.appendChild(rootEl)}
-    var rows=leaderboardData().map(function(x){var medal=x.rank===1?'🥇':x.rank===2?'🥈':x.rank===3?'🥉':'#'+x.rank;return '<tr><td class="mbz-v160-rank">'+esc(medal)+'</td><td><strong>'+esc(x.user)+'</strong><small>'+esc(x.note||'')+'</small></td><td class="mbz-v160-score">'+esc(x.score)+'</td><td><a href="https://www.roblox.com/search/users?keyword='+encodeURIComponent(x.user)+'" target="_blank" rel="noopener noreferrer">Open Roblox</a></td></tr>';}).join('');
-    rootEl.innerHTML='<section class="mbz-v160-lb-page"><div class="mbz-v160-lb-hero"><h1>Leaderboards</h1><p>Collection rankings and player lookup. This V160 page is rendered directly by the command palette, so it will not route to Ideas Lab or open empty.</p><div class="mbz-v160-lb-tools"><input id="mbz-v160-lb-search" placeholder="Search player…"><button class="sbtn" data-v160-cmd="home">Home</button><button class="sbtn" data-v160-cmd="inventory">Scanner</button></div></div><div class="mbz-v160-lb-card"><table class="mbz-v160-lb-table"><thead><tr><th>Rank</th><th>Player</th><th>Score</th><th>Profile</th></tr></thead><tbody>'+rows+'</tbody></table></div></section>';
-    var inp=q('#mbz-v160-lb-search',rootEl),tbody=q('tbody',rootEl); if(inp&&tbody)inp.addEventListener('input',function(){var term=inp.value.toLowerCase().trim();qa('tr',tbody).forEach(function(tr){tr.style.display=(tr.textContent||'').toLowerCase().indexOf(term)>-1?'':'none'})});
-    d.body.classList.add('mbz-v94-leaderboards-open'); d.body.classList.remove('mbz-v82-ideas-open'); d.body.dataset.mbzRoute='leaderboards';
-    hardHideNon(page); activateTab('leaderboards'); scrollTop();
+    if(!cmd) return;
+    if(cmd.indexOf('tier:') === 0) return route('tier',cmd.split(':')[1] || 'X');
+    if(cmd.indexOf('glove:') === 0){
+      var name = cmd.slice(6);
+      route('all');
+      setTimeout(function(){ var input=q('#gsearch'); if(input){ input.value=name; if(typeof w.onSearchInput === 'function') safe(function(){ w.onSearchInput(name); }); } },70);
+      return;
+    }
+    if(cmd.indexOf('serial:') === 0){
+      route('ai');
+      setTimeout(function(){ var box=q('#inv-ocr-text'); if(box){ box.value = addSerialHints(cmd.slice(7)); safe(function(){ box.scrollIntoView({behavior:'smooth',block:'center'}); }); } },120);
+      return;
+    }
+    route(cmd);
   }
-  w.showLeaderboards=showLeaderboards; w.MBZOpenLeaderboardsV160=showLeaderboards;
-  function run(cmd){
-    cmd=String(cmd||''); closePalette(); closeOldPalette();
-    if(cmd==='leaderboards'){showLeaderboards();return}
-    if(cmd==='play'){w.open('https://www.roblox.com/games/3738091713/Boxing-League#!/game-instances','_blank','noopener,noreferrer');return}
-    if(cmd.indexOf('search:')===0){var val=cmd.slice(7); try{if(typeof w.showAll==='function')w.showAll()}catch(_){ } setTimeout(function(){var gs=q('#gsearch')||q('.sb input'); if(gs){gs.value=val; gs.dispatchEvent(new Event('input',{bubbles:true})); try{if(typeof w.onSearchInput==='function')w.onSearchInput(val)}catch(_){ } gs.focus();}},70); return}
-    if(cmd.indexOf('ask:')===0){var msg=cmd.slice(4); try{if(typeof w.showAI==='function')w.showAI()}catch(_){ } setTimeout(function(){var ai=q('#ai-input')||q('.ai-input'); if(ai){ai.value=msg; ai.focus();}},100); return}
-    var map={home:'showHome',all:'showAll',trade:'showTrade',ai:'showAI',wishlist:'showWishlist',updates:'showUpdates',history:'showHistory',inventory:'showInventory',ideas:'showIdeas',custom:'showCustomSerial'};
-    var fn=map[cmd]; if(fn&&typeof w[fn]==='function'){try{w[fn]()}catch(e){console.error('V160 command failed',cmd,e)}}
+
+  function parseRange(name){
+    var m = String(name || '').match(/\[\s*(\d+)\s*(?:-|–)\s*(\d+)\s*\]|\[\s*(\d+)\s*\+\s*\]/);
+    if(!m) return null;
+    return {lo:Number(m[1] || m[3]), hi:m[2] ? Number(m[2]) : Infinity};
   }
-  function bind(){
-    closeOldPalette();
-    var btn=q('#mbz-v82-command-button')||q('[data-command-palette]')||q('.command-palette-button');
-    if(btn&&!btn.__mbzV160){btn.__mbzV160=true; btn.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette();},true); btn.onclick=function(ev){if(ev){ev.preventDefault();ev.stopPropagation&&ev.stopPropagation()}openPalette();return false};}
+  function cleanBase(name){ return norm(String(name || '').replace(/\[[^\]]+\]/g,' ').replace(/\b(low|mid|high)\b/ig,' ')); }
+  function serialNumber(line){
+    var m = String(line || '').match(/#\s*(\d+)|\bserial\s*#?\s*(\d+)\b|\b(\d+)\s*\/\s*\d+\b/i);
+    return m ? Number(m[1] || m[2] || m[3]) : 0;
   }
-  d.addEventListener('click',function(e){
-    var item=e.target&&e.target.closest?e.target.closest('[data-v160-cmd],#mbz-v93-leaderboards-tab,[data-v93-palette]'):null; if(!item)return;
-    var cmd=item.dataset&&item.dataset.v160Cmd; var txt=String(item.textContent||'').toLowerCase();
-    if(!cmd&&(item.id==='mbz-v93-leaderboards-tab'||item.hasAttribute('data-v93-palette')||txt.indexOf('leaderboard')>-1))cmd='leaderboards';
-    if(!cmd)return; e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();run(cmd);
-  },true);
-  d.addEventListener('keydown',function(e){
-    if((e.ctrlKey||e.metaKey)&&String(e.key).toLowerCase()==='k'){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation();openPalette();}
-    if(e.key==='Escape')closePalette();
-  },true);
-  var mo=new MutationObserver(function(){bind();closeOldPalette()});
-  function boot(){bind();try{mo.observe(d.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']})}catch(_){ }try{d.title='MadeByZebra — Value List · V160 Safe Command Palette'}catch(_){ }}
-  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  w.addEventListener('load',function(){[80,260,700,1500].forEach(function(ms){setTimeout(boot,ms)})},{once:true,passive:true});
+  function resolveSerialLine(line){
+    var n = serialNumber(line); if(!n) return null;
+    var list = gloveList();
+    var ranged = list.filter(function(g){ return /\[\s*\d+\s*(?:-|–|\+)\s*\d*\s*\]/.test(g.n || ''); });
+    var text = norm(line);
+    var bases = [];
+    ranged.forEach(function(g){ var b = cleanBase(g.n); if(b && bases.indexOf(b) < 0) bases.push(b); });
+    var base = bases.sort(function(a,b){ return b.length - a.length; }).find(function(b){ return text.indexOf(b) >= 0; });
+    if(!base) return null;
+    var hits = ranged.map(function(g){ return {g:g, b:cleanBase(g.n), r:parseRange(g.n)}; }).filter(function(x){ return x.b === base && x.r; }).sort(function(a,b){ return a.r.lo - b.r.lo; });
+    var exact = hits.find(function(x){ return n >= x.r.lo && n <= x.r.hi; });
+    return exact ? exact.g.n : null;
+  }
+  function addSerialHints(text){
+    var original = String(text || ''), add = [];
+    original.split(/[\n,;]+/).forEach(function(line){ var resolved = resolveSerialLine(line); if(resolved && original.indexOf(resolved) < 0 && add.indexOf(resolved) < 0) add.push(resolved); });
+    return add.length ? original + '\n' + add.join('\n') : original;
+  }
+  function patchScanner(){
+    var old = w.scanInventoryText;
+    if(typeof old === 'function' && !old.__mbzV170Serial){
+      w.scanInventoryText = function(){ var box=q('#inv-ocr-text'); if(box) box.value = addSerialHints(box.value || ''); return old.apply(this,arguments); };
+      w.scanInventoryText.__mbzV170Serial = true;
+    }
+  }
+
+  function installClickAndKeys(){
+    if(w.__MBZ_V170_EVENTS__) return; w.__MBZ_V170_EVENTS__ = true;
+    w.addEventListener('keydown',function(e){
+      if((e.ctrlKey || e.metaKey) && norm(e.key) === 'k'){
+        e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); openPalette(); return;
+      }
+      if((e.key === 'Escape' || e.key === 'Esc') && q('#mbz-v170-command-palette.show')){ e.preventDefault(); closePalette(); }
+    },true);
+    w.addEventListener('click',function(e){
+      var cmd = e.target && e.target.closest && e.target.closest('#mbz-v170-command-palette .mbz-v170-cmd-item');
+      if(cmd){ e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); runCommand(cmd.dataset.cmd); return; }
+      if(e.target && e.target.id === 'mbz-v170-command-palette'){ e.preventDefault(); e.stopPropagation(); closePalette(); return; }
+      var oldCmdBtn = e.target && e.target.closest && e.target.closest('#mbz-v82-command-button,.mbz-v82-command-btn,[aria-controls="mbz-v82-palette"]');
+      if(oldCmdBtn){ e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); openPalette(); return; }
+      var prof = e.target && e.target.closest && e.target.closest('[data-v170-profile]');
+      if(prof){ e.preventDefault(); e.stopPropagation(); var user=prof.dataset.v170Profile; if(typeof w.openCollectorProfile === 'function') safe(function(){ w.openCollectorProfile(user); }); return; }
+      var tab = e.target && e.target.closest && e.target.closest('#nav-tabs .ntab');
+      if(tab){
+        var rt = tabRouteText(tab);
+        if(rt){ e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation(); route(rt.name,rt.arg); return; }
+      }
+    },true);
+    d.addEventListener('input',function(e){
+      if(e.target && e.target.id === 'inv-ocr-text'){
+        var next = addSerialHints(e.target.value || '');
+        if(next !== e.target.value) e.target.value = next;
+      }
+    },true);
+  }
+
+  function installGloveSizeGuard(){
+    d.documentElement.style.setProperty('--mbz-v141-showroom-zoom','1');
+    qa('.z39-showroom-visual').forEach(function(stage){
+      stage.style.setProperty('min-height','300px');
+      stage.style.setProperty('transform-origin','50% 50%','important');
+      var model = q('.z39-model',stage);
+      if(model){
+        model.style.setProperty('min-width','220px');
+        model.style.setProperty('min-height','220px');
+        model.style.setProperty('transform-origin','50% 50%','important');
+      }
+    });
+  }
+
+  function boot(){
+    ensureNavTabs();
+    closeOldPalettes();
+    patchScanner();
+    installGloveSizeGuard();
+    installClickAndKeys();
+    if(lastRoute === 'leaderboards'){
+      var restoredFullBoard = false;
+      if(typeof w.showLeaderboards === 'function'){
+        safe(function(){ w.showLeaderboards(); restoredFullBoard = true; });
+      }
+      if(!restoredFullBoard) renderLeaderboards();
+    }
+    try{ d.title = 'MadeByZebra — Value List · V170 Stable'; }catch(_){}
+  }
+
+  if(d.readyState === 'loading') d.addEventListener('DOMContentLoaded',boot,{once:true}); else boot();
+  [40,120,320,800,1600,3000].forEach(function(ms){ setTimeout(boot,ms); });
+  w.addEventListener('resize',function(){ ensureNavTabs(); installGloveSizeGuard(); },{passive:true});
+})();
+
+</script>
+
+
+<!-- ========================= V173 COMMAND PALETTE BUTTON-ONLY FIX ========================= -->
+<style id="mbz-v173-command-only-style">
+/* Hide every older duplicate command button. V173 owns the single visible button. */
+#mbz-v82-command-button,
+#mbz-v169-command-button,
+#mbz-v171-command-button,
+#mbz-v172-command-button{display:none!important}
+
+#mbz-v173-command-button{
+  position:relative!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+  white-space:nowrap!important;
+  pointer-events:auto!important;
+}
+#mbz-v173-command-button .mbz-v173-command-kbd{
+  padding:3px 7px;
+  border:1px solid var(--border2);
+  border-radius:8px;
+  background:var(--surface3);
+  color:var(--text-dim);
+  font:9px 'DM Mono',monospace;
+  line-height:1;
+}
+
+/* Keep the already-working V170 palette, but remove popping/bouncing.
+   It opens instantly and fades when it closes. */
+#mbz-v170-command-palette{
+  display:flex!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:opacity .16s ease,visibility 0s linear .16s!important;
+  animation:none!important;
+}
+#mbz-v170-command-palette.show{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+  transition:opacity .14s ease,visibility 0s linear 0s!important;
+}
+#mbz-v170-command-palette .mbz-v170-cmd-card{
+  transform:none!important;
+  translate:none!important;
+  scale:1!important;
+  animation:none!important;
+}
+@media(max-width:720px){
+  #mbz-v173-command-button{padding-inline:10px!important}
+  #mbz-v173-command-button .mbz-v173-command-label{font-size:0}
+  #mbz-v173-command-button .mbz-v173-command-label::after{content:'Command';font-size:12px}
+}
+</style>
+<script id="mbz-v173-command-only-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V173_COMMAND_ONLY__) return;
+  window.__MBZ_V173_COMMAND_ONLY__ = true;
+
+  var d = document, w = window;
+  function q(s,r){ return (r||d).querySelector(s); }
+  function qa(s,r){ return Array.prototype.slice.call((r||d).querySelectorAll(s)); }
+
+  function fireOpenShortcut(){
+    var ev;
+    try{
+      ev = new KeyboardEvent('keydown',{
+        key:'k',code:'KeyK',ctrlKey:true,bubbles:true,cancelable:true,composed:true
+      });
+    }catch(_){
+      ev = d.createEvent('Event');
+      ev.initEvent('keydown',true,true);
+      try{ Object.defineProperty(ev,'key',{value:'k'}); Object.defineProperty(ev,'ctrlKey',{value:true}); }catch(__){}
+    }
+    w.dispatchEvent(ev);
+  }
+
+  function ensureButton(){
+    var right = q('.nav-right');
+    if(!right) return;
+
+    /* Older scripts may recreate their button. Keep it hidden, not duplicated. */
+    qa('#mbz-v82-command-button,#mbz-v169-command-button,#mbz-v171-command-button,#mbz-v172-command-button').forEach(function(x){
+      x.setAttribute('aria-hidden','true');
+      x.tabIndex = -1;
+    });
+
+    var b = q('#mbz-v173-command-button');
+    if(!b){
+      b = d.createElement('button');
+      b.type = 'button';
+      b.id = 'mbz-v173-command-button';
+      b.className = 'td-btn mbz-v173-command-btn';
+      b.setAttribute('aria-haspopup','dialog');
+      b.setAttribute('aria-controls','mbz-v170-command-palette');
+      b.title = 'Open Command Palette (Ctrl K)';
+      b.innerHTML = '<span aria-hidden="true">⌘</span><span class="mbz-v173-command-label">Command</span><span class="mbz-v173-command-kbd">Ctrl K</span>';
+      b.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        fireOpenShortcut();
+        /* A second attempt covers unusually slow startup without creating another palette. */
+        setTimeout(function(){
+          var p = q('#mbz-v170-command-palette');
+          if(!p || !p.classList.contains('show')) fireOpenShortcut();
+        },80);
+      },false);
+    }
+
+    /* Command appears immediately before Trello, as requested. */
+    var trello = qa('.trello-btn',right).find(function(x){ return x.id !== 'mbz-v82-command-button' && !x.classList.contains('mbz-v82-command-btn'); });
+    if(trello){
+      if(b.parentNode !== right || b.nextElementSibling !== trello) right.insertBefore(b,trello);
+    }else if(b.parentNode !== right){
+      right.insertBefore(b,right.firstChild);
+    }
+  }
+
+  function boot(){
+    ensureButton();
+    try{ d.title = 'MadeByZebra — Value List · V173 Command Fixed'; }catch(_){}
+  }
+
+  if(d.readyState === 'loading') d.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+
+  [40,120,320,900,1800,3200].forEach(function(ms){ setTimeout(boot,ms); });
+
+  var mo = new MutationObserver(function(){
+    if(!q('#mbz-v173-command-button') || q('#mbz-v82-command-button:not([aria-hidden="true"])')){
+      w.requestAnimationFrame(ensureButton);
+    }
+  });
+  if(d.documentElement) mo.observe(d.documentElement,{childList:true,subtree:true});
 })();
 </script>
-<!-- ========================= /V160 SAFE COMMAND PALETTE + LEADERBOARD HARD FIX ========================= -->
+<!-- ========================= /V173 COMMAND PALETTE BUTTON-ONLY FIX ========================= -->
+
+
+
+<!-- ========================= V174 SINGLE LEADERBOARD TAB FIX ========================= -->
+<script id="mbz-v174-single-leaderboard-tab-fix">
+(function(){
+  'use strict';
+  if(window.__MBZ_V174_SINGLE_LEADERBOARD_TAB__) return;
+  window.__MBZ_V174_SINGLE_LEADERBOARD_TAB__ = true;
+
+  var d = document;
+  function q(s,r){ return (r||d).querySelector(s); }
+  function qa(s,r){ return Array.prototype.slice.call((r||d).querySelectorAll(s)); }
+
+  function isLeaderboardTab(el){
+    return !!el && el.matches && el.matches('.ntab,button') &&
+      String(el.textContent || '').trim().toLowerCase() === 'leaderboards';
+  }
+
+  function fixDuplicateLeaderboardTabs(){
+    var nav = q('#nav-tabs') || q('.nav-tabs');
+    if(!nav) return;
+
+    var tabs = qa('.ntab,button', nav).filter(isLeaderboardTab);
+    if(!tabs.length) return;
+
+    /* Keep the site's original V93 tab whenever it exists. */
+    var keep = tabs.find(function(t){ return t.id === 'mbz-v93-leaderboards-tab'; }) || tabs[0];
+
+    tabs.forEach(function(t){
+      if(t !== keep && t.parentNode) t.parentNode.removeChild(t);
+    });
+
+    keep.style.removeProperty('display');
+    keep.removeAttribute('aria-hidden');
+    keep.tabIndex = 0;
+    keep.classList.add('ntab','ntab-special');
+
+    /* Keep the tab immediately before Ideas Lab, with sensible fallbacks. */
+    var ideas = qa('.ntab,button',nav).find(function(t){
+      return String(t.textContent || '').trim().toLowerCase() === 'ideas lab';
+    });
+    var updates = qa('.ntab,button',nav).find(function(t){
+      return String(t.textContent || '').trim().toLowerCase() === 'updates';
+    });
+    var credits = qa('.ntab,button',nav).find(function(t){
+      return String(t.textContent || '').trim().toLowerCase() === 'credits';
+    });
+    var anchor = ideas || updates || credits || null;
+    if(anchor && keep.nextElementSibling !== anchor){
+      nav.insertBefore(keep,anchor);
+    }else if(!anchor && keep.parentNode !== nav){
+      nav.appendChild(keep);
+    }
+  }
+
+  function boot(){
+    fixDuplicateLeaderboardTabs();
+    try{ d.title = 'MadeByZebra — Value List · V175 Leaderboard Command + Page Motion'; }catch(_){}
+  }
+
+  if(d.readyState === 'loading') d.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+
+  [40,120,320,800,1600,3000].forEach(function(ms){ setTimeout(fixDuplicateLeaderboardTabs,ms); });
+
+  var nav = q('#nav-tabs') || q('.nav-tabs');
+  if(nav && window.MutationObserver){
+    var queued = false;
+    new MutationObserver(function(){
+      if(queued) return;
+      queued = true;
+      requestAnimationFrame(function(){ queued = false; fixDuplicateLeaderboardTabs(); });
+    }).observe(nav,{childList:true});
+  }
+})();
+</script>
+<!-- ========================= /V174 SINGLE LEADERBOARD TAB FIX ========================= -->
+
+
+
+<!-- ========================= V175 LEADERBOARD COMMAND + PAGE MOTION FIX ========================= -->
+<style id="mbz-v175-page-motion-style">
+  /* Reuse the site's tiny premium page bounce, but guarantee it is available
+     for routes opened from tabs, the Command Palette, cards, or internal links. */
+  main > .mbz-v175-page-enter{
+    animation:mbzV175PageEnter .46s cubic-bezier(.16,1.18,.3,1) both!important;
+    transform-origin:top center!important;
+    will-change:transform,opacity!important;
+  }
+  @keyframes mbzV175PageEnter{
+    0%{opacity:.18;transform:translate3d(0,13px,0)}
+    58%{opacity:1;transform:translate3d(0,-3px,0)}
+    80%{transform:translate3d(0,1px,0)}
+    100%{opacity:1;transform:translate3d(0,0,0)}
+  }
+  html.mbz-v74-reduced-motion main > .mbz-v175-page-enter{animation:none!important;opacity:1!important;transform:none!important}
+  @media(prefers-reduced-motion:reduce){main > .mbz-v175-page-enter{animation:none!important;opacity:1!important;transform:none!important}}
+</style>
+<script id="mbz-v175-page-motion-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V175_PAGE_MOTION__) return;
+  window.__MBZ_V175_PAGE_MOTION__ = true;
+
+  var d=document,w=window,lastPage=null,queued=false,removeTimer=0;
+  var IDS=['home-page','tier-page','class-page','custom-serial-page','trade-page','history-page','updates-page','wishlist-page','ai-page','inventory-page','leaderboards-page','mbz-v82-ideas-page','mbz-v138-builder-page'];
+  function q(s,r){return (r||d).querySelector(s)}
+  function visible(el){
+    if(!el||el.hidden||el.getAttribute('aria-hidden')==='true') return false;
+    var cs=w.getComputedStyle(el);
+    return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0;
+  }
+  function current(){
+    for(var i=0;i<IDS.length;i++){
+      var el=q('#'+IDS[i]);
+      if(el&&el.classList.contains('active')&&visible(el)) return el;
+    }
+    var active=d.querySelectorAll('main > .active');
+    for(var j=0;j<active.length;j++) if(visible(active[j])) return active[j];
+    return null;
+  }
+  function animate(el){
+    if(!el) return;
+    try{
+      if(d.documentElement.classList.contains('mbz-v74-reduced-motion') || (w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+    }catch(_){}
+    el.classList.remove('mbz-v97-page-enter','mbz-v175-page-enter');
+    void el.offsetWidth;
+    el.classList.add('mbz-v175-page-enter');
+    clearTimeout(removeTimer);
+    removeTimer=w.setTimeout(function(){el.classList.remove('mbz-v175-page-enter')},560);
+  }
+  function check(){
+    queued=false;
+    var next=current();
+    if(next&&next!==lastPage){
+      lastPage=next;
+      animate(next);
+    }
+  }
+  function queue(){
+    if(queued) return;
+    queued=true;
+    w.requestAnimationFrame(function(){w.requestAnimationFrame(check)});
+  }
+  function keepOrder(){
+    var nav=q('#nav-tabs')||q('.nav-tabs');
+    if(!nav) return;
+    var tabs=Array.prototype.slice.call(nav.querySelectorAll('.ntab,button')).filter(function(el){return String(el.textContent||'').trim().toLowerCase()==='leaderboards'});
+    if(!tabs.length) return;
+    var keep=tabs.find(function(el){return el.id==='mbz-v93-leaderboards-tab'})||tabs[0];
+    tabs.forEach(function(el){if(el!==keep&&el.parentNode)el.parentNode.removeChild(el)});
+    var ideas=Array.prototype.slice.call(nav.querySelectorAll('.ntab,button')).find(function(el){return String(el.textContent||'').trim().toLowerCase()==='ideas lab'});
+    if(ideas&&keep.nextElementSibling!==ideas) nav.insertBefore(keep,ideas);
+  }
+  function boot(){
+    var main=q('main');
+    lastPage=current();
+    keepOrder();
+    if(main&&w.MutationObserver){
+      new MutationObserver(queue).observe(main,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style','aria-hidden','hidden']});
+    }
+    var nav=q('#nav-tabs')||q('.nav-tabs');
+    if(nav&&w.MutationObserver){
+      new MutationObserver(function(){w.requestAnimationFrame(keepOrder)}).observe(nav,{childList:true});
+    }
+    try{d.title='MadeByZebra — Value List · V175 Leaderboard Command + Page Motion'}catch(_){}
+  }
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  [80,240,700,1600,3200].forEach(function(ms){w.setTimeout(keepOrder,ms)});
+})();
+</script>
+<!-- ========================= /V175 LEADERBOARD COMMAND + PAGE MOTION FIX ========================= -->
+
+
+
+<!-- ===== V176 REAL SERIAL INVENTORY FIX ===== -->
+<style id="mbz-v176-serial-style">
+.mbz-v176-serial-map{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.mbz-v176-serial-row{display:grid;grid-template-columns:minmax(150px,1fr) 28px minmax(190px,1.2fr) auto;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--border);background:var(--surface2);border-radius:var(--radius-sm);font-size:12px}
+.mbz-v176-serial-arrow{color:var(--text-dim);text-align:center}
+.mbz-v176-serial-read{color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mbz-v176-serial-match{color:var(--text);font-weight:600}
+@media(max-width:700px){.mbz-v176-serial-row{grid-template-columns:1fr}.mbz-v176-serial-arrow{display:none}.mbz-v176-serial-read{white-space:normal}}
+</style>
+<script id="mbz-v176-real-serial-inventory-fix">
+(function(){
+  'use strict';
+  var VERSION='V176';
+  function byId(id){return document.getElementById(id)}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function db(){try{return Array.isArray(GLOVES)?GLOVES:[]}catch(e){return []}}
+  function norm(s){return String(s||'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
+  function parseRange(name){
+    var m=String(name||'').match(/\[\s*(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*\]/i);
+    if(m)return {lo:Number(m[1]),hi:Number(m[2])};
+    m=String(name||'').match(/\[\s*(\d+)\s*\+\s*\]/i);
+    return m?{lo:Number(m[1]),hi:Infinity}:null;
+  }
+  function family(name){
+    return norm(String(name||'')
+      .replace(/\[[^\]]+\]/g,' ')
+      .replace(/\b(low|mid|high)\b/ig,' ')
+      .replace(/#\s*\d+(?:\s*\/\s*\d+)?/g,' ')
+      .replace(/\bserial\s*#?\s*\d+(?:\s*\/\s*\d+)?/ig,' '));
+  }
+  function getSerial(value){
+    if(value && typeof value==='object'){
+      var direct=Number(value.serial||value.number||value.rank||0);
+      if(isFinite(direct)&&direct>0)return direct;
+      value=value.visibleText||value.text||value.read||value.label||value.baseName||value.name||'';
+    }
+    var str=String(value||'');
+    var m=str.match(/#\s*(\d+)(?:\s*\/\s*\d+)?/i) || str.match(/\bserial\s*#?\s*(\d+)/i) || str.match(/\b(\d+)\s*\/\s*\d+\b/);
+    return m?Number(m[1]):0;
+  }
+  function textFrom(value){
+    if(value && typeof value==='object')return String(value.visibleText||value.text||value.read||value.label||value.baseName||value.name||value.glove||value.candidate||'');
+    return String(value||'');
+  }
+  function exactName(value){
+    var n=norm(textFrom(value)); if(!n)return null;
+    var list=db();
+    for(var i=0;i<list.length;i++)if(norm(list[i].n)===n)return list[i];
+    return null;
+  }
+  function serialResolve(value){
+    var serial=getSerial(value); if(!serial)return null;
+    var raw=textFrom(value);
+    var rawFamily=family((value&&typeof value==='object'&&(value.baseName||value.name))||raw);
+    var groups={};
+    db().forEach(function(g){var r=parseRange(g.n);if(!r)return;var f=family(g.n);(groups[f]||(groups[f]=[])).push({g:g,r:r})});
+    var keys=Object.keys(groups).filter(function(f){return rawFamily && (rawFamily===f || rawFamily.indexOf(f)>=0 || f.indexOf(rawFamily)>=0)});
+    keys.sort(function(a,b){
+      var ae=rawFamily===a?10000:0,be=rawFamily===b?10000:0;
+      return (be+b.length)-(ae+a.length);
+    });
+    for(var k=0;k<keys.length;k++){
+      var variants=groups[keys[k]];
+      for(var j=0;j<variants.length;j++)if(serial>=variants[j].r.lo&&serial<=variants[j].r.hi)return {g:variants[j].g,serial:serial,read:raw||((value&&value.baseName)||keys[k])+' #'+serial};
+    }
+    return null;
+  }
+  function resolveName(value){return serialResolve(value)||((function(){var g=exactName(value);return g?{g:g,serial:0,read:textFrom(value)}:null})())}
+  function persistOwned(name){
+    if(!name)return false;
+    try{if(typeof owned!=='undefined'&&owned)owned.add(name)}catch(e){}
+    try{
+      var arr=[];try{arr=JSON.parse(localStorage.getItem('mbz-owned')||'[]')}catch(_){arr=[]}
+      arr.push(name);localStorage.setItem('mbz-owned',JSON.stringify(Array.from(new Set(arr))));
+      window.invOwnedQty=window.invOwnedQty||{};window.invOwnedQty[name]=Math.max(1,Number(window.invOwnedQty[name]||1));
+      localStorage.setItem('mbz_inventory_owned_qty_v1',JSON.stringify(window.invOwnedQty));
+      localStorage.setItem('mbz-owned-qty',JSON.stringify(window.invOwnedQty));
+    }catch(e){}
+    try{if(typeof saveOwned==='function')saveOwned()}catch(e){}
+    return true;
+  }
+  function clearOwnedSafe(){
+    try{if(typeof owned!=='undefined'&&owned)owned.clear()}catch(e){}
+    try{localStorage.setItem('mbz-owned','[]');localStorage.setItem('mbz_inventory_owned_qty_v1','{}');localStorage.setItem('mbz-owned-qty','{}');window.invOwnedQty={}}catch(e){}
+  }
+  function uniqueResolved(items){
+    var map={};(items||[]).forEach(function(x){var r=resolveName(x);if(r&&r.g)map[r.g.n]=r});return Object.keys(map).map(function(k){return map[k]})
+  }
+  function familyCandidates(line){
+    var f=family(line);if(!f)return [];
+    var seen={};return db().filter(function(g){var gf=family(g.n);var ok=gf===f||gf.indexOf(f)>=0||f.indexOf(gf)>=0;if(ok&&!seen[g.n]){seen[g.n]=1;return true}return false}).slice(0,12)
+  }
+  function safeTextScan(text){
+    var lines=String(text||'').split(/\n|\r|\t|\||•|·|;/).map(function(x){return x.trim()}).filter(Boolean).slice(0,500);
+    var confirmed={},serialRows=[],review=[];
+    lines.forEach(function(line){
+      var sr=serialResolve(line);
+      if(sr){confirmed[sr.g.n]=sr;serialRows.push(sr);return}
+      var ex=exactName(line);
+      if(ex){confirmed[ex.n]={g:ex,serial:0,read:line};return}
+      var cands=familyCandidates(line);
+      if(cands.length===1){confirmed[cands[0].n]={g:cands[0],serial:0,read:line}}
+      else if(cands.length>1)review.push({text:line,candidates:cands.map(function(g){return g.n})});
+      else{
+        try{
+          if(typeof aiFindMatches==='function'){
+            var hits=aiFindMatches(line,3)||[];
+            if(hits.length===1)confirmed[hits[0].n]={g:hits[0],serial:0,read:line};
+            else if(hits.length>1)review.push({text:line,candidates:hits.map(function(g){return g.n})});
+          }
+        }catch(e){}
+      }
+    });
+    return {confirmed:Object.keys(confirmed).map(function(k){return confirmed[k]}),serialRows:serialRows,review:review};
+  }
+  function serialRowsHtml(rows){
+    if(!rows.length)return '';
+    return '<div class="inv-section-title">Serial numbers mapped to exact inventory types</div><div class="mbz-v176-serial-map">'+rows.map(function(r){return '<div class="mbz-v176-serial-row"><span class="mbz-v176-serial-read">'+esc(r.read)+'</span><span class="mbz-v176-serial-arrow">→</span><span class="mbz-v176-serial-match">'+esc(r.g.n)+'</span><span class="inv-status-saved">SAVED</span></div>'}).join('')+'</div>';
+  }
+  function reviewHtml(review){
+    if(!review.length)return '';
+    return '<div class="inv-section-title">Needs review</div><div class="inv-text-table">'+review.slice(0,80).map(function(r){return '<div class="inv-text-row"><div>'+esc(r.text||'uncertain')+'</div><div>'+((r.candidates||[]).slice(0,8).map(function(n){return '<button class="add-btn" onclick="window.mbzV176Confirm(\''+encodeURIComponent(n)+'\')">✓ '+esc(n)+'</button>'}).join(' ')||'No exact candidate')+'</div><div>review</div><div><span class="inv-status-review">REVIEW</span></div></div>'}).join('')+'</div>';
+  }
+  window.mbzV176Confirm=function(encoded){var n=decodeURIComponent(encoded);var r=resolveName(n);if(r){persistOwned(r.g.n);var p=byId('inv-progress');if(p)p.textContent='Added '+r.g.n+' to inventory.';try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){}}};
+  window.scanInventoryText=function(){
+    var text=(byId('inv-ocr-text')||{}).value||'',out=byId('inv-results');if(!out)return;
+    var result=safeTextScan(text),replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
+    if(replace)clearOwnedSafe();
+    result.confirmed.forEach(function(r){persistOwned(r.g.n)});
+    try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){}
+    try{if(typeof addHistory==='function')addHistory('owned','Serial-aware inventory scan',result.confirmed.length+' exact gloves saved')}catch(e){}
+    var saved=result.confirmed.map(function(r){return '<div class="inv-missing-row"><span class="inv-missing-name">'+esc(r.g.n)+'</span><span class="cpill cls-'+esc(r.g.cls)+'">'+esc(r.g.cls)+'</span><span class="td-val" style="font-size:11px">'+esc(r.g.vs||r.g.v)+'</span><span class="inv-status-saved">SAVED</span></div>'}).join('');
+    out.innerHTML='<div class="ai-answer"><strong>Serial-aware scan complete.</strong><br>Exact serial ranges are saved as the correct inventory type. A base family without a readable serial is sent to Review instead of saving the wrong range.<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill">Saved: '+result.confirmed.length+'</span><span class="inv-count-pill">Serials mapped: '+result.serialRows.length+'</span><span class="inv-count-pill">Review: '+result.review.length+'</span></div>'+serialRowsHtml(result.serialRows)+'<div class="inv-section-title">Saved to Inventory</div><div class="inv-missing-list">'+(saved||'<div class="wl-empty">No exact matches found.</div>')+'</div>'+reviewHtml(result.review)+'</div>';
+    try{if(typeof view!=='undefined'&&view==='inventory'&&typeof renderInventory==='function')renderInventory()}catch(e){}
+  };
+  function fileData(file){return new Promise(function(resolve,reject){var r=new FileReader();r.onload=function(){resolve(String(r.result))};r.onerror=reject;r.readAsDataURL(file)})}
+  window.scanInventoryImage=async function(){
+    var input=byId('inv-img'),files=input&&input.files?Array.from(input.files):[],out=byId('inv-results'),p=byId('inv-progress');
+    if(!files.length){if(p)p.textContent='Choose screenshot(s) first.';return}
+    if(out)out.innerHTML='<div class="ai-answer"><strong>Reading glove names and serial numbers…</strong><br>The scanner will map a visible serial to its exact bracketed inventory type.</div>';
+    try{
+      var images=[];for(var i=0;i<Math.min(files.length,6);i++)images.push(await fileData(files[i]));
+      if(p)p.textContent='Calling /api/scan in serial mode…';
+      var res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({images:images,gloveNames:db().map(function(g){return g.n}),serialMode:true})});
+      var data=await res.json().catch(function(){return {error:'Bad JSON response from /api/scan'}});
+      if(!res.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
+      var rawItems=[];
+      (data.confirmed||[]).forEach(function(x){rawItems.push(x)});
+      (data.serials||[]).forEach(function(x){rawItems.push(x)});
+      var resolved=uniqueResolved(rawItems),serialResolved=uniqueResolved(data.serials||[]).filter(function(r){return r.serial>0});
+      var replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;if(replace)clearOwnedSafe();
+      resolved.forEach(function(r){persistOwned(r.g.n)});
+      var review=(data.review||data.possible||[]).map(function(x){
+        var text=typeof x==='string'?x:(x.text||x.read||x.visibleText||x.label||'uncertain');
+        var c=(typeof x==='object'?(x.candidates||x.matches||[]):[]).map(function(n){var r=resolveName(typeof n==='string'?n:(n.name||n.glove||n.text||''));return r?r.g.n:null}).filter(Boolean);
+        var sr=serialResolve(x);if(sr&&!resolved.some(function(r){return r.g.n===sr.g.n})){resolved.push(sr);persistOwned(sr.g.n);serialResolved.push(sr)}
+        return {text:text,candidates:Array.from(new Set(c))};
+      });
+      if(byId('inv-ocr-text'))byId('inv-ocr-text').value=JSON.stringify(data,null,2);
+      var saved=resolved.map(function(r){return '<div class="inv-missing-row"><span class="inv-missing-name">'+esc(r.g.n)+'</span><span class="cpill cls-'+esc(r.g.cls)+'">'+esc(r.g.cls)+'</span><span class="td-val" style="font-size:11px">'+esc(r.g.vs||r.g.v)+'</span><span class="inv-status-saved">SAVED</span></div>'}).join('');
+      if(out)out.innerHTML='<div class="ai-answer"><strong>AI serial scan finished.</strong><br>Visible serial numbers were converted to the exact bracketed glove entry before saving to Inventory.<div class="inv-counts" style="margin:10px 0"><span class="inv-count-pill">Saved: '+resolved.length+'</span><span class="inv-count-pill">Serials mapped: '+serialResolved.length+'</span><span class="inv-count-pill">Review: '+review.length+'</span></div>'+serialRowsHtml(serialResolved)+'<div class="inv-section-title">Saved to Inventory</div><div class="inv-missing-list">'+(saved||'<div class="wl-empty">No exact gloves were confirmed.</div>')+'</div>'+reviewHtml(review)+'</div>';
+      if(p)p.textContent='AI serial scan done.';
+      try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(e){}
+    }catch(e){if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed.</strong><br>'+esc(e.message||e)+'</div>';if(p)p.textContent='AI scan failed.'}
+  };
+  // Remove the mistaken serial-test commands if an older palette script ever renders them.
+  document.addEventListener('click',function(){setTimeout(function(){document.querySelectorAll('#mbz-v170-command-palette .mbz-v170-cmd-item').forEach(function(b){if(/^Search (Frostbite|Nuclear|Chronos|Shrimple) #/i.test((b.textContent||'').trim()))b.remove()})},0)},true);
+  document.documentElement.setAttribute('data-serial-inventory-version',VERSION);
+  console.log('MadeByZebra '+VERSION+' real serial inventory fix loaded.');
+})();
+</script>
+<!-- ===== END V176 REAL SERIAL INVENTORY FIX ===== -->
+
+
+
+
+
+
+<!-- ========================= V180 COMMAND LEADERBOARD FINAL FIX ========================= -->
+<style id="mbz-v180-command-leaderboard-style">
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command{
+    width:100%;display:grid;grid-template-columns:42px minmax(0,1fr) auto;
+    gap:10px;align-items:center;text-align:left;padding:11px 12px;border:0;
+    border-radius:14px;background:transparent;color:var(--text);cursor:pointer;
+    font-family:'Inter',sans-serif;transform:none!important;box-shadow:none!important;
+  }
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command:hover,
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command.active{background:var(--surface2)!important}
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command b{display:block;font-size:13.5px;color:var(--text)}
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command small{display:block;margin-top:3px;font:10.5px 'DM Mono',monospace;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command em{font:10px 'DM Mono',monospace;color:var(--text-dim);font-style:normal}
+</style>
+<script id="mbz-v180-command-leaderboard-final-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V180_COMMAND_LEADERBOARD_FINAL__)return;
+  window.__MBZ_V180_COMMAND_LEADERBOARD_FINAL__=true;
+
+  var d=document,w=window,queued=false;
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function norm(v){return String(v==null?'':v).replace(/\s+/g,' ').trim().toLowerCase()}
+
+  function closePalette(){
+    qa('#mbz-v170-command-palette.show,#mbz-v82-palette.show,#mbz-v169-palette.show').forEach(function(p){
+      p.classList.remove('show');p.setAttribute('aria-hidden','true');
+    });
+    d.documentElement.style.removeProperty('overflow');
+    d.documentElement.style.removeProperty('pointer-events');
+    if(d.body){d.body.style.removeProperty('overflow');d.body.style.removeProperty('pointer-events')}
+  }
+
+  function realLeaderboardTab(){
+    return q('#mbz-v93-leaderboards-tab') || qa('#nav-tabs .ntab').find(function(tab){return norm(tab.textContent)==='leaderboards'});
+  }
+
+  function openLeaderboard(e){
+    if(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation()}
+    closePalette();
+    var tab=realLeaderboardTab();
+    if(!tab)return;
+
+    /* Synchronous on purpose. The authoritative V150 router stores its page
+       state privately and only updates it from the real nav-tab click. */
+    try{tab.click()}catch(_){
+      try{tab.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:w}))}catch(__){}
+    }
+  }
+
+  function isLeaderboardButton(btn){
+    if(!btn)return false;
+    if(btn.getAttribute('data-cmd')==='leaderboards')return true;
+    var title=q('b',btn);
+    return norm(title?title.textContent:'')==='leaderboards';
+  }
+
+  function patchButton(btn){
+    if(!isLeaderboardButton(btn)||btn.__mbzV180Patched)return;
+    btn.__mbzV180Patched=true;
+    btn.removeAttribute('data-cmd');
+    btn.classList.remove('mbz-v170-cmd-item');
+    btn.classList.add('mbz-v180-leaderboard-command');
+    btn.setAttribute('data-mbz-v180-command','leaderboards');
+    btn.onclick=openLeaderboard;
+    btn.addEventListener('click',openLeaderboard,true);
+  }
+
+  function patchInput(input){
+    if(!input||input.__mbzV180Patched)return;
+    input.__mbzV180Patched=true;
+    input.addEventListener('keydown',function(e){
+      if(e.key!=='Enter')return;
+      var term=norm(input.value);
+      var btn=q('#mbz-v170-command-palette .mbz-v180-leaderboard-command');
+      if(!btn)return;
+      if(term && term.indexOf('leader')<0 && term!=='board' && term!=='rankings' && term!=='top 100')return;
+      openLeaderboard(e);
+    },true);
+  }
+
+  function patchPalette(){
+    queued=false;
+    var p=q('#mbz-v170-command-palette');
+    if(!p)return;
+    patchInput(q('#mbz-v170-cmd-input',p));
+    qa('button',p).forEach(patchButton);
+  }
+
+  function queuePatch(){
+    if(queued)return;queued=true;
+    if(w.queueMicrotask)w.queueMicrotask(patchPalette);else Promise.resolve().then(patchPalette);
+  }
+
+  function boot(){
+    patchPalette();
+    var root=d.body||d.documentElement;
+    if(root&&!root.__mbzV180Observed&&w.MutationObserver){
+      root.__mbzV180Observed=true;
+      new MutationObserver(queuePatch).observe(root,{childList:true,subtree:true});
+    }
+    d.addEventListener('input',function(e){if(e.target&&e.target.id==='mbz-v170-cmd-input')queuePatch()},true);
+    try{d.title='MadeByZebra — Value List · V180 Command Leaderboard Final Fix'}catch(_){}
+  }
+
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+<!-- ========================= /V180 COMMAND LEADERBOARD FINAL FIX ========================= -->
 
 </body>
 </html>
