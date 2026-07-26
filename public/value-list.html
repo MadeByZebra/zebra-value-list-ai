@@ -22626,26 +22626,13 @@ html,body{max-width:100%;overflow-x:hidden!important}
     if(e){e.preventDefault();e.stopPropagation();if(e.stopImmediatePropagation)e.stopImmediatePropagation()}
     closePalette();
     var tab=realLeaderboardTab();
+    if(!tab)return;
 
-    /* Use the real working nav tab first. This keeps the site's private route
-       state synchronized instead of leaving the Home page active. */
-    if(tab){
-      try{tab.click()}catch(_){
-        try{tab.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:w}))}catch(__){}
-      }
-    }else if(typeof w.showLeaderboards==='function'){
-      try{w.showLeaderboards()}catch(_){}
+    /* Synchronous on purpose. The authoritative V150 router stores its page
+       state privately and only updates it from the real nav-tab click. */
+    try{tab.click()}catch(_){
+      try{tab.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,view:w}))}catch(__){}
     }
-
-    /* Last-resort repair for older stacked routers: if the tab click was
-       swallowed, call the public leaderboard route once on the next frame. */
-    w.requestAnimationFrame(function(){
-      var page=q('#leaderboards-page');
-      var visible=page&&page.classList.contains('active')&&w.getComputedStyle(page).display!=='none';
-      if(!visible&&typeof w.showLeaderboards==='function'){
-        try{w.showLeaderboards()}catch(_){}
-      }
-    });
   }
 
   function isLeaderboardButton(btn){
@@ -22679,27 +22666,6 @@ html,body{max-width:100%;overflow-x:hidden!important}
     },true);
   }
 
-  function isTypingTarget(target){
-    if(!target)return false;
-    var tag=String(target.tagName||'').toLowerCase();
-    return tag==='input'||tag==='textarea'||tag==='select'||target.isContentEditable||
-      !!(target.closest&&target.closest('[contenteditable="true"],input,textarea,select'));
-  }
-
-  function installLeaderboardShortcut(){
-    if(w.__MBZ_V180_L_SHORTCUT__)return;
-    w.__MBZ_V180_L_SHORTCUT__=true;
-
-    /* Window capture runs before the old V110 document shortcut. That older
-       handler called a stale route and left Home visible. */
-    w.addEventListener('keydown',function(e){
-      if(e.repeat||e.ctrlKey||e.metaKey||e.altKey||e.shiftKey)return;
-      if(isTypingTarget(e.target))return;
-      if(norm(e.key)!=='l')return;
-      openLeaderboard(e);
-    },true);
-  }
-
   function patchPalette(){
     queued=false;
     var p=q('#mbz-v170-command-palette');
@@ -22715,26 +22681,414 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
   function boot(){
     patchPalette();
-    installLeaderboardShortcut();
     var root=d.body||d.documentElement;
     if(root&&!root.__mbzV180Observed&&w.MutationObserver){
       root.__mbzV180Observed=true;
       new MutationObserver(queuePatch).observe(root,{childList:true,subtree:true});
     }
     d.addEventListener('input',function(e){if(e.target&&e.target.id==='mbz-v170-cmd-input')queuePatch()},true);
-    try{
-      d.title='MadeByZebra — Value List · V180';
-      d.documentElement.setAttribute('data-madebyzebra-version','V180');
-      qa('.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge').forEach(function(b){
-        if(/V\d+/i.test(b.textContent||''))b.textContent=(b.textContent||'').replace(/V\d+/i,'V180');
-      });
-    }catch(_){}
+    try{d.title='MadeByZebra — Value List · V180 Command Leaderboard Final Fix'}catch(_){}
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 <!-- ========================= /V180 COMMAND LEADERBOARD FINAL FIX ========================= -->
+
+
+<!-- ========================= V180 COLORED CORE + CYBERFLY SCANNER FIX ========================= -->
+<style id="mbz-v180-color-scanner-style">
+  .mbz-v180-color-map{display:flex;flex-wrap:wrap;gap:6px;margin:9px 0}
+  .mbz-v180-color-chip{border:1px solid var(--border2);border-radius:999px;background:var(--surface2);padding:5px 8px;font:10px 'DM Mono',monospace;color:var(--text-muted)}
+  .mbz-v180-scan-row{display:grid;grid-template-columns:minmax(145px,1fr) minmax(190px,1.2fr) auto;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px}
+  .mbz-v180-scan-list{display:flex;flex-direction:column;gap:7px;margin-top:9px}
+  @media(max-width:700px){.mbz-v180-scan-row{grid-template-columns:1fr}}
+</style>
+<script id="mbz-v180-color-scanner-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V180_COLOR_SCANNER__)return;
+  window.__MBZ_V180_COLOR_SCANNER__=true;
+
+  var d=document,w=window;
+  function byId(id){return d.getElementById(id)}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function list(){try{return Array.isArray(GLOVES)?GLOVES:[]}catch(_){return []}}
+  function norm(v){return String(v||'').toLowerCase().replace(/0/g,'o').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
+  function exact(name){var n=norm(name),a=list();for(var i=0;i<a.length;i++)if(norm(a[i].n)===n)return a[i];return null}
+  function persist(name){
+    if(!name)return;
+    try{if(typeof owned!=='undefined'&&owned)owned.add(name)}catch(_){ }
+    try{var a=JSON.parse(localStorage.getItem('mbz-owned')||'[]');a.push(name);localStorage.setItem('mbz-owned',JSON.stringify(Array.from(new Set(a))))}catch(_){ }
+    try{if(typeof saveOwned==='function')saveOwned()}catch(_){ }
+  }
+  function clearOwned(){
+    try{if(typeof owned!=='undefined'&&owned)owned.clear()}catch(_){ }
+    try{localStorage.setItem('mbz-owned','[]');localStorage.setItem('mbz_inventory_owned_qty_v1','{}');localStorage.setItem('mbz-owned-qty','{}');window.invOwnedQty={}}catch(_){ }
+  }
+  function familyText(v){
+    var n=norm(v);
+    if(/\b(cyberfly|cyber fly|cf)\b/.test(n))return 'Cyberfly';
+    if(/\bcore\b/.test(n))return 'Core';
+    return '';
+  }
+  var aliases={
+    BLK:['blk','black','dark'],BLU:['blu','blue','cyan'],RED:['red'],PUR:['pur','purple','violet'],
+    PNK:['pnk','pink','magenta'],GRN:['grn','green'],YLW:['ylw','yellow'],ORG:['org','orn','orange']
+  };
+  function colorCode(v){
+    var n=norm(v),compact=n.replace(/\s+/g,'');
+    var keys=Object.keys(aliases);
+    for(var i=0;i<keys.length;i++){
+      var code=keys[i],arr=aliases[code];
+      for(var j=0;j<arr.length;j++){
+        var a=arr[j];
+        if(new RegExp('(^|\\s)'+a+'($|\\s)').test(n)||compact.indexOf(a)>=0)return code;
+      }
+    }
+    var raw=String(v||'').toUpperCase().replace(/0/g,'O');
+    var m=raw.match(/#\s*([A-Z](?:\s*[A-Z]){0,2})/);
+    if(m){
+      var p=m[1].replace(/\s+/g,'');
+      if(p==='G')return 'GRN';if(p==='Y')return 'YLW';if(p==='R')return 'RED';if(p==='O')return 'ORG';
+      if(p==='BLU'||p==='BLUE')return 'BLU';if(p==='BLK')return 'BLK';if(p==='PUR')return 'PUR';if(p==='PNK')return 'PNK';if(p==='GRN')return 'GRN';if(p==='YLW')return 'YLW';if(p==='ORG'||p==='ORN')return 'ORG';if(p==='RED')return 'RED';
+    }
+    return '';
+  }
+  function partialColorCandidates(v){
+    var raw=String(v||'').toUpperCase().replace(/0/g,'O'),m=raw.match(/#\s*([A-Z])/);if(!m)return [];
+    return m[1]==='B'?['BLK','BLU']:m[1]==='P'?['PNK','PUR']:m[1]==='G'?['GRN']:m[1]==='Y'?['YLW']:m[1]==='R'?['RED']:m[1]==='O'?['ORG']:[];
+  }
+  function variantName(family,code){
+    if(!family||!code)return null;
+    var wanted=[];
+    if(family==='Core')wanted=code==='ORG'?['Core [ORN]','Core [ORG]']:['Core ['+code+']'];
+    else if(family==='Cyberfly')wanted=code==='ORG'?['Cyberfly [ORG]','Cyberfly [ORN]']:['Cyberfly ['+code+']'];
+    for(var i=0;i<wanted.length;i++){var g=exact(wanted[i]);if(g)return g}
+    return null;
+  }
+  function parseRange(name){var m=String(name||'').match(/\[\s*(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*\]/i);if(m)return{lo:+m[1],hi:+m[2]};m=String(name||'').match(/\[\s*(\d+)\s*\+\s*\]/i);return m?{lo:+m[1],hi:Infinity}:null}
+  function serialFamily(v){return norm(String(v||'').replace(/\[[^\]]+\]/g,' ').replace(/\b(low|mid|high)\b/ig,' ').replace(/#\s*\d+(?:\s*\/\s*\d+)?/g,' ').replace(/\bserial\s*#?\s*\d+/ig,' '))}
+  function serialResolve(v){
+    var s=String(v||''),m=s.match(/#\s*(\d+)/i)||s.match(/\bserial\s*#?\s*(\d+)/i)||s.match(/\b(\d+)\s*\/\s*\d+\b/);if(!m)return null;
+    var num=+m[1],f=serialFamily(s),best=null;
+    list().forEach(function(g){var r=parseRange(g.n);if(!r)return;var gf=serialFamily(g.n);if(!(gf===f||gf.indexOf(f)>=0||f.indexOf(gf)>=0))return;if(num<r.lo||num>r.hi)return;var score=(gf===f?10000:0)+gf.length;if(!best||score>best.score)best={g:g,score:score,serial:num,read:s}});
+    return best;
+  }
+  function chunks(text){
+    var raw=String(text||'').replace(/#\s*([A-Z])\s+([A-Z])\s+([A-Z])/gi,'#$1$2$3');
+    var base=raw.split(/\n|\r|\t|\||•|·|;|,/).map(function(x){return x.trim()}).filter(Boolean);
+    var familyRe=/\b(cyber\s*fly|cyberfly|cf|core)\b/ig,m,starts=[];
+    while((m=familyRe.exec(raw)))starts.push(m.index);
+    for(var i=0;i<starts.length;i++)base.push(raw.slice(Math.max(0,starts[i]-12),starts[i+1]||Math.min(raw.length,starts[i]+55)).trim());
+    return Array.from(new Set(base)).slice(0,600);
+  }
+  function parseText(text){
+    var confirmed={},review=[],reads=chunks(text);
+    reads.forEach(function(line){
+      var sr=serialResolve(line);if(sr){confirmed[sr.g.n]={g:sr.g,read:line,kind:'serial'};return}
+      var ex=exact(line);if(ex){confirmed[ex.n]={g:ex,read:line,kind:'exact'};return}
+      var fam=familyText(line),code=colorCode(line);
+      if(fam&&code){var vg=variantName(fam,code);if(vg){confirmed[vg.n]={g:vg,read:line,kind:'color'};return}}
+      if(fam){
+        var simple=norm(line).replace(/\b(cf|cyber fly)\b/g,'cyberfly');
+        var base=exact(fam);
+        if(base&&(simple===norm(fam)||simple==='cyberfly')){confirmed[base.n]={g:base,read:line,kind:'base'};return}
+        var pcs=partialColorCandidates(line),cand=pcs.map(function(c){var g=variantName(fam,c);return g&&g.n}).filter(Boolean);
+        if(cand.length)review.push({text:line,candidates:Array.from(new Set(cand)),reason:'color tag is cut off'});
+        else{
+          var variants=list().filter(function(g){return norm(g.n).indexOf(norm(fam))===0&&/\[[A-Z]{3}\]/i.test(g.n)}).map(function(g){return g.n});
+          review.push({text:line,candidates:variants.slice(0,10),reason:'family detected but color was not readable'});
+        }
+        return;
+      }
+      try{
+        if(typeof aiFindMatches==='function'){
+          var hits=aiFindMatches(line,4)||[];
+          if(hits.length===1&&norm(hits[0].n)===norm(line))confirmed[hits[0].n]={g:hits[0],read:line,kind:'exact'};
+          else if(hits.length)review.push({text:line,candidates:hits.map(function(g){return g.n}),reason:'fuzzy text match'});
+        }
+      }catch(_){ }
+    });
+    return {confirmed:Object.keys(confirmed).map(function(k){return confirmed[k]}),review:review,reads:reads};
+  }
+  function reviewHtml(review){
+    if(!review.length)return '';
+    return '<div class="inv-section-title">Needs review</div><div class="inv-text-table">'+review.slice(0,100).map(function(r){return '<div class="inv-text-row"><div>'+esc(r.text)+'</div><div>'+r.candidates.map(function(n){return '<button class="add-btn" data-v180-own="'+encodeURIComponent(n)+'">✓ '+esc(n)+'</button>'}).join(' ')+'</div><div>'+esc(r.reason||'review')+'</div><div><span class="inv-status-review">REVIEW</span></div></div>'}).join('')+'</div>';
+  }
+  function renderTextResult(result){
+    var out=byId('inv-results');if(!out)return;
+    var saved=result.confirmed.map(function(r){return '<div class="mbz-v180-scan-row"><span>'+esc(r.read)+'</span><strong>'+esc(r.g.n)+'</strong><span class="inv-status-saved">SAVED</span></div>'}).join('');
+    out.innerHTML='<div class="ai-answer"><strong>V180 colored glove scan complete.</strong><br>Pasted text now recognizes colored <strong>Core</strong> and <strong>Cyberfly / CF</strong> tags, including OCR aliases such as ORG/ORN.<div class="mbz-v180-color-map"><span class="mbz-v180-color-chip">BLK</span><span class="mbz-v180-color-chip">BLU</span><span class="mbz-v180-color-chip">RED</span><span class="mbz-v180-color-chip">PUR</span><span class="mbz-v180-color-chip">PNK</span><span class="mbz-v180-color-chip">GRN</span><span class="mbz-v180-color-chip">YLW</span><span class="mbz-v180-color-chip">ORG/ORN</span></div><div class="inv-counts"><span class="inv-count-pill">Saved: '+result.confirmed.length+'</span><span class="inv-count-pill">Review: '+result.review.length+'</span></div><div class="inv-section-title">Saved to Inventory</div><div class="mbz-v180-scan-list">'+(saved||'<div class="wl-empty">No exact gloves found. Paste one item per line, for example: Core #BLU or Cyberfly #PUR.</div>')+'</div>'+reviewHtml(result.review)+'</div>';
+  }
+  window.scanInventoryText=function(){
+    var box=byId('inv-ocr-text'),text=box?box.value:'',p=byId('inv-progress');
+    if(!String(text).trim()){if(p)p.textContent='Paste glove names first.';var out=byId('inv-results');if(out)out.innerHTML='<div class="ai-answer">Paste glove names into the box, then click <strong>Smart Scan Text</strong>.</div>';return}
+    var result=parseText(text),replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
+    if(replace)clearOwned();result.confirmed.forEach(function(r){persist(r.g.n)});
+    try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(_){ }
+    renderTextResult(result);if(p)p.textContent='Text scan done — saved '+result.confirmed.length+' exact gloves; '+result.review.length+' need review.';
+  };
+  d.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('[data-v180-own]');if(!b)return;var n=decodeURIComponent(b.getAttribute('data-v180-own'));persist(n);b.classList.add('added');b.textContent='Owned ✓';try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(_){ }},true);
+  d.addEventListener('input',function(e){if(e.target&&e.target.id==='inv-ocr-text'){var p=byId('inv-progress');if(p)p.textContent='Pasted text ready. Click Smart Scan Text.'}},true);
+
+  /* Guarantee the L shortcut uses the real Leaderboards tab. */
+  function typing(t){return !!(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable))}
+  d.addEventListener('keydown',function(e){
+    if(String(e.key||'').toLowerCase()!=='l'||typing(e.target)||e.ctrlKey||e.metaKey||e.altKey||e.repeat)return;
+    var tab=byId('mbz-v93-leaderboards-tab')||Array.prototype.slice.call(d.querySelectorAll('#nav-tabs .ntab')).find(function(x){return norm(x.textContent)==='leaderboards'});
+    if(tab){e.preventDefault();try{tab.click()}catch(_){ }}
+  },true);
+  function keepV180(){
+    try{d.title='MadeByZebra — Value List · V180 Colored Scanner'}catch(_){ }
+    Array.prototype.slice.call(d.querySelectorAll('.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge')).forEach(function(b){if(/V\d+/.test(b.textContent||''))b.textContent='V180 · Colored Scanner'});
+    d.documentElement.setAttribute('data-scanner-version','V180-colored-core-cyberfly');
+  }
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',keepV180,{once:true});else keepV180();
+  [100,500,1600,4000].forEach(function(ms){setTimeout(keepV180,ms)});
+})();
+</script>
+<!-- ========================= /V180 COLORED CORE + CYBERFLY SCANNER FIX ========================= -->
+
+
+<!-- ========================= V180 SHOWROOM HAND SWITCH FIX ========================= -->
+<style id="mbz-v180-showroom-hand-style">
+  /* V143 forced translateZ(0), which accidentally overrode the older hand mirror. */
+  html:not(.mbz-v125-left-glove) #mbz-v138-stage-mount .mbz-glb-grid-host canvas,
+  html:not(.mbz-v125-left-glove) #home-page .z39-showroom-visual .mbz-glb-grid-host canvas{
+    transform:translateZ(0) scaleX(1)!important;
+    transform-origin:50% 50%!important;
+  }
+  html.mbz-v125-left-glove #mbz-v138-stage-mount .mbz-glb-grid-host canvas,
+  html.mbz-v125-left-glove #home-page .z39-showroom-visual .mbz-glb-grid-host canvas{
+    transform:translateZ(0) scaleX(-1)!important;
+    transform-origin:50% 50%!important;
+  }
+  html:not(.mbz-v125-left-glove) #mbz-v138-stage-mount .mbz-v133-prototype-hand,
+  html:not(.mbz-v125-left-glove) #home-page .z39-showroom-visual .mbz-v133-prototype-hand{
+    transform:scaleX(1)!important;
+    transform-origin:50% 50%!important;
+  }
+  html.mbz-v125-left-glove #mbz-v138-stage-mount .mbz-v133-prototype-hand,
+  html.mbz-v125-left-glove #home-page .z39-showroom-visual .mbz-v133-prototype-hand{
+    transform:scaleX(-1)!important;
+    transform-origin:50% 50%!important;
+  }
+  #mbz-v138-hand-btn[aria-pressed="true"]{
+    background:var(--text)!important;
+    color:var(--bg)!important;
+    border-color:var(--text)!important;
+  }
+</style>
+<script id="mbz-v180-showroom-hand-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V180_SHOWROOM_HAND_FIX__)return;
+  window.__MBZ_V180_SHOWROOM_HAND_FIX__=true;
+
+  var d=document,w=window,root=d.documentElement;
+  var KEY='mbzGloveHand';
+
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function read(){try{return localStorage.getItem(KEY)==='left'?'left':'right'}catch(_){return 'right'}}
+  function write(v){try{localStorage.setItem(KEY,v)}catch(_){}}
+
+  function paint(v){
+    var left=v==='left',sx=left?-1:1;
+    root.classList.toggle('mbz-v125-left-glove',left);
+    root.style.setProperty('--mbz-v125-glove-scale-x',String(sx));
+
+    qa('.z39-showroom-visual .mbz-glb-grid-host canvas').forEach(function(canvas){
+      canvas.style.setProperty('transform','translateZ(0) scaleX('+sx+')','important');
+      canvas.style.setProperty('transform-origin','50% 50%','important');
+    });
+    qa('.z39-showroom-visual .mbz-v133-prototype-hand').forEach(function(hand){
+      hand.style.setProperty('transform','scaleX('+sx+')','important');
+      hand.style.setProperty('transform-origin','50% 50%','important');
+    });
+
+    var studio=q('#mbz-v138-hand-btn');
+    if(studio){
+      studio.textContent=left?'Left Hand':'Right Hand';
+      studio.setAttribute('aria-pressed',left?'true':'false');
+      studio.setAttribute('aria-label',left?'Current glove hand: left. Click for right hand.':'Current glove hand: right. Click for left hand.');
+      studio.title=left?'Switch to Right Hand':'Switch to Left Hand';
+    }
+
+    qa('#mbz-v125-glove-hand-setting').forEach(function(btn){
+      var note=q('.mbz-v51-scroll-note',btn),pill=q('.mbz-v125-hand-pill',btn);
+      if(note)note.textContent=(left?'Left hand':'Right hand')+' · showroom glove';
+      if(pill)pill.textContent=left?'L':'R';
+      btn.setAttribute('aria-pressed',left?'true':'false');
+    });
+  }
+
+  function set(v){
+    v=v==='left'?'left':'right';
+    write(v);paint(v);
+    try{w.dispatchEvent(new Event('resize'))}catch(_){}
+  }
+
+  /* Own the Studio hand button so older duplicate handlers cannot toggle twice. */
+  d.addEventListener('click',function(e){
+    var btn=e.target&&e.target.closest?e.target.closest('#mbz-v138-hand-btn'):null;
+    if(!btn)return;
+    e.preventDefault();
+    e.stopPropagation();
+    if(e.stopImmediatePropagation)e.stopImmediatePropagation();
+    set(read()==='left'?'right':'left');
+  },true);
+
+  /* Repaint after the showroom/model is rebuilt or an older Settings handler changes the class. */
+  var queued=false;
+  function queuePaint(){
+    if(queued)return;queued=true;
+    requestAnimationFrame(function(){queued=false;paint(read())});
+  }
+  new MutationObserver(queuePaint).observe(root,{attributes:true,attributeFilter:['class']});
+  new MutationObserver(queuePaint).observe(d.documentElement,{childList:true,subtree:true});
+
+  function boot(){paint(read())}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  w.addEventListener('load',function(){[60,250,700,1500].forEach(function(ms){setTimeout(boot,ms)})},{once:true,passive:true});
+})();
+</script>
+<!-- ========================= /V180 SHOWROOM HAND SWITCH FIX ========================= -->
+
+<!-- ========================= V180 MULTI-GLOVE + COLOR + SERIAL + CUSTOM SERIAL SCANNER ========================= -->
+<style id="mbz-v180-multi-scanner-style">
+  .mbz-v180multi-summary{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+  .mbz-v180multi-section{margin-top:13px}
+  .mbz-v180multi-row{display:grid;grid-template-columns:minmax(135px,1fr) minmax(180px,1.25fr) 92px 86px;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2);font-size:12px;margin-top:7px}
+  .mbz-v180multi-read{min-width:0;overflow-wrap:anywhere;color:var(--text-muted)}
+  .mbz-v180multi-match{min-width:0;overflow-wrap:anywhere}
+  .mbz-v180multi-meta{font:10px 'DM Mono',monospace;color:var(--text-dim);margin-top:3px}
+  .mbz-v180multi-custom{border-color:color-mix(in srgb,#f59e0b 38%,var(--border));background:linear-gradient(135deg,color-mix(in srgb,#f59e0b 8%,var(--surface2)),var(--surface2))}
+  .mbz-v180multi-review{border-color:color-mix(in srgb,#facc15 30%,var(--border))}
+  .mbz-v180multi-review-buttons{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+  @media(max-width:760px){.mbz-v180multi-row{grid-template-columns:1fr}.mbz-v180multi-row .inv-status-saved,.mbz-v180multi-row .inv-status-review{justify-self:start}}
+</style>
+<script id="mbz-v180-multi-scanner-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V180_MULTI_SCANNER__)return;
+  window.__MBZ_V180_MULTI_SCANNER__=true;
+
+  var d=document,w=window;
+  var CUSTOM_KEY='mbz-custom-serial-inventory-v180';
+  function id(x){return d.getElementById(x)}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+  function gloves(){try{return Array.isArray(GLOVES)?GLOVES:[]}catch(_){return []}}
+  function customDefs(){try{return Array.isArray(CUSTOM_SERIALS)?CUSTOM_SERIALS:[]}catch(_){return []}}
+  function uniq(a){return Array.from(new Set((a||[]).filter(Boolean)))}
+  function norm(v){return String(v||'').toLowerCase().replace(/0/g,'o').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim()}
+  function customNorm(v){return String(v==null?'':v).toLowerCase().replace(/[“”]/g,'"').replace(/[‘’]/g,"'").replace(/^#+\s*/,'').replace(/[^a-z0-9-]+/g,' ').replace(/\s+/g,' ').trim()}
+  function familyNorm(v){return norm(String(v||'').replace(/\[[^\]]+\]/g,' ').replace(/#\s*-?\d+(?:\s*\/\s*\d+)?/g,' ').replace(/\b(low|mid|high|serial|limited|class|custom)\b/ig,' '))}
+  function exact(name){var n=norm(name),a=gloves();for(var i=0;i<a.length;i++)if(norm(a[i].n)===n)return a[i];return null}
+  function parseRange(name){var m=String(name||'').match(/\[\s*(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*\]/i);if(m)return{lo:+m[1],hi:+m[2]};m=String(name||'').match(/\[\s*(\d+)\s*\+\s*\]/i);return m?{lo:+m[1],hi:Infinity}:null}
+  function serialNumber(v){var s=String(v||''),m=s.match(/#\s*(\d+)/i)||s.match(/\bserial\s*#?\s*(\d+)/i)||s.match(/\b(\d+)\s*\/\s*\d+\b/);return m?+m[1]:0}
+  function serialTotal(v){var m=String(v||'').match(/(?:#\s*)?\d+\s*\/\s*(\d+)/i);return m?+m[1]:0}
+  function serialResolve(v){
+    var n=serialNumber(v);if(!n)return null;var fam=familyNorm(v),best=null;
+    gloves().forEach(function(g){var r=parseRange(g.n);if(!r)return;var gf=familyNorm(g.n);if(!fam||!(gf===fam||gf.indexOf(fam)>=0||fam.indexOf(gf)>=0))return;if(n<r.lo||n>r.hi)return;var score=(gf===fam?10000:0)+gf.length;if(!best||score>best.score)best={candidate:g.n,glove:g,serialNumber:n,serialTotal:serialTotal(v)||0,score:score}});
+    return best;
+  }
+  var aliases={BLK:['blk','black','dark'],BLU:['blu','blue','cyan'],RED:['red'],PUR:['pur','purple','violet'],PNK:['pnk','pink','magenta'],GRN:['grn','green'],YLW:['ylw','yellow'],ORG:['org','orn','orange']};
+  function colorFamily(v){var n=norm(v);if(/\b(cyberfly|cyber fly|cf)\b/.test(n))return'Cyberfly';if(/\bcore\b/.test(n))return'Core';return''}
+  function colorCode(v){
+    var n=norm(v),compact=n.replace(/\s+/g,''),keys=Object.keys(aliases);
+    for(var i=0;i<keys.length;i++){var code=keys[i],arr=aliases[code];for(var j=0;j<arr.length;j++){var a=arr[j];if(new RegExp('(^|\\s)'+a+'($|\\s)').test(n)||compact.indexOf(a)>=0)return code}}
+    var raw=String(v||'').toUpperCase().replace(/0/g,'O'),m=raw.match(/#\s*([A-Z](?:\s*[A-Z]){0,3})/);if(!m)return'';var p=m[1].replace(/\s+/g,'');
+    if(p==='ORN')return'ORG';return['BLK','BLU','RED','PUR','PNK','GRN','YLW','ORG'].indexOf(p)>=0?p:'';
+  }
+  function colorResolve(v){var fam=colorFamily(v),code=colorCode(v);if(!fam||!code)return null;var names=fam==='Core'?(code==='ORG'?['Core [ORN]','Core [ORG]']:['Core ['+code+']']):(code==='ORG'?['Cyberfly [ORG]','Cyberfly [ORN]']:['Cyberfly ['+code+']']);for(var i=0;i<names.length;i++){var g=exact(names[i]);if(g)return{candidate:g.n,glove:g,colorCode:code,family:fam}}return null}
+  function rawHasCustom(raw,custom){
+    if(custom==null||custom==='')return false;raw=String(raw||'');custom=String(custom);
+    if(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(custom))return raw.indexOf(custom)>=0;
+    var rn=customNorm(raw),cn=customNorm(custom);if(!cn)return raw.indexOf(custom)>=0;
+    return rn===cn||rn.indexOf(cn)>=0||new RegExp('(^|\\s)'+cn.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'($|\\s)').test(rn);
+  }
+  function customResolve(v){
+    var raw=String(v||''),fam=familyNorm(raw),defs=customDefs(),matches=[];
+    defs.forEach(function(x){var xf=familyNorm(x.glove);if(!fam||!(fam===xf||fam.indexOf(xf)>=0||xf.indexOf(fam)>=0))return;if(rawHasCustom(raw,x.custom))matches.push(x)});
+    if(matches.length!==1)return null;var x=matches[0],label=x.glove+' [CUSTOM: '+(x.custom||'blank')+']';
+    var familyMatches=gloves().filter(function(g){var gf=familyNorm(g.n),xf=familyNorm(x.glove);return(gf===xf||gf.indexOf(xf)>=0||xf.indexOf(gf)>=0)&&!parseRange(g.n)});
+    return{label:label,glove:x.glove,custom:x.custom,record:x,baseCandidate:familyMatches.length===1?familyMatches[0].n:null};
+  }
+  function loadQty(){var q={};try{q=JSON.parse(localStorage.getItem('mbz_inventory_owned_qty_v1')||localStorage.getItem('mbz-owned-qty')||'{}')||{}}catch(_){q={}}return q}
+  function persistQty(name,qty){if(!name)return;qty=Math.max(1,Number(qty||1));try{if(typeof owned!=='undefined'&&owned)owned.add(name)}catch(_){ }
+    try{var a=JSON.parse(localStorage.getItem('mbz-owned')||'[]');a.push(name);localStorage.setItem('mbz-owned',JSON.stringify(uniq(a)));var q=loadQty();q[name]=Number(q[name]||0)+qty;localStorage.setItem('mbz_inventory_owned_qty_v1',JSON.stringify(q));localStorage.setItem('mbz-owned-qty',JSON.stringify(q));window.invOwnedQty=q}catch(_){ }
+    try{if(typeof saveOwned==='function')saveOwned()}catch(_){ }
+  }
+  function clearAll(){try{if(typeof owned!=='undefined'&&owned)owned.clear()}catch(_){ }try{localStorage.setItem('mbz-owned','[]');localStorage.setItem('mbz_inventory_owned_qty_v1','{}');localStorage.setItem('mbz-owned-qty','{}');localStorage.setItem(CUSTOM_KEY,'[]');window.invOwnedQty={}}catch(_){ }}
+  function loadCustom(){try{var a=JSON.parse(localStorage.getItem(CUSTOM_KEY)||'[]');return Array.isArray(a)?a:[]}catch(_){return[]}}
+  function saveCustom(rows,replace){var a=replace?[]:loadCustom(),map={};a.forEach(function(x){map[x.label]=x});(rows||[]).forEach(function(x){if(!x||!x.label)return;if(map[x.label])map[x.label].qty=Number(map[x.label].qty||1)+Number(x.qty||1);else map[x.label]=Object.assign({qty:1},x)});var out=Object.keys(map).map(function(k){return map[k]});localStorage.setItem(CUSTOM_KEY,JSON.stringify(out));return out}
+  function familyCandidates(v){var f=familyNorm(v);if(!f)return[];return gloves().filter(function(g){var gf=familyNorm(g.n);return gf===f||gf.indexOf(f)>=0||f.indexOf(gf)>=0}).map(function(g){return g.n}).slice(0,14)}
+  function knownFamilies(){var out=[];gloves().forEach(function(g){var n=String(g.n||'').replace(/\[[^\]]+\]/g,' ').replace(/\b(low|mid|high)\b/ig,' ').replace(/\s+/g,' ').trim();if(n.length>1)out.push(n)});customDefs().forEach(function(x){if(x.glove)out.push(x.glove)});out.push('Cyberfly','Cyber fly','CF','Core');return uniq(out).sort(function(a,b){return b.length-a.length})}
+  function splitKnown(line){
+    line=String(line||'').trim();if(!line)return[];var hits=[],families=knownFamilies();
+    families.forEach(function(f){var re=new RegExp('(^|[^a-z0-9])('+f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s*')+')(?=$|[^a-z0-9])','ig'),m;while((m=re.exec(line))){var pos=m.index+(m[1]||'').length;hits.push({pos:pos,len:m[2].length});if(re.lastIndex===m.index)re.lastIndex++}});
+    hits.sort(function(a,b){return a.pos-b.pos||b.len-a.len});var clean=[];hits.forEach(function(h){if(!clean.length||h.pos>clean[clean.length-1].pos)clean.push(h)});if(clean.length<2)return[line];var out=[];for(var i=0;i<clean.length;i++){var s=line.slice(clean[i].pos,clean[i+1]?clean[i+1].pos:line.length).replace(/^[,;|•·\s]+|[,;|•·\s]+$/g,'').trim();if(s)out.push(s)}return out.length?out:[line]
+  }
+  function chunks(text){var base=String(text||'').replace(/#\s*([A-Z])\s+([A-Z])\s+([A-Z])/gi,'#$1$2$3').split(/\n|\r|\t|\||•|·|;/).map(function(x){return x.trim()}).filter(Boolean),out=[];base.forEach(function(line){splitKnown(line).forEach(function(x){out.push(x)})});return out.slice(0,800)}
+  function parseText(text){
+    var items=[],review=[];chunks(text).forEach(function(line,index){
+      var custom=customResolve(line);if(custom){items.push({kind:'custom',status:'confirmed',visibleText:line,customLabel:custom.label,customRecord:custom.record,baseCandidate:custom.baseCandidate,confidence:100,imageIndex:0,cardIndex:index+1});return}
+      var sr=serialResolve(line);if(sr){items.push({kind:'serial',status:'confirmed',visibleText:line,candidate:sr.candidate,serialNumber:sr.serialNumber,serialTotal:sr.serialTotal,confidence:100,imageIndex:0,cardIndex:index+1});return}
+      var ex=exact(line);if(ex){items.push({kind:'standard',status:'confirmed',visibleText:line,candidate:ex.n,confidence:100,imageIndex:0,cardIndex:index+1});return}
+      var cr=colorResolve(line);if(cr){items.push({kind:'colored',status:'confirmed',visibleText:line,candidate:cr.candidate,colorCode:cr.colorCode,confidence:100,imageIndex:0,cardIndex:index+1});return}
+      var cands=familyCandidates(line);if(cands.length===1)items.push({kind:'standard',status:'confirmed',visibleText:line,candidate:cands[0],confidence:92,imageIndex:0,cardIndex:index+1});
+      else review.push({text:line,candidates:cands,confidence:cands.length?65:35,reason:cands.length?'family has multiple color/serial variants':'name not matched'});
+    });return{items:items,review:review,detectionCount:items.length+review.length,imageCount:0,provider:'Local text parser',model:'V180'}
+  }
+  function normalizeApi(data){
+    if(Array.isArray(data.items))return data;
+    var items=[];(data.confirmed||[]).forEach(function(x){items.push({kind:'standard',status:'confirmed',candidate:typeof x==='string'?x:x.candidate,visibleText:typeof x==='string'?x:(x.visibleText||x.text||'')})});
+    (data.colored||[]).forEach(function(x){items.push(Object.assign({kind:'colored',status:x.status||'confirmed'},x))});
+    (data.serials||[]).forEach(function(x){items.push(Object.assign({kind:'serial',status:x.status||'confirmed',serialNumber:x.serial},x))});
+    (data.customSerials||[]).forEach(function(x){items.push(Object.assign({kind:'custom',status:x.status||'confirmed',customLabel:x.label,customRecord:{glove:x.glove,custom:x.custom}},x))});
+    data.items=items;return data;
+  }
+  function apply(data,replace){
+    data=normalizeApi(data||{});if(replace)clearAll();var counts={},customMap={},review=[];
+    (data.items||[]).forEach(function(x){
+      if(x.status==='confirmed'&&x.kind==='custom'&&x.customLabel){var k=x.customLabel;if(!customMap[k])customMap[k]={label:k,glove:(x.customRecord||{}).glove||x.visibleName||'',custom:(x.customRecord||{}).custom||x.customSerialText||'',qty:0,confidence:x.confidence||0,reason:x.reason||'',baseCandidate:x.baseCandidate||null};customMap[k].qty++;return}
+      if(x.status==='confirmed'&&x.candidate&&exact(x.candidate)){counts[x.candidate]=(counts[x.candidate]||0)+1;return}
+      if(x.status!=='confirmed')review.push({text:x.visibleText||x.visibleName||'uncertain card',candidates:x.candidate?[x.candidate]:[],confidence:x.confidence||0,reason:x.reason||'needs review',kind:x.kind||'unknown',customLabel:x.customLabel||''})
+    });
+    Object.keys(counts).forEach(function(n){persistQty(n,counts[n])});var customRows=Object.keys(customMap).map(function(k){return customMap[k]});saveCustom(customRows,replace);
+    (data.review||[]).forEach(function(x){review.push({text:x.text||x.visibleText||'uncertain card',candidates:uniq(x.candidates||[]),confidence:x.confidence||0,reason:x.reason||'needs review',kind:x.kind||'unknown',customLabel:x.customLabel||''})});
+    try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(_){ }try{if(typeof addHistory==='function')addHistory('owned','V180 multi-glove scanner',Object.keys(counts).length+' glove types, '+customRows.length+' custom serials')}catch(_){ }
+    return{data:data,counts:counts,customRows:customRows,review:review}
+  }
+  function confirmCandidate(encoded){var n=decodeURIComponent(encoded);if(exact(n)){persistQty(n,1);try{if(typeof updateInventoryStat==='function')updateInventoryStat()}catch(_){ }}}
+  w.mbzV180MultiConfirm=confirmCandidate;
+  function rowRead(x){var src=x.imageIndex?'Image '+x.imageIndex+(x.cardIndex?' · card '+x.cardIndex:''):'Pasted text';return'<div class="mbz-v180multi-read">'+esc(x.visibleText||x.visibleName||x.text||'card')+'<div class="mbz-v180multi-meta">'+esc(src)+'</div></div>'}
+  function render(applied){
+    var out=id('inv-results');if(!out)return;var data=applied.data,counts=applied.counts,customRows=applied.customRows,review=applied.review;
+    var standard=Object.keys(counts).map(function(n){var g=exact(n),q=counts[n];return'<div class="mbz-v180multi-row">'+rowRead({visibleText:q>1?q+' cards detected':'card detected'})+'<div class="mbz-v180multi-match"><strong>'+esc(n)+'</strong><div class="mbz-v180multi-meta">'+(g?esc((g.vs||g.v)+' · Class '+g.cls+' · Tier '+g.t):'exact database match')+'</div></div><div>x'+q+'</div><span class="inv-status-saved">SAVED</span></div>'}).join('');
+    var custom=customRows.map(function(x){return'<div class="mbz-v180multi-row mbz-v180multi-custom">'+rowRead({visibleText:x.glove+' #'+x.custom})+'<div class="mbz-v180multi-match"><strong>'+esc(x.label)+'</strong><div class="mbz-v180multi-meta">Saved in custom-serial inventory'+(x.baseCandidate?' · base '+esc(x.baseCandidate):'')+'</div></div><div>x'+x.qty+'</div><span class="inv-status-saved">CUSTOM</span></div>'}).join('');
+    var reviews=review.slice(0,180).map(function(x){var buttons=uniq(x.candidates||[]).slice(0,10).map(function(n){return'<button class="add-btn" data-v180multi-own="'+encodeURIComponent(n)+'">✓ '+esc(n)+'</button>'}).join(' ');return'<div class="mbz-v180multi-row mbz-v180multi-review">'+rowRead({visibleText:x.text})+'<div class="mbz-v180multi-match"><strong>Review before saving</strong><div class="mbz-v180multi-meta">'+esc(x.reason||'uncertain')+'</div><div class="mbz-v180multi-review-buttons">'+(buttons||'No exact candidate')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div><span class="inv-status-review">REVIEW</span></div>'}).join('');
+    var totalCards=Number(data.detectionCount||(data.items||[]).length||0),images=Number(data.imageCount||0),savedCards=Object.keys(counts).reduce(function(a,k){return a+counts[k]},0)+customRows.reduce(function(a,x){return a+x.qty},0);
+    out.innerHTML='<div class="ai-answer"><strong>V180 multi-glove scanner complete.</strong><br>It scans every visible card across multiple screenshots, keeps duplicate quantities, resolves Core/Cyberfly colors, maps numeric serials to exact ranges, and saves known custom serials separately.<div class="mbz-v180multi-summary"><span class="inv-count-pill">Images: '+images+'</span><span class="inv-count-pill">Cards detected: '+totalCards+'</span><span class="inv-count-pill" style="color:#86efac">Cards saved: '+savedCards+'</span><span class="inv-count-pill">Glove types: '+Object.keys(counts).length+'</span><span class="inv-count-pill" style="color:#fbbf24">Custom serials: '+customRows.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+review.length+'</span></div>'+(standard?'<div class="mbz-v180multi-section"><div class="inv-section-title">Saved standard, colored, and numeric-serial gloves</div>'+standard+'</div>':'')+(custom?'<div class="mbz-v180multi-section"><div class="inv-section-title">Saved custom serials</div>'+custom+'</div>':'')+(reviews?'<div class="mbz-v180multi-section"><div class="inv-section-title">Needs review</div>'+reviews+'</div>':'')+(!standard&&!custom?'<div class="wl-empty">No cards were safe to auto-save. Use closer screenshots or review the uncertain reads.</div>':'')+'<div class="ai-note">'+esc(data.notes||'')+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+  }
+  function readFile(file){return new Promise(function(resolve,reject){var fr=new FileReader();fr.onload=function(){var source=String(fr.result||''),img=new Image();img.onload=function(){try{var max=1800,scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height)),cw=Math.max(1,Math.round((img.naturalWidth||img.width)*scale)),ch=Math.max(1,Math.round((img.naturalHeight||img.height)*scale)),c=d.createElement('canvas');c.width=cw;c.height=ch;var ctx=c.getContext('2d');ctx.drawImage(img,0,0,cw,ch);resolve(c.toDataURL('image/jpeg',.9))}catch(e){resolve(source)}};img.onerror=function(){resolve(source)};img.src=source};fr.onerror=reject;fr.readAsDataURL(file)})}
+  w.scanInventoryImage=async function(){
+    var input=id('inv-img'),files=input&&input.files?Array.from(input.files):[],out=id('inv-results'),p=id('inv-progress');if(!files.length){if(p)p.textContent='Choose one or more screenshots first.';return}
+    if(out)out.innerHTML='<div class="ai-answer"><strong>Scanning every visible glove card…</strong><br>Reading names, Core/Cyberfly colors, numeric serials, and custom serials across '+Math.min(files.length,10)+' screenshot(s).</div>';
+    try{var images=[];for(var i=0;i<Math.min(files.length,10);i++){if(p)p.textContent='Preparing image '+(i+1)+' of '+Math.min(files.length,10)+'…';images.push(await readFile(files[i]))}if(p)p.textContent='Calling /api/scan — this can take up to a minute…';
+      var payload={images:images,gloveNames:gloves().map(function(g){return g.n}),customSerials:customDefs(),serialMode:true,multiple:true};var res=await fetch('/api/scan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),data=await res.json().catch(function(){return{error:'Bad JSON response from /api/scan'}});if(!res.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
+      if(id('inv-ocr-text'))id('inv-ocr-text').value=JSON.stringify(data,null,2);var replace=!id('inv-add-mode')||!id('inv-add-mode').checked,applied=apply(data,replace);render(applied);if(p)p.textContent='Done — '+(data.detectionCount||(data.items||[]).length||0)+' cards processed; '+applied.review.length+' need review.';
+    }catch(e){if(out)out.innerHTML='<div class="ai-answer"><strong>Multi-glove scan failed.</strong><br>'+esc(e&&e.message?e.message:e)+'<div class="ai-note">The pasted-text scanner still works. Make sure the newest app/api/scan/route.ts is deployed and the Gemini environment keys are set.</div></div>';if(p)p.textContent='Scan failed.'}
+  };
+  w.scanInventoryText=function(){var box=id('inv-ocr-text'),text=box?box.value:'',p=id('inv-progress');if(!String(text).trim()){if(p)p.textContent='Paste glove names first.';return}var data=parseText(text),replace=!id('inv-add-mode')||!id('inv-add-mode').checked,applied=apply(data,replace);render(applied);if(p)p.textContent='Text scan done — '+data.detectionCount+' entries processed; '+applied.review.length+' need review.'};
+  d.addEventListener('click',function(e){var b=e.target&&e.target.closest&&e.target.closest('[data-v180multi-own]');if(!b)return;e.preventDefault();confirmCandidate(b.getAttribute('data-v180multi-own'));b.textContent='Owned ✓';b.classList.add('added')},true);
+  function keepVersion(){d.documentElement.setAttribute('data-scanner-version','V180-multi-color-serial-custom');try{d.title='MadeByZebra — Value List · V180'}catch(_){ }}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',keepVersion,{once:true});else keepVersion();
+})();
+</script>
+<!-- ========================= /V180 MULTI-GLOVE + COLOR + SERIAL + CUSTOM SERIAL SCANNER ========================= -->
 
 </body>
 </html>
