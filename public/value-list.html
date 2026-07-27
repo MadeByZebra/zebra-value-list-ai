@@ -5929,7 +5929,7 @@ console.log('Scanner V10 strict smart OCR loaded.');
     const el=$('ai-content');
     if(!el){ if(oldRender) oldRender(); return; }
     el.innerHTML=`<div class="ai-box">
-      <div class="ai-row"><strong style="font-size:13px">🤖 Real Gemini AI Helper</strong><span class="ai-pill">/api/ai connected</span><span class="ai-pill">uses glove context</span></div>
+      <div class="ai-row"><strong style="font-size:13px">🤖 Real AI Helper</strong><span class="ai-pill">/api/ai connected</span><span class="ai-pill">uses glove context</span></div>
       <div class="ai-row" style="margin-top:10px">
         <input id="ai-input" class="ai-input" placeholder="Ask naturally: build me a wishlist, is this trade good, what am I missing, explain values..." onkeydown="if(event.key==='Enter')askAI()">
         <button class="ai-send" onclick="askAI()">Ask Real AI</button>
@@ -21919,7 +21919,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
   var COMMANDS = [
     ['Home','Open main home page','home','⌂'],['All Gloves','Browse every value','all','ALL'],['Leaderboards','Open collection leaderboard','leaderboards','#'],
-    ['Trade Calculator','Compare a trade','trade','⇄'],['AI Helper / Scanner','Open AI scanner tools','ai','AI'],['Wishlist','Open saved wishlist','wishlist','★'],
+    ['Trade Calculator','Compare a trade','trade','⇄'],['Real AI Helper','Open real AI helper and scanner tools','ai','AI'],['Wishlist','Open saved wishlist','wishlist','★'],
     ['Inventory','Open owned/missing inventory','inventory','🎒'],['Updates','Open changelog','updates','UP'],['History','Open action history','history','H'],
     ['Class Index','Open class list','class','C'],['Custom Serials','Open custom serial list','custom','CS'],['Ideas Lab','Open ideas lab','ideas','IDEA'],
     ['Tier X','Open X tier','tier:X','X'],['Tier SS','Open SS tier','tier:SS','SS'],['Tier S','Open S tier','tier:S','S'],['Tier A','Open A tier','tier:A','A'],['Tier B','Open B tier','tier:B','B'],['Tier C','Open C tier','tier:C','C'],['Tier D','Open D tier','tier:D','D']
@@ -23437,6 +23437,161 @@ html,body{max-width:100%;overflow-x:hidden!important}
 })();
 </script>
 <!-- ========================= /V180 FAST SCAN TIMEOUT + THEME PATCH ========================= -->
+
+
+
+<!-- ========================= V184 UI MOTION + SEPARATE AI LABELS ========================= -->
+<style id="mbz-v183-ui-motion-style">
+  /* Restore a proper spring-open to the command palette. V173 deliberately
+     disabled its transform motion, so this uses relative top motion instead. */
+  #mbz-v170-command-palette.show .mbz-v170-cmd-card{
+    position:relative!important;
+    animation:mbzV183PaletteOpen .62s cubic-bezier(.16,1.16,.3,1) both!important;
+    transform-origin:50% 0!important;
+    will-change:top,opacity!important;
+  }
+  @keyframes mbzV183PaletteOpen{
+    0%{top:30px;opacity:0}
+    48%{top:-8px;opacity:1}
+    70%{top:4px;opacity:1}
+    86%{top:-2px;opacity:1}
+    100%{top:0;opacity:1}
+  }
+
+  /* Make every command result lift consistently, including the special
+     Leaderboards command that was removed from the normal command class. */
+  #mbz-v170-command-palette .mbz-v170-cmd-item,
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command{
+    transform:translateY(0) scale(1)!important;
+    transition:transform .22s cubic-bezier(.16,1.12,.3,1),background-color .18s ease,box-shadow .22s ease!important;
+    will-change:transform!important;
+  }
+  #mbz-v170-command-palette .mbz-v170-cmd-item:hover,
+  #mbz-v170-command-palette .mbz-v170-cmd-item.active,
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command:hover,
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command.active{
+    transform:translateY(-4px) scale(1.012)!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.22)!important;
+  }
+  #mbz-v170-command-palette .mbz-v170-cmd-item:active,
+  #mbz-v170-command-palette .mbz-v180-leaderboard-command:active{
+    transform:translateY(0) scale(.985)!important;
+    transition-duration:.09s!important;
+  }
+
+  /* Replays on the visible page heading whenever the selected tab changes. */
+  .mbz-v183-title-bounce{
+    animation:mbzV183TitleBounce .66s cubic-bezier(.16,1.16,.3,1) both!important;
+    transform-origin:0 50%!important;
+    will-change:transform,opacity!important;
+  }
+  @keyframes mbzV183TitleBounce{
+    0%{opacity:0;transform:translateY(20px) scale(.955)}
+    50%{opacity:1;transform:translateY(-7px) scale(1.018)}
+    72%{opacity:1;transform:translateY(3px) scale(.994)}
+    88%{opacity:1;transform:translateY(-1px) scale(1.003)}
+    100%{opacity:1;transform:translateY(0) scale(1)}
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    #mbz-v170-command-palette.show .mbz-v170-cmd-card,
+    .mbz-v183-title-bounce{animation:none!important}
+    #mbz-v170-command-palette .mbz-v170-cmd-item,
+    #mbz-v170-command-palette .mbz-v180-leaderboard-command{transition:none!important;transform:none!important}
+  }
+</style>
+<script id="mbz-v183-ui-motion-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V183_UI_MOTION__)return;
+  window.__MBZ_V183_UI_MOTION__=true;
+
+  var d=document,w=window,timer=0,lastSignature='';
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function norm(v){return String(v==null?'':v).replace(/\s+/g,' ').trim().toLowerCase()}
+
+  function fixAIHelperLabels(){
+    qa('.ai-row strong').forEach(function(el){
+      var card=el.closest('.inv-scan-box,.ai-box');
+      var isScanner=!!(card&&card.classList.contains('inv-scan-box'));
+      var t=norm(el.textContent);
+      if(isScanner||t.indexOf('inventory scanner')>=0||t.indexOf('ai scanner')>=0){
+        if(el.textContent!=='📸 Real AI Inventory Scanner')el.textContent='📸 Real AI Inventory Scanner';
+      }else if(t.indexOf('gemini ai helper')>=0||t.indexOf('real ai helper')>=0){
+        if(el.textContent!=='🤖 Real AI Helper')el.textContent='🤖 Real AI Helper';
+      }
+    });
+    qa('#mbz-v170-command-palette .mbz-v170-cmd-item b,#mbz-v170-command-palette .mbz-v180-leaderboard-command b').forEach(function(el){
+      if(norm(el.textContent)==='ai helper / scanner')el.textContent='Real AI Helper';
+    });
+  }
+
+  function activePage(){
+    var id=d.body&&d.body.getAttribute('data-mbz-v150-page');
+    var byRoute=id&&d.getElementById(id);
+    if(byRoute&&!byRoute.hidden&&byRoute.getAttribute('aria-hidden')!=='true')return byRoute;
+    return qa('main > *').find(function(el){
+      if(el.hidden||el.getAttribute('aria-hidden')==='true')return false;
+      if(el.classList.contains('active')||el.getAttribute('data-mbz-v150-active')==='true')return true;
+      try{return getComputedStyle(el).display!=='none'}catch(_){return false}
+    })||null;
+  }
+
+  function pageTitle(page){
+    if(!page)return null;
+    return q('h1,.mbz-v93-title,.z25-hero h1,.tier-hero h1,.class-hero h1,.z28-title,.sec-title',page);
+  }
+
+  function signature(){
+    var tab=q('#nav-tabs .ntab.active,#nav-tabs .mbz-v67-credits-tab.active');
+    var page=activePage(),title=pageTitle(page);
+    return [tab?norm(tab.textContent):'',page?page.id:'',title?norm(title.textContent):''].join('|');
+  }
+
+  function replayTitle(){
+    var title=pageTitle(activePage());
+    if(!title)return;
+    title.classList.remove('mbz-v183-title-bounce');
+    void title.offsetWidth;
+    title.classList.add('mbz-v183-title-bounce');
+    clearTimeout(title.__mbzV183Timer);
+    title.__mbzV183Timer=setTimeout(function(){title.classList.remove('mbz-v183-title-bounce')},760);
+  }
+
+  function sync(force){
+    fixAIHelperLabels();
+    var sig=signature();
+    if(force||(sig&&sig!==lastSignature)){
+      lastSignature=sig;
+      replayTitle();
+    }
+  }
+
+  function queue(){
+    clearTimeout(timer);
+    timer=setTimeout(function(){sync(false)},34);
+  }
+
+  function boot(){
+    fixAIHelperLabels();
+    sync(true);
+    var root=d.body||d.documentElement;
+    if(root&&w.MutationObserver&&!root.__mbzV183Observer){
+      root.__mbzV183Observer=true;
+      new MutationObserver(function(){fixAIHelperLabels();queue()}).observe(root,{
+        subtree:true,childList:true,attributes:true,
+        attributeFilter:['class','hidden','aria-hidden','data-mbz-v150-page','data-mbz-v150-active']
+      });
+    }
+    d.documentElement.setAttribute('data-ui-motion-version','V184');
+  }
+
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  w.addEventListener('pageshow',function(){setTimeout(function(){sync(true)},40)},{passive:true});
+})();
+</script>
+<!-- ========================= /V184 UI MOTION + SEPARATE AI LABELS ========================= -->
 
 </body>
 </html>
