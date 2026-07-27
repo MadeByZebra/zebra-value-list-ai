@@ -1155,7 +1155,7 @@ Return compact JSON only:
       provider: result.provider,
       model: result.model,
       attempts,
-      scanMode: "full-grid-two-pass-colored-variants-v182",
+      scanMode: "version-1.9.0-full-grid-two-pass-colored-variants",
     });
   } catch (error: any) {
     return errorJson(error?.message || "Scanner server error.");

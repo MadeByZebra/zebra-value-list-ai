@@ -46,7 +46,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra — Value List · V180 Command Leaderboard Final Fix</title>
+<title>MadeByZebra — Value List · Version 1.9.0</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
@@ -2031,7 +2031,7 @@ function aiAmbiguousAction(action,subject){
   const exact=matches.find(g=>aiClean(g.n)===aiClean(subject));
   if(exact){action(exact.n);return true;}
   if(matches.length>1 && matches[0].n.toLowerCase().split(' ')[0]===matches[1].n.toLowerCase().split(' ')[0]){
-    aiAddMessage('bot',`I found multiple versions for <strong>${aiEscape(subject)}</strong>. Pick one:${aiMiniCards(matches,10)}`);return true;
+    aiAddMessage('bot',`I found multiple Vs for <strong>${aiEscape(subject)}</strong>. Pick one:${aiMiniCards(matches,10)}`);return true;
   }
   action(matches[0].n);return true;
 }
@@ -9287,7 +9287,7 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
     var options=GLOVES.slice().sort(function(a,b){return a.n.localeCompare(b.n)}).map(function(g){return '<option value="'+escAttr(g.n)+'"></option>'}).join('');
     page.innerHTML='\
       <div class="page-header"><h1>Your Inventory</h1><p>Add gloves manually or use the scanner. This page tracks quantities, estimated total value, owned gloves, and everything still missing.</p></div>\
-      <section class="mbz-v57-manual"><div class="mbz-v57-manual-head"><div><div class="mbz-v57-manual-title">Add gloves manually</div><div class="mbz-v57-manual-sub">Start typing a glove name, select the exact version, choose the quantity, then add it.</div></div></div><div class="mbz-v57-manual-row"><input id="mbz-v57-manual-name" list="mbz-v57-glove-options" autocomplete="off" placeholder="Search exact glove name…"><datalist id="mbz-v57-glove-options">'+options+'</datalist><input id="mbz-v57-manual-qty" type="number" min="1" step="1" value="1" aria-label="Quantity"><button class="sbtn" id="mbz-v57-manual-add" type="button">+ Add to Inventory</button></div></section>\
+      <section class="mbz-v57-manual"><div class="mbz-v57-manual-head"><div><div class="mbz-v57-manual-title">Add gloves manually</div><div class="mbz-v57-manual-sub">Start typing a glove name, select the exact V, choose the quantity, then add it.</div></div></div><div class="mbz-v57-manual-row"><input id="mbz-v57-manual-name" list="mbz-v57-glove-options" autocomplete="off" placeholder="Search exact glove name…"><datalist id="mbz-v57-glove-options">'+options+'</datalist><input id="mbz-v57-manual-qty" type="number" min="1" step="1" value="1" aria-label="Quantity"><button class="sbtn" id="mbz-v57-manual-add" type="button">+ Add to Inventory</button></div></section>\
       <div class="inv-summary-grid"><div class="inv-summary-card"><div class="inv-summary-num">'+stats.unique+'</div><div class="inv-summary-label">Confirmed unique owned</div></div><div class="inv-summary-card"><div class="inv-summary-num">x'+stats.totalQty+'</div><div class="inv-summary-label">Confirmed total gloves</div></div>'+(scan.gloveCount?'<div class="inv-summary-card"><div class="inv-summary-num">x'+scan.gloveCount+'</div><div class="inv-summary-label">Detected in last scan</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+Number(scan.reviewCount||0)+'</div><div class="inv-summary-label">Still needs review</div></div>':'')+'<div class="inv-summary-card mbz-v57-total-card"><div class="inv-summary-num">'+fmt(stats.totalCurrency)+' Currency</div><div class="mbz-v57-total-sub">'+fmt(stats.totalBlox)+' Blox · estimated current list value'+(stats.excluded?' · '+stats.excluded+' N/A excluded':'')+'</div><div class="inv-summary-label">Total glove value</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.missing+'</div><div class="inv-summary-label">Missing</div></div><div class="inv-summary-card"><div class="inv-summary-num">'+stats.need+'</div><div class="inv-summary-label">Missing + wishlisted</div></div></div>      '+(scan.gloveCount&&scan.gloveCount>stats.totalQty?'<div class="inv-warning"><strong>Last scan detected x'+scan.gloveCount+' gloves.</strong> '+stats.totalQty+' are confirmed in Inventory and '+Number(scan.reviewCount||0)+' still need review. Clear colored Core/Cyberfly variants are now saved separately instead of being collapsed into one Core.</div>':'')+'\
       <div class="inv-tab-toolbar"><input id="inventory-search" placeholder="Search owned or missing gloves…" value="'+escAttr(state.query)+'"><select id="inventory-mode" class="sbtn"><option value="missing" '+(state.mode==='missing'?'selected':'')+'>What I am missing</option><option value="have" '+(state.mode==='have'?'selected':'')+'>My owned gloves</option><option value="need" '+(state.mode==='need'?'selected':'')+'>Missing from wishlist</option><option value="all" '+(state.mode==='all'?'selected':'')+'>All database gloves</option></select><button class="sbtn" id="mbz-v57-open-scanner" type="button">Open Scanner</button><button class="sbtn" id="mbz-v57-clear-owned" type="button">Clear Inventory</button></div>\
       <div class="inv-counts">'+classPills+'</div><div class="inv-section-title">Showing '+list.length+' '+(state.mode==='have'?'owned':state.mode==='need'?'wishlisted missing':state.mode==='all'?'database':'missing')+' glove entries</div><div class="inv-missing-list">'+(list.length?list.map(function(g){return row(g,map)}).join(''):'<div class="wl-empty">Nothing to show for this filter.</div>')+'</div>';
@@ -9691,7 +9691,7 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
   window.__MBZ_V150_INTERACTIVE_GLOVE__=true;
 
   var d=document,w=window,root=d.documentElement;
-  var VERSION='V157';
+  var VERSION='1.9.0';
   var states=new WeakMap();
   var badgeObserver=null;
 
@@ -9701,12 +9701,12 @@ html.z31-preview-off .z25-hero.z33-real-hero{min-height:320px!important}
   function reduced(){return root.classList.contains('mbz-v74-reduced-motion')||root.classList.contains('mbz-v82-focus')||!!(w.matchMedia&&w.matchMedia('(prefers-reduced-motion: reduce)').matches)}
 
   function enforceVersion(){
-    var badgeText='MadeByZebra · V157';
+    var badgeText='MadeByZebra · Version 1.9.0';
     var b=q('.z40-badge');
     if(!b&&d.body){b=d.createElement('div');b.className='z40-badge';d.body.appendChild(b)}
     if(b&&b.textContent!==badgeText)b.textContent=badgeText;
     d.documentElement.setAttribute('data-app-version',VERSION);
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
     if(b&&(!badgeObserver||badgeObserver.__target!==b)){
       if(badgeObserver)badgeObserver.disconnect();
       badgeObserver=new MutationObserver(function(){
@@ -15961,7 +15961,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   function boot(){
     ensureSetting();
     apply(read(),false);
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
     qa('.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge').forEach(function(b){
       if(/V\d+/.test(b.textContent||''))b.textContent='V128 · Motion Toggle';
     });
@@ -15982,7 +15982,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   window.__MBZ_V128_PERSISTENT_DEFAULTS__=true;
 
   var d=document,w=window,root=d.documentElement;
-  var BADGE='MadeByZebra · V157';
+  var BADGE='MadeByZebra · Version 1.9.0';
   var badgeRAF=0;
 
   function q(s,r){return (r||d).querySelector(s)}
@@ -16093,7 +16093,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
     applySavedChoices();
     lockBadge();
     watchBadge();
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   if(d.readyState==='loading'){
@@ -16258,7 +16258,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   function boot(){
     root.classList.add('mbz-v129-motion-polish');
     if(d.body&&d.body.classList.contains('mbz-v94-leaderboards-open'))replayLeaderboard();
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});
@@ -16770,7 +16770,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
     ensurePrototypes();
     ensureSetting();
     apply(read(),false);
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});
@@ -17038,7 +17038,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
     if(page&&!d.body.classList.contains('mbz-v94-leaderboards-open')){
       sleepLeaderboard();
     }
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   if(d.readyState==='loading'){
@@ -17431,7 +17431,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   function boot(){
     scanStages();
     cleanupHiddenPages();
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});
@@ -18116,7 +18116,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   function boot(){
     loadBuilder();ensureBuilderPage();ensureBuilderTab();ensureShowroom();ensureShowroomEntrances();
     applyVisualSettings();addUpdate();
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
   w.addEventListener('load',function(){
@@ -18135,12 +18135,12 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   window.__MBZ_V139_WEEKLY_MANAGER_FIX__=true;
 
   var d=document,w=window;
-  var VERSION='V157';
+  var VERSION='1.9.0';
 
   function q(s,r){return (r||d).querySelector(s)}
 
   function version(){
-    var titleText='MadeByZebra — Value List · V157';
+    var titleText='MadeByZebra — Value List · Version 1.9.0';
     if(d.title!==titleText)d.title=titleText;
 
     var titleEl=q('title');
@@ -18167,7 +18167,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
         '<div class="cl-chg"><span class="cl-chg-icon">✓</span>'+
         '<div class="cl-chg-text"><strong>Manage Weekly Update</strong> — the popup now stays visible after its opening animation instead of fading to a transparent backdrop.</div></div>'+
         '<div class="cl-chg"><span class="cl-chg-icon">↑</span>'+
-        '<div class="cl-chg-text"><strong>Version tracking</strong> — the visible project badge now advances with each improvement.</div></div>'+
+        '<div class="cl-chg-text"><strong>V tracking</strong> — the visible project badge now advances with each improvement.</div></div>'+
       '</div>';
 
     host.insertBefore(card,host.firstChild);
@@ -18358,7 +18358,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -19013,7 +19013,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -19178,7 +19178,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -19248,7 +19248,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function addUpdate(){
@@ -19795,7 +19795,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -20620,7 +20620,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    var title='MadeByZebra — Value List · V157';
+    var title='MadeByZebra — Value List · Version 1.9.0';
     if(d.title!==title)d.title=title;
 
     var titleEl=q('title');
@@ -20699,7 +20699,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -20748,7 +20748,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -20796,7 +20796,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -21102,7 +21102,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -21404,7 +21404,7 @@ if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:tru
   }
 
   function version(){
-    d.title='MadeByZebra — Value List · V157';
+    d.title='MadeByZebra — Value List · Version 1.9.0';
   }
 
   function boot(){
@@ -23387,8 +23387,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','V182-colored-variants-count-separately');
-    try{d.title='MadeByZebra — Value List · V182'}catch(_){}
+    d.documentElement.setAttribute('data-scanner-version','1.9.0-colored-variants-count-separately');
+    try{d.title='MadeByZebra — Value List · Version 1.9.0'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -23584,7 +23584,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
         attributeFilter:['class','hidden','aria-hidden','data-mbz-v150-page','data-mbz-v150-active']
       });
     }
-    d.documentElement.setAttribute('data-ui-motion-version','V184');
+    d.documentElement.setAttribute('data-ui-motion-version','1.9.0');
   }
 
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -23592,6 +23592,72 @@ html,body{max-width:100%;overflow-x:hidden!important}
 })();
 </script>
 <!-- ========================= /V184 UI MOTION + SEPARATE AI LABELS ========================= -->
+
+
+<!-- ========================= VERSION 1.9.0 SEMANTIC RELEASE LABEL ========================= -->
+<script id="mbz-version-1-9-0-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_VERSION_1_9_0__)return;
+  window.__MBZ_VERSION_1_9_0__=true;
+
+  var d=document,w=window;
+  var APP_VERSION='1.9.0';
+  var BADGE_TEXT='MadeByZebra · Version '+APP_VERSION;
+  var TITLE_TEXT='MadeByZebra — Value List · Version '+APP_VERSION;
+  var BADGE_SELECTOR='.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge,.z35-version-pill,.z39-version-pill';
+  var queued=false;
+
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+
+  function compactVersionWording(root){
+    if(!root)return;
+    var walker=d.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+    var nodes=[],node;
+    while((node=walker.nextNode()))nodes.push(node);
+    nodes.forEach(function(n){
+      var p=n.parentElement;
+      if(!p||/^(SCRIPT|STYLE|TITLE)$/i.test(p.tagName))return;
+      var old=n.nodeValue||'',next=old;
+      next=next.replace(/\bGlove Model Version\b/gi,'Glove Model V');
+      next=next.replace(/\bGlove Version\b/gi,'Glove V');
+      next=next.replace(/\bModel Version\b/gi,'Model V');
+      next=next.replace(/\bselect the exact version\b/gi,'select the exact V');
+      next=next.replace(/\bmultiple versions\b/gi,'multiple Vs');
+      next=next.replace(/\bVersion tracking\b/gi,'V tracking');
+      if(next!==old)n.nodeValue=next;
+    });
+  }
+
+  function enforce(){
+    queued=false;
+    if(d.title!==TITLE_TEXT)d.title=TITLE_TEXT;
+    d.documentElement.setAttribute('data-app-version',APP_VERSION);
+    d.documentElement.setAttribute('data-release-version',APP_VERSION);
+    qa(BADGE_SELECTOR).forEach(function(b){if((b.textContent||'')!==BADGE_TEXT)b.textContent=BADGE_TEXT});
+    compactVersionWording(d.body);
+  }
+
+  function queue(){
+    if(queued)return;
+    queued=true;
+    (w.requestAnimationFrame||w.setTimeout)(enforce);
+  }
+
+  function boot(){
+    enforce();
+    if(d.body&&!d.body.__mbzVersion190Observer){
+      d.body.__mbzVersion190Observer=true;
+      new MutationObserver(queue).observe(d.body,{subtree:true,childList:true,characterData:true});
+    }
+  }
+
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  w.addEventListener('pageshow',function(){setTimeout(enforce,30)},{passive:true});
+  [80,300,900,1800,4200].forEach(function(ms){setTimeout(enforce,ms)});
+})();
+</script>
+<!-- ========================= /VERSION 1.9.0 SEMANTIC RELEASE LABEL ========================= -->
 
 </body>
 </html>
