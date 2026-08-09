@@ -46,7 +46,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MadeByZebra — Value List · Version 1.9.0</title>
+<title>MadeByZebra — Value List · Version 1.9.1</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"></noscript>
@@ -23825,15 +23825,15 @@ html,body{max-width:100%;overflow-x:hidden!important}
 <!-- ========================= /V184 UI MOTION + SEPARATE AI LABELS ========================= -->
 
 
-<!-- ========================= VERSION 1.9.0 SEMANTIC RELEASE LABEL ========================= -->
-<script id="mbz-version-1-9-0-script">
+<!-- ========================= VERSION 1.9.1 SEMANTIC RELEASE LABEL ========================= -->
+<script id="mbz-version-1-9-1-script">
 (function(){
   'use strict';
-  if(window.__MBZ_VERSION_1_9_0__)return;
-  window.__MBZ_VERSION_1_9_0__=true;
+  if(window.__MBZ_VERSION_1_9_1__)return;
+  window.__MBZ_VERSION_1_9_1__=true;
 
   var d=document,w=window;
-  var APP_VERSION='1.9.0';
+  var APP_VERSION='1.9.1';
   var BADGE_TEXT='MadeByZebra · Version '+APP_VERSION;
   var TITLE_TEXT='MadeByZebra — Value List · Version '+APP_VERSION;
   var BADGE_SELECTOR='.z40-badge,.z39-badge,.z35-badge,.z33-badge,.z32-badge,.z31-badge,.z30-badge,.z28-badge,.z25-badge,.v22-fixed-badge,.mobile-version-badge,.z35-version-pill,.z39-version-pill';
@@ -23877,8 +23877,8 @@ html,body{max-width:100%;overflow-x:hidden!important}
 
   function boot(){
     enforce();
-    if(d.body&&!d.body.__mbzVersion190Observer){
-      d.body.__mbzVersion190Observer=true;
+    if(d.body&&!d.body.__mbzVersion191Observer){
+      d.body.__mbzVersion191Observer=true;
       new MutationObserver(queue).observe(d.body,{subtree:true,childList:true,characterData:true});
     }
   }
@@ -23888,7 +23888,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
   [80,300,900,1800,4200].forEach(function(ms){setTimeout(enforce,ms)});
 })();
 </script>
-<!-- ========================= /VERSION 1.9.0 SEMANTIC RELEASE LABEL ========================= -->
+<!-- ========================= /VERSION 1.9.1 SEMANTIC RELEASE LABEL ========================= -->
 
 <!-- ========================= V185 REFINED DEPTH SYSTEM ========================= -->
 <style id="mbz-v185-refined-depth-style">
@@ -24374,6 +24374,196 @@ html,body{max-width:100%;overflow-x:hidden!important}
 })();
 </script>
 <!-- ========================= /V188 COMPLETE UPDATES LOG ========================= -->
+
+
+<!-- ========================= VERSION 1.9.1 COMPLETE LEADERBOARD AVATARS ========================= -->
+<style id="mbz-v191-complete-leaderboard-avatars-style">
+  /* V1.9.1 owns leaderboard avatars. Older screenshot/API avatar layers stay hidden to prevent doubles. */
+  #leaderboards-page .mbz-v111-avatar,
+  #leaderboards-page .mbz-v113-avatar,
+  #leaderboards-page .mbz-v114-shot-avatar{display:none!important}
+
+  #leaderboards-page .mbz-v191-avatar{
+    position:relative;display:inline-grid;place-items:center;flex:0 0 auto;overflow:hidden;
+    border:1px solid var(--border2);background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 14%,var(--surface2)),var(--surface2));
+    color:var(--text);font:800 9px 'Space Grotesk',sans-serif;text-transform:uppercase;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 7px 20px rgba(0,0,0,.18)
+  }
+  #leaderboards-page .mbz-v191-avatar img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover;opacity:0;transition:opacity .18s ease}
+  #leaderboards-page .mbz-v191-avatar.has-image img{opacity:1}
+  #leaderboards-page .mbz-v191-avatar.has-image .mbz-v191-fallback{opacity:0}
+  #leaderboards-page .mbz-v191-fallback{position:relative;z-index:0;transition:opacity .18s ease}
+  #leaderboards-page .mbz-v191-table-avatar{width:36px;height:36px;border-radius:12px;margin:-6px 0}
+  #leaderboards-page .mbz-v191-podium-avatar{width:54px;height:54px;border-radius:17px;font-size:12px}
+  #leaderboards-page .mbz-v93-name,#leaderboards-page .mbz-v93-user{display:inline-flex!important;align-items:center;gap:9px}
+  #leaderboards-page .mbz-v191-avatar.loading::after{
+    content:"";position:absolute;inset:-45%;border:1px solid transparent;border-top-color:color-mix(in srgb,var(--accent) 72%,white);
+    border-radius:50%;animation:mbzV191AvatarSpin 1.05s linear infinite;opacity:.7
+  }
+  #leaderboards-page .mbz-v191-avatar.has-image::after,#leaderboards-page .mbz-v191-avatar.failed::after{display:none}
+  @keyframes mbzV191AvatarSpin{to{transform:rotate(360deg)}}
+  [data-theme="light"] #leaderboards-page .mbz-v191-avatar{box-shadow:inset 0 1px 0 #fff,0 6px 16px rgba(15,23,42,.10)}
+  @media(max-width:600px){#leaderboards-page .mbz-v191-table-avatar{width:31px;height:31px}#leaderboards-page .mbz-v191-podium-avatar{width:46px;height:46px}}
+  @media(prefers-reduced-motion:reduce){#leaderboards-page .mbz-v191-avatar.loading::after{animation:none;display:none}#leaderboards-page .mbz-v191-avatar img{transition:none}}
+</style>
+<script id="mbz-v191-complete-leaderboard-avatars-script">
+(function(){
+  'use strict';
+  if(window.__MBZ_V191_COMPLETE_LEADERBOARD_AVATARS__)return;
+  window.__MBZ_V191_COMPLETE_LEADERBOARD_AVATARS__=true;
+
+  var d=document,w=window;
+  var CACHE_KEY='mbz-v191-roblox-avatar-cache';
+  var CACHE_TTL=24*60*60*1000;
+  var pending=false,observer=null,requestInFlight=false;
+  var memory={};
+
+  function q(s,r){return (r||d).querySelector(s)}
+  function qa(s,r){return Array.prototype.slice.call((r||d).querySelectorAll(s))}
+  function key(v){return String(v||'').trim().toLowerCase()}
+  function initials(v){var s=String(v||'?').replace(/[^a-z0-9]/ig,'');return (s.slice(0,2)||'?').toUpperCase()}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+  function loadCache(){
+    try{
+      var raw=JSON.parse(localStorage.getItem(CACHE_KEY)||'{}')||{};
+      Object.keys(raw).forEach(function(k){var x=raw[k];if(x&&x.url&&Date.now()-Number(x.at||0)<CACHE_TTL)memory[k]=x});
+    }catch(_){ }
+  }
+  function saveCache(){
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(memory))}catch(_){ }
+  }
+
+  function oldScreenshotSrc(user,root){
+    var old=q('.mbz-v114-shot-avatar img',root||d);
+    if(old&&old.src)return old.src;
+    /* V114 keeps a complete embedded Top-100 fallback map in the page. We only use it if it is already attached. */
+    return '';
+  }
+
+  function makeAvatar(user,cls,host){
+    var span=d.createElement('span');
+    span.className='mbz-v191-avatar '+cls+' loading';
+    span.dataset.v191User=key(user);
+    span.title='Roblox avatar for @'+user;
+    span.innerHTML='<span class="mbz-v191-fallback">'+esc(initials(user))+'</span><img alt="Roblox avatar for '+esc(user)+'">';
+    var img=q('img',span),fallbackSrc=oldScreenshotSrc(user,host);
+    span.dataset.fallbackSrc=fallbackSrc||'';
+    if(fallbackSrc){
+      img.onload=function(){span.classList.add('has-image');span.classList.remove('loading','failed')};
+      img.onerror=function(){span.classList.remove('has-image','loading');span.classList.add('failed');img.removeAttribute('src')};
+      img.src=fallbackSrc;
+    }
+    return span;
+  }
+
+  function ensureOne(host,user,cls){
+    if(!host||!user)return;
+    var existing=q('.mbz-v191-avatar',host);
+    if(existing&&existing.dataset.v191User!==key(user)){existing.remove();existing=null}
+    if(!existing){existing=makeAvatar(user,cls,host);host.insertBefore(existing,host.firstChild)}
+    var cached=memory[key(user)];
+    if(cached&&cached.url)applyOfficial(user,cached.url);
+  }
+
+  function installPlaceholders(){
+    qa('#leaderboards-page .mbz-v93-table tbody tr[data-user]').forEach(function(row){
+      var user=row.dataset.user,host=q('.mbz-v93-name',row);ensureOne(host,user,'mbz-v191-table-avatar');
+    });
+    qa('#leaderboards-page .mbz-v93-podium-card[data-user]').forEach(function(card){
+      var user=card.dataset.user,host=q('.mbz-v93-user',card);ensureOne(host,user,'mbz-v191-podium-avatar');
+    });
+  }
+
+  function applyOfficial(user,url){
+    if(!url)return;
+    qa('#leaderboards-page .mbz-v191-avatar[data-v191-user="'+CSS.escape(key(user))+'"]').forEach(function(span){
+      var img=q('img',span);if(!img)return;
+      if(img.dataset.officialUrl===url&&span.classList.contains('has-image'))return;
+      img.dataset.officialUrl=url;
+      span.classList.add('loading');span.classList.remove('failed');
+      var fallback=span.dataset.fallbackSrc||'';
+      img.onload=function(){span.classList.add('has-image');span.classList.remove('loading','failed')};
+      img.onerror=function(){
+        if(fallback&&img.src!==fallback){img.dataset.officialUrl='';img.src=fallback;return}
+        span.classList.remove('has-image','loading');span.classList.add('failed');img.removeAttribute('src');
+      };
+      img.src=url;
+    });
+  }
+
+  function currentUsers(){
+    var out=[],seen={};
+    qa('#leaderboards-page [data-user]').forEach(function(el){var u=String(el.dataset.user||'').trim(),k=key(u);if(u&&!seen[k]){seen[k]=1;out.push(u)}});
+    return out;
+  }
+
+  function chunks(arr,size){var out=[];for(var i=0;i<arr.length;i+=size)out.push(arr.slice(i,i+size));return out}
+
+  async function fetchJson(url,opts){
+    var r=await fetch(url,opts||{credentials:'omit'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  }
+
+  async function resolveOfficial(users){
+    var need=users.filter(function(u){var c=memory[key(u)];return !(c&&c.url&&Date.now()-Number(c.at||0)<CACHE_TTL)});
+    if(!need.length)return;
+    var idToUser={};
+    for(const batch of chunks(need,50)){
+      var data=await fetchJson('https://users.roblox.com/v1/usernames/users',{
+        method:'POST',mode:'cors',credentials:'omit',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({usernames:batch,excludeBannedUsers:false})
+      });
+      (data&&data.data||[]).forEach(function(x){
+        var requested=key(x.requestedUsername||x.name),real=batch.find(function(u){return key(u)===requested})||x.name;
+        if(x&&x.id!=null&&real)idToUser[String(x.id)]=real;
+      });
+    }
+    var ids=Object.keys(idToUser);
+    for(const idBatch of chunks(ids,50)){
+      var t=await fetchJson('https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds='+encodeURIComponent(idBatch.join(','))+'&size=150x150&format=Png&isCircular=false',{mode:'cors',credentials:'omit'});
+      (t&&t.data||[]).forEach(function(x){
+        var user=idToUser[String(x.targetId)];
+        if(user&&x.imageUrl&&(x.state==='Completed'||!x.state)){
+          memory[key(user)]={id:x.targetId,url:x.imageUrl,at:Date.now()};
+          applyOfficial(user,x.imageUrl);
+        }
+      });
+    }
+    saveCache();
+  }
+
+  async function refresh(){
+    pending=false;
+    installPlaceholders();
+    if(requestInFlight)return;
+    var users=currentUsers();
+    if(!users.length)return;
+    requestInFlight=true;
+    try{await resolveOfficial(users)}catch(err){
+      /* Keep embedded screenshot/initial fallbacks if Roblox is temporarily unavailable. */
+      if(w.console&&console.debug)console.debug('Leaderboard avatar refresh fallback:',err&&err.message||err);
+    }finally{requestInFlight=false;installPlaceholders()}
+  }
+
+  function schedule(){
+    if(pending)return;pending=true;
+    (w.requestAnimationFrame||w.setTimeout)(refresh);
+  }
+
+  function observe(){
+    var page=q('#leaderboards-page');
+    if(page&&!observer){observer=new MutationObserver(function(){schedule()});observer.observe(page,{childList:true,subtree:true})}
+  }
+
+  function boot(){loadCache();installPlaceholders();observe();schedule();[80,250,700,1600,3500].forEach(function(ms){setTimeout(schedule,ms)})}
+  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+  d.addEventListener('click',function(e){if(e.target&&e.target.closest&&e.target.closest('#mbz-v93-leaderboards-tab,[data-v93-palette]'))[0,90,300,900].forEach(function(ms){setTimeout(schedule,ms)})},true);
+  w.addEventListener('pageshow',function(){setTimeout(schedule,50)},{passive:true});
+})();
+</script>
+<!-- ========================= /VERSION 1.9.1 COMPLETE LEADERBOARD AVATARS ========================= -->
 
 </body>
 </html>
