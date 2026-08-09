@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MadeByZebra — Value List · Version 1.9.0",
+  title: "MadeByZebra — Value List · Version 1.9.1",
   description: "MadeByZebra Boxing League Value List",
 };
 
@@ -27,7 +27,31 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                const title = "MadeByZebra — Value List · Version 1.9.1   •   ";
+                let position = 0;
+
+                setInterval(function () {
+                  document.title =
+                    title.substring(position) + title.substring(0, position);
+
+                  position++;
+
+                  if (position >= title.length) {
+                    position = 0;
+                  }
+                }, 450);
+              })();
+            `,
+          }}
+        />
+      </body>
     </html>
   );
 }
