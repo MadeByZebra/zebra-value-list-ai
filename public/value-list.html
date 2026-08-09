@@ -23127,9 +23127,17 @@ html,body{max-width:100%;overflow-x:hidden!important}
     families.forEach(function(f){var re=new RegExp('(^|[^a-z0-9])('+f.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/\s+/g,'\\s*')+')(?=$|[^a-z0-9])','ig'),m;while((m=re.exec(line))){var pos=m.index+(m[1]||'').length;hits.push({pos:pos,len:m[2].length});if(re.lastIndex===m.index)re.lastIndex++}});
     hits.sort(function(a,b){return a.pos-b.pos||b.len-a.len});var clean=[];hits.forEach(function(h){if(!clean.length||h.pos>clean[clean.length-1].pos)clean.push(h)});if(clean.length<2)return[line];var out=[];for(var i=0;i<clean.length;i++){var s=line.slice(clean[i].pos,clean[i+1]?clean[i+1].pos:line.length).replace(/^[,;|•·\s]+|[,;|•·\s]+$/g,'').trim();if(s)out.push(s)}return out.length?out:[line]
   }
-  function chunks(text){var base=String(text||'').replace(/#\s*([A-Z])\s+([A-Z])\s+([A-Z])/gi,'#$1$2$3').split(/\n|\r|\t|\||•|·|;/).map(function(x){return x.trim()}).filter(Boolean),out=[];base.forEach(function(line){splitKnown(line).forEach(function(x){out.push(x)})});return out.slice(0,800)}
+  function chunks(text){var base=String(text||'').replace(/#\s*([A-Z])\s+([A-Z])\s+([A-Z])/gi,'#$1$2$3').split(/\n|\r|\t|\||•|·|;/).map(function(x){return x.trim()}).filter(Boolean),out=[];base.forEach(function(line){splitKnown(cleanRepeatedScanLine(line)).forEach(function(x){out.push(x)})});return out.slice(0,800)}
+  function cleanRepeatedScanLine(value){
+    var words=String(value||'').replace(/\s+/g,' ').trim().split(' ').filter(Boolean),out=[];
+    function key(word){return norm(word)}
+    words.forEach(function(word){if(!out.length||key(out[out.length-1])!==key(word))out.push(word)});
+    if(out.length%2===0){var half=out.length/2;if(out.slice(0,half).map(key).join('|')===out.slice(half).map(key).join('|'))out=out.slice(0,half)}
+    if(out.length>2&&key(out[0])===key(out[out.length-1]))out.pop();
+    return out.join(' ');
+  }
   function parseText(text){
-    var items=[],review=[];chunks(text).forEach(function(line,index){
+    var items=[],review=[];chunks(text).forEach(function(rawLine,index){var line=cleanRepeatedScanLine(rawLine);
       var custom=customResolve(line);if(custom){items.push({kind:'custom',status:'confirmed',visibleText:line,customLabel:custom.label,customRecord:custom.record,baseCandidate:custom.baseCandidate,confidence:100,imageIndex:0,cardIndex:index+1});return}
       var sr=serialResolve(line);if(sr){items.push({kind:'serial',status:'confirmed',visibleText:line,candidate:sr.candidate,serialNumber:sr.serialNumber,serialTotal:sr.serialTotal,confidence:100,imageIndex:0,cardIndex:index+1});return}
       var ex=exact(line);if(ex){items.push({kind:'standard',status:'confirmed',visibleText:line,candidate:ex.n,confidence:100,imageIndex:0,cardIndex:index+1});return}
@@ -23165,7 +23173,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     var out=id('inv-results');if(!out)return;var data=applied.data,counts=applied.counts,customRows=applied.customRows,review=applied.review;
     var standard=Object.keys(counts).map(function(n){var g=exact(n),q=counts[n];return'<div class="mbz-v180multi-row">'+rowRead({visibleText:q>1?q+' cards detected':'card detected'})+'<div class="mbz-v180multi-match"><strong>'+esc(n)+'</strong><div class="mbz-v180multi-meta">'+(g?esc((g.vs||g.v)+' · Class '+g.cls+' · Tier '+g.t):'exact database match')+'</div></div><div>x'+q+'</div><span class="inv-status-saved">SAVED</span></div>'}).join('');
     var custom=customRows.map(function(x){return'<div class="mbz-v180multi-row mbz-v180multi-custom">'+rowRead({visibleText:x.glove+' #'+x.custom})+'<div class="mbz-v180multi-match"><strong>'+esc(x.label)+'</strong><div class="mbz-v180multi-meta">Saved in custom-serial inventory'+(x.baseCandidate?' · base '+esc(x.baseCandidate):'')+'</div></div><div>x'+x.qty+'</div><span class="inv-status-saved">CUSTOM</span></div>'}).join('');
-    var reviews=review.slice(0,180).map(function(x){var buttons=uniq(x.candidates||[]).slice(0,10).map(function(n){return'<button class="add-btn" data-v180multi-own="'+encodeURIComponent(n)+'">✓ '+esc(n)+'</button>'}).join(' ');return'<div class="mbz-v180multi-row mbz-v180multi-review">'+rowRead({visibleText:x.text})+'<div class="mbz-v180multi-match"><strong>Review before saving</strong><div class="mbz-v180multi-meta">'+esc(x.reason||'uncertain')+'</div><div class="mbz-v180multi-review-buttons">'+(buttons||'No exact candidate')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div><span class="inv-status-review">REVIEW</span></div>'}).join('');
+    var reviews=review.slice(0,180).map(function(x){var names=uniq(x.candidates||[]).slice(0,10),same=names.length===1&&norm(cleanRepeatedScanLine(x.text))===norm(names[0]);var buttons=names.map(function(n){return'<button class="add-btn" data-v180multi-own="'+encodeURIComponent(n)+'">✓ '+esc(same?'Confirm':n)+'</button>'}).join(' ');return'<div class="mbz-v180multi-row mbz-v180multi-review">'+rowRead({visibleText:cleanRepeatedScanLine(x.text)})+'<div class="mbz-v180multi-match"><strong>Review before saving</strong><div class="mbz-v180multi-meta">'+esc(x.reason||'uncertain')+'</div><div class="mbz-v180multi-review-buttons">'+(buttons||'No exact candidate')+'</div></div><div>'+Math.round(Number(x.confidence||0))+'%</div><span class="inv-status-review">REVIEW</span></div>'}).join('');
     var totalCards=Number(data.detectionCount||(data.items||[]).length||0),images=Number(data.imageCount||0),savedCards=Object.keys(counts).reduce(function(a,k){return a+counts[k]},0)+customRows.reduce(function(a,x){return a+x.qty},0);
     out.innerHTML='<div class="ai-answer"><strong>V180 multi-glove scanner complete.</strong><br>It scans multiple cards, keeps duplicate quantities, maps serials, and only auto-saves a Core/Cyberfly color when the tag or visual evidence is strong. Unclear colors stay in Needs Review.<div class="mbz-v180multi-summary"><span class="inv-count-pill">Images: '+images+'</span><span class="inv-count-pill">Cards detected: '+totalCards+'</span><span class="inv-count-pill" style="color:#86efac">Cards saved: '+savedCards+'</span><span class="inv-count-pill">Glove types: '+Object.keys(counts).length+'</span><span class="inv-count-pill" style="color:#fbbf24">Custom serials: '+customRows.length+'</span><span class="inv-count-pill" style="color:#fcd34d">Review: '+review.length+'</span></div>'+(standard?'<div class="mbz-v180multi-section"><div class="inv-section-title">Saved standard, colored, and numeric-serial gloves</div>'+standard+'</div>':'')+(custom?'<div class="mbz-v180multi-section"><div class="inv-section-title">Saved custom serials</div>'+custom+'</div>':'')+(reviews?'<div class="mbz-v180multi-section"><div class="inv-section-title">Needs review</div>'+reviews+'</div>':'')+(!standard&&!custom?'<div class="wl-empty">No cards were safe to auto-save. Use closer screenshots or review the uncertain reads.</div>':'')+'<div class="ai-note">'+esc(data.notes||'')+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
   }
@@ -23390,9 +23398,22 @@ html,body{max-width:100%;overflow-x:hidden!important}
       '<span class="mbz-fastscan-small">Change this before choosing the glove.</span>'+
     '</div>';
   }
-  function candidateButtons(cands,inputId){
-    return uniq(cands||[]).slice(0,12).map(function(n){
-      var label=(n==='Core'||n==='Cyberfly')?n+' (uncolored)':n;
+  function cleanScanText(value){
+    var words=String(value==null?'':value).replace(/\s+/g,' ').trim().split(' ').filter(Boolean);
+    function key(word){return String(word||'').toLowerCase().replace(/[^a-z0-9]+/g,'')||String(word||'').toLowerCase()}
+    var compact=[];
+    words.forEach(function(word){if(!compact.length||key(compact[compact.length-1])!==key(word))compact.push(word)});
+    if(compact.length%2===0){
+      var half=compact.length/2,left=compact.slice(0,half).map(key).join('|'),right=compact.slice(half).map(key).join('|');
+      if(left&&left===right)compact=compact.slice(0,half);
+    }
+    if(compact.length>2&&key(compact[0])===key(compact[compact.length-1]))compact.pop();
+    return compact.join(' ');
+  }
+  function candidateButtons(cands,inputId,visibleText){
+    var names=uniq(cands||[]).slice(0,12),singleSame=names.length===1&&norm(cleanScanText(visibleText))===norm(names[0]);
+    return names.map(function(n){
+      var label=singleSame?'Confirm':(n==='Core'||n==='Cyberfly')?n+' (uncolored)':n;
       return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\',\''+inputId+'\',this)">✓ '+esc(label)+'</button>';
     }).join(' ');
   }
@@ -23407,7 +23428,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     var map={},order=[];
     function absorb(raw,index){
       if(!raw||raw.status==='confirmed')return;
-      var key=reviewKey(raw,index),text=raw.text||raw.visibleText||raw.visibleName||raw.family||'Unclear card';
+      var key=reviewKey(raw,index),text=cleanScanText(raw.text||raw.visibleText||raw.visibleName||raw.family||'Unclear card');
       var candidates=uniq((raw.candidates||[]).concat(raw.candidate?[raw.candidate]:[]));
       if(!map[key]){
         map[key]=Object.assign({},raw,{text:text,candidates:candidates,quantity:Math.max(1,Number(raw.quantity||1))});
@@ -23443,10 +23464,10 @@ html,body{max-width:100%;overflow-x:hidden!important}
         var detail=colored?((x.family||'Core/Cyberfly')+(x.tagText?' · tag '+x.tagText:'')):(x.kind||'uncertain');
         return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row '+(x.kind==='scan-error'?'scan-error':'')+'">'+
           '<div><span class="inv-status-review">'+esc(label)+'</span><div class="mbz-fastscan-small">'+esc(source(x))+' · counted x'+q+'</div></div>'+
-          '<div><strong>'+esc(x.text||x.visibleText||'Unclear card')+'</strong><div class="mbz-fastscan-small">'+esc(detail)+' · '+esc(x.reason||'Needs confirmation')+'</div></div>'+
+          '<div><strong>'+esc(cleanScanText(x.text||x.visibleText||'Unclear card'))+'</strong><div class="mbz-fastscan-small">'+esc(detail)+' · '+esc(x.reason||'Needs confirmation')+'</div></div>'+
           '<div><strong>'+(x.kind==='scan-error'?'Try this screenshot again':'Choose the correct glove')+'</strong>'+
             (x.kind==='scan-error'?'':quantityControl(inputId,q)+
-            '<div class="mbz-fastscan-actions">'+(candidateButtons(c,inputId)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div>')+
+            '<div class="mbz-fastscan-actions">'+(candidateButtons(c,inputId,x.text||x.visibleText)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div>')+
           '</div>'+
           '<div class="'+(x.kind==='scan-error'?'mbz-fastscan-error':'')+'">'+(x.kind==='scan-error'?'FAILED':Math.round(Number(x.confidence||0))+'%')+'</div>'+
         '</div>';
@@ -24321,6 +24342,7 @@ html,body{max-width:100%;overflow-x:hidden!important}
     {icon:'↑',name:'Multiple screenshots',old:'One oversized all-or-nothing request',nv:'Up to 8 isolated scans',reason:'Each screenshot is processed independently, preventing one failed page from canceling the rest.'},
     {icon:'↑',name:'Partial recovery',old:'Any error lost the whole scan',nv:'Successful pages are kept',reason:'Failed screenshots are clearly flagged in the review queue while successful results remain available.'},
     {icon:'→',name:'Needs Review',old:'Color checks above and other reviews below',nv:'One grouped review queue',reason:'Merged and deduplicated every uncertain color, serial, and glove name by screenshot and card.'},
+    {icon:'→',name:'Scanned glove labels',old:'Repeated names such as M1911 M1911',nv:'One clean glove name',reason:'Removed overlapping AI fields and redundant confirmation labels from hosted and offline scan results.'},
     {icon:'↑',name:'Downloaded HTML',old:'Missing /api/scan caused a hard failure',nv:'Offline OCR fallback',reason:'Direct file downloads use local browser OCR; full AI vision remains available through the hosted or local app server.'}
   ]};
   var performanceUpdate={date:'V186',title:'Framerate + Interaction Performance',badge:'major',changes:[
