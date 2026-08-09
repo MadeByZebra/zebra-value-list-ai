@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MadeByZebra — Value List · Version 1.9.1",
+  title: "MadeByZebra — Value List · Version 1.9.0",
   description: "MadeByZebra Boxing League Value List",
 };
 
@@ -34,19 +34,24 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function () {
-                const title = "MadeByZebra — Value List · Version 1.9.1   •   ";
+                const title =
+                  "MadeByZebra — Value List · Version 1.9.0     •     ";
+
                 let position = 0;
 
-                setInterval(function () {
+                function moveTitle() {
                   document.title =
-                    title.substring(position) + title.substring(0, position);
+                    title.slice(position) +
+                    title.slice(0, position);
 
                   position++;
 
                   if (position >= title.length) {
                     position = 0;
                   }
-                }, 450);
+                }
+
+                setInterval(moveTitle, 150);
               })();
             `,
           }}
