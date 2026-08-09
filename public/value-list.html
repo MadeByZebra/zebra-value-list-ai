@@ -23198,6 +23198,16 @@ html,body{max-width:100%;overflow-x:hidden!important}
   @keyframes mbzFastScanMove{from{transform:translateX(-35%)}to{transform:translateX(210%)}}
   .mbz-fastscan-summary{display:flex;flex-wrap:wrap;gap:7px;margin:11px 0}
   .mbz-fastscan-section{margin-top:15px}
+  .mbz-fastscan-review-group{margin-top:9px}
+  .mbz-fastscan-review-group-title{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:8px 10px;border:1px solid color-mix(in srgb,#facc15 24%,var(--border));
+    border-radius:11px;background:color-mix(in srgb,#facc15 6%,var(--surface2));
+    color:var(--text);font:700 10px 'DM Mono',monospace;letter-spacing:.035em
+  }
+  .mbz-fastscan-review-group-title span{color:var(--text-muted);font-weight:500}
+  .mbz-fastscan-color-row.scan-error{border-color:color-mix(in srgb,#fb7185 44%,var(--border))}
+  .mbz-fastscan-error{color:#fda4af}
   .mbz-fastscan-empty{padding:11px 12px;border:1px dashed var(--border2);border-radius:12px;color:var(--text-muted);font-size:12px}
   .mbz-fastscan-ok{color:#86efac}
   .mbz-fastscan-warn{color:#fcd34d}
@@ -23314,6 +23324,20 @@ html,body{max-width:100%;overflow-x:hidden!important}
         row.querySelectorAll('.mbz-fastscan-qty-step').forEach(function(b){
           b.disabled=true;
         });
+        setTimeout(function(){
+          var group=row.closest('.mbz-fastscan-review-group');
+          row.remove();
+          if(group){
+            var groupRemaining=group.querySelectorAll('.mbz-fastscan-choice-row').length;
+            if(!groupRemaining)group.remove();
+            else{var groupCount=group.querySelector('.mbz-fastscan-review-group-title span');if(groupCount)groupCount.textContent=groupRemaining+' item'+(groupRemaining===1?'':'s')}
+          }
+          var list=byId('mbz-fastscan-review-list');
+          var remaining=list?list.querySelectorAll('.mbz-fastscan-choice-row').length:0;
+          var pill=byId('mbz-fastscan-review-count');if(pill)pill.textContent='Needs Review: '+remaining;
+          var title=byId('mbz-fastscan-review-title');if(title)title.textContent='Needs Review ('+remaining+')';
+          if(list&&!remaining)list.innerHTML='<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>All review items resolved.</strong></span></div>';
+        },180);
       }
     }
   }
@@ -23328,15 +23352,22 @@ html,body{max-width:100%;overflow-x:hidden!important}
         img.onerror=function(){resolve(original)};
         img.onload=function(){
           try{
-            // V181: 820px/.62 JPEG erased small glove names on full inventory screenshots.
-            // Keep enough resolution for every row while still reducing upload size.
-            var max=1800,iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
-            var scale=Math.min(1,max/Math.max(iw,ih)),cw=Math.max(1,Math.round(iw*scale)),ch=Math.max(1,Math.round(ih*scale));
-            var c=d.createElement('canvas');c.width=cw;c.height=ch;
-            var ctx=c.getContext('2d',{alpha:false});
-            ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
-            ctx.fillStyle='#111';ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
-            resolve(c.toDataURL('image/jpeg',.88));
+            // Keep labels readable, but adaptively step down before a single
+            // screenshot can exceed a typical serverless request-body limit.
+            var iw=img.naturalWidth||img.width,ih=img.naturalHeight||img.height;
+            var passes=[{max:1900,q:.86},{max:1750,q:.80},{max:1550,q:.74},{max:1350,q:.68}];
+            var best=original;
+            for(var i=0;i<passes.length;i++){
+              var pass=passes[i],scale=Math.min(1,pass.max/Math.max(iw,ih));
+              var cw=Math.max(1,Math.round(iw*scale)),ch=Math.max(1,Math.round(ih*scale));
+              var c=d.createElement('canvas');c.width=cw;c.height=ch;
+              var ctx=c.getContext('2d',{alpha:false});
+              ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+              ctx.fillStyle='#111';ctx.fillRect(0,0,cw,ch);ctx.drawImage(img,0,0,cw,ch);
+              best=c.toDataURL('image/jpeg',pass.q);
+              if(best.length<=3200000)break;
+            }
+            resolve(best);
           }catch(e){resolve(original)}
         };
         img.src=original;
@@ -23365,41 +23396,62 @@ html,body{max-width:100%;overflow-x:hidden!important}
       return '<button class="add-btn" onclick="mbzFastScanConfirm(\''+encodeURIComponent(n)+'\',\''+inputId+'\',this)">✓ '+esc(label)+'</button>';
     }).join(' ');
   }
-  function reviewRows(review){
-    var rows=(review||[]).filter(function(x){return x.kind!=='colored'});
-    if(!rows.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>Other Needs Review: 0</strong></span> — no other uncertain gloves.</div>';
-    return rows.map(function(x,index){
-      var c=uniq(x.candidates||[]);
-      var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
-      var inputId='mbz-review-qty-'+index;
-      return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row">'+
-        '<div><span class="inv-status-review">REVIEW</span><div class="mbz-fastscan-small">'+esc(x.kind||'uncertain')+' · scanner counted x'+q+'</div></div>'+
-        '<div>'+esc(x.text||'Unclear card')+'<div class="mbz-fastscan-small">'+esc(x.reason||'Needs confirmation')+'</div></div>'+
-        '<div><strong>Choose the correct glove</strong>'+
-          quantityControl(inputId,q)+
-          '<div class="mbz-fastscan-actions">'+(candidateButtons(c,inputId)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div>'+
-        '</div>'+
-        '<div>'+Math.round(Number(x.confidence||0))+'%</div>'+
-      '</div>';
-    }).join('');
+  function reviewKey(x,index){
+    var image=Math.max(1,Math.floor(Number(x&&x.imageIndex||1)));
+    var card=Math.max(0,Math.floor(Number(x&&x.cardIndex||0)));
+    if(card)return image+'|card|'+card;
+    var text=norm(x&&(x.text||x.visibleText||x.visibleName||x.family)||'');
+    return image+'|text|'+text+'|'+norm(x&&x.kind||'uncertain')+'|'+index;
   }
-  function coloredRows(data){
-    var rows=(data.colored||[]).filter(function(x){return x&&x.status!=='confirmed'});
-    if(!rows.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>All clear colored variants were saved separately.</strong></span></div>';
-    return rows.map(function(x,index){
-      var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
-      var inputId='mbz-color-qty-'+index;
-      var candidates=uniq(x.candidates||[]);
-      return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row">'+
-        '<div>'+esc(source(x))+'<div class="mbz-fastscan-small">'+esc(x.family||'Core/Cyberfly')+' · scanner counted x'+q+'</div></div>'+
-        '<div><strong>Visible tag: '+esc(x.tagText||'none')+'</strong><div class="mbz-fastscan-small">No color is preselected.</div></div>'+
-        '<div><strong>Choose plain or the exact color</strong>'+
-          '<div class="mbz-fastscan-small">Choose '+esc(x.family||'the glove')+' (uncolored) when there is no color indication.</div>'+
-          quantityControl(inputId,q)+
-          '<div class="mbz-fastscan-actions">'+candidateButtons(candidates,inputId)+'</div>'+
-        '</div>'+
-        '<div><span class="inv-status-review">REVIEW</span></div>'+
-      '</div>';
+  function collectReview(data){
+    var map={},order=[];
+    function absorb(raw,index){
+      if(!raw||raw.status==='confirmed')return;
+      var key=reviewKey(raw,index),text=raw.text||raw.visibleText||raw.visibleName||raw.family||'Unclear card';
+      var candidates=uniq((raw.candidates||[]).concat(raw.candidate?[raw.candidate]:[]));
+      if(!map[key]){
+        map[key]=Object.assign({},raw,{text:text,candidates:candidates,quantity:Math.max(1,Number(raw.quantity||1))});
+        order.push(key);return;
+      }
+      var old=map[key];
+      old.candidates=uniq((old.candidates||[]).concat(candidates));
+      old.quantity=Math.max(Number(old.quantity||1),Number(raw.quantity||1));
+      old.confidence=Math.max(Number(old.confidence||0),Number(raw.confidence||0));
+      if((!old.kind||old.kind==='unknown')&&raw.kind)old.kind=raw.kind;
+      ['family','tagText','visibleText','visibleName','reason'].forEach(function(field){if(!old[field]&&raw[field])old[field]=raw[field]});
+      if((!old.text||old.text==='Unclear card')&&text)old.text=text;
+    }
+    (data.review||[]).forEach(function(x,i){absorb(x,'r'+i)});
+    (data.colored||[]).forEach(function(x,i){if(x&&x.status!=='confirmed')absorb(Object.assign({kind:'colored'},x),'c'+i)});
+    (data.items||[]).forEach(function(x,i){if(x&&x.status==='review')absorb(x,'i'+i)});
+    return order.map(function(k){return map[k]}).sort(function(a,b){
+      return Number(a.imageIndex||1)-Number(b.imageIndex||1)||Number(a.cardIndex||9999)-Number(b.cardIndex||9999);
+    }).slice(0,300);
+  }
+  function reviewRows(rows){
+    if(!rows.length)return '<div class="mbz-fastscan-empty"><span class="mbz-fastscan-ok"><strong>No gloves need review.</strong></span></div>';
+    var groups={};
+    rows.forEach(function(x,index){var image=Math.max(1,Number(x.imageIndex||1));(groups[image]||(groups[image]=[])).push({x:x,index:index})});
+    return Object.keys(groups).sort(function(a,b){return Number(a)-Number(b)}).map(function(image){
+      var entries=groups[image];
+      var body=entries.map(function(entry){
+        var x=entry.x,index=entry.index,c=uniq(x.candidates||[]);
+        var q=Math.max(1,Math.min(999,Math.floor(Number(x.quantity||1))));
+        var inputId='mbz-review-qty-'+image+'-'+Number(x.cardIndex||0)+'-'+index;
+        var colored=x.kind==='colored'||!!x.family;
+        var label=x.kind==='scan-error'?'SCAN ERROR':colored?'COLOR REVIEW':String(x.kind||'uncertain').toUpperCase();
+        var detail=colored?((x.family||'Core/Cyberfly')+(x.tagText?' · tag '+x.tagText:'')):(x.kind||'uncertain');
+        return '<div class="mbz-fastscan-color-row review mbz-fastscan-choice-row '+(x.kind==='scan-error'?'scan-error':'')+'">'+
+          '<div><span class="inv-status-review">'+esc(label)+'</span><div class="mbz-fastscan-small">'+esc(source(x))+' · counted x'+q+'</div></div>'+
+          '<div><strong>'+esc(x.text||x.visibleText||'Unclear card')+'</strong><div class="mbz-fastscan-small">'+esc(detail)+' · '+esc(x.reason||'Needs confirmation')+'</div></div>'+
+          '<div><strong>'+(x.kind==='scan-error'?'Try this screenshot again':'Choose the correct glove')+'</strong>'+
+            (x.kind==='scan-error'?'':quantityControl(inputId,q)+
+            '<div class="mbz-fastscan-actions">'+(candidateButtons(c,inputId)||'<span class="mbz-fastscan-small">No safe candidate</span>')+'</div>')+
+          '</div>'+
+          '<div class="'+(x.kind==='scan-error'?'mbz-fastscan-error':'')+'">'+(x.kind==='scan-error'?'FAILED':Math.round(Number(x.confidence||0))+'%')+'</div>'+
+        '</div>';
+      }).join('');
+      return '<div class="mbz-fastscan-review-group"><div class="mbz-fastscan-review-group-title">Screenshot '+image+'<span>'+entries.length+' item'+(entries.length===1?'':'s')+'</span></div>'+body+'</div>';
     }).join('');
   }
   function savedRows(counts){
@@ -23412,73 +23464,140 @@ html,body{max-width:100%;overflow-x:hidden!important}
   }
   function render(data,counts,elapsed){
     var out=byId('inv-results');if(!out)return;
-    var review=(data.review||[]).slice(0,180);
+    var review=collectReview(data);
     var detected=Number(data.cardCount||data.detectionCount||(data.items||[]).length||0);
     var expected=Number(data.expectedCardCount||detected||0);
     var gloveCount=Number(data.gloveCount||(data.items||[]).reduce(function(t,x){return t+Math.max(1,Number(x.quantity||1))},0));
     var saved=Object.keys(counts).reduce(function(t,k){return t+Number(counts[k]||0)},0);
-    out.innerHTML='<div class="ai-answer"><strong>V182 colored-variant scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. <span class="mbz-fastscan-warn">Yellow REVIEW</span> items were not saved until you confirm them.'+
-      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Census target: '+expected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Images: '+Number(data.imageCount||0)+'</span></div>'+
-      '<div class="mbz-fastscan-section"><div class="inv-section-title">Colored Core / Cyberfly checks</div>'+coloredRows(data)+'</div>'+
+    var selected=Number(data.selectedImageCount||data.imageCount||0),successful=Number(data.successfulImageCount==null?data.imageCount||0:data.successfulImageCount),failed=Number(data.failedImageCount||0);
+    out.innerHTML='<div class="ai-answer"><strong>Multi-screenshot scan complete.</strong><br><span class="mbz-fastscan-ok">Green SAVED</span> items were added to Inventory. Every uncertain glove—color, serial, or name—is grouped once in the review queue.'+
+      '<div class="mbz-fastscan-summary"><span class="inv-count-pill">Time: '+elapsed+'s</span><span class="inv-count-pill">Card slots: '+detected+'</span><span class="inv-count-pill">Census target: '+expected+'</span><span class="inv-count-pill">Gloves counted: '+gloveCount+'</span><span class="inv-count-pill" style="color:#86efac">Saved: '+saved+'</span><span id="mbz-fastscan-review-count" class="inv-count-pill" style="color:#fcd34d">Needs Review: '+review.length+'</span><span class="inv-count-pill">Screenshots: '+successful+'/'+selected+'</span>'+(failed?'<span class="inv-count-pill mbz-fastscan-error">Failed: '+failed+'</span>':'')+'</div>'+
+      '<div class="mbz-fastscan-section"><div id="mbz-fastscan-review-title" class="inv-section-title">Needs Review ('+review.length+')</div><div id="mbz-fastscan-review-list">'+reviewRows(review)+'</div></div>'+
       '<div class="mbz-fastscan-section"><div class="inv-section-title">Saved to Inventory</div>'+savedRows(counts)+'</div>'+
-      '<div class="mbz-fastscan-section"><div class="inv-section-title">Needs Review</div>'+reviewRows(review)+'</div>'+
-      '<div class="ai-note">Quantity mode counts every visible card slot and honors visible xN stack badges. Clear Core/Cyberfly colors are auto-saved as separate exact gloves—for example GRN, BLU, and RED Core count as three unique gloves. Only unclear colors stay in Needs Review.'+(data.provider?' · '+esc(data.provider)+' / '+esc(data.model||''):'')+'</div></div>';
+      '<div class="ai-note">Each screenshot is processed separately, so one failed page cannot erase the successful pages. Quantity mode honors visible xN badges. Clear Core/Cyberfly colors are saved as exact variants; uncertain colors stay in the single review queue.'+(data.partialPreserved?' Existing inventory was preserved because at least one screenshot failed.':'')+(data.provider?' · '+esc(data.provider)+(data.model?' / '+esc(data.model):''):'')+'</div></div>';
     try{out.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
+  }
+
+  var scanRunning=false,MAX_SCAN_IMAGES=8;
+  function setScanButtons(disabled){
+    Array.prototype.slice.call(d.querySelectorAll('button[onclick*="scanInventoryImage"]')).forEach(function(button){button.disabled=disabled;button.setAttribute('aria-busy',disabled?'true':'false')});
+  }
+  function mappedRows(rows,imageIndex){
+    return (Array.isArray(rows)?rows:[]).map(function(x){return Object.assign({},x,{imageIndex:imageIndex})});
+  }
+  function newMerged(total){
+    return{items:[],confirmed:[],counts:{},colored:[],serials:[],customSerials:[],review:[],censusByImage:[],attempts:[],cardCount:0,detectionCount:0,expectedCardCount:0,gloveCount:0,imageCount:0,selectedImageCount:total,successfulImageCount:0,failedImageCount:0,provider:'',model:'',notes:''};
+  }
+  function mergeScanResult(merged,data,imageIndex){
+    ['items','colored','serials','customSerials','review'].forEach(function(field){merged[field]=merged[field].concat(mappedRows(data[field],imageIndex))});
+    merged.censusByImage=merged.censusByImage.concat(mappedRows(data.censusByImage,imageIndex));
+    merged.attempts=merged.attempts.concat(mappedRows(data.attempts,imageIndex));
+    merged.confirmed=uniq(merged.confirmed.concat(data.confirmed||[]));
+    Object.keys(data.counts||{}).forEach(function(name){merged.counts[name]=Number(merged.counts[name]||0)+Number(data.counts[name]||0)});
+    merged.cardCount+=Number(data.cardCount||data.detectionCount||(data.items||[]).length||0);
+    merged.detectionCount+=Number(data.detectionCount||data.cardCount||(data.items||[]).length||0);
+    merged.expectedCardCount+=Number(data.expectedCardCount||data.cardCount||data.detectionCount||0);
+    merged.gloveCount+=Number(data.gloveCount||(data.items||[]).reduce(function(total,x){return total+Math.max(1,Number(x.quantity||1))},0));
+    merged.imageCount++;merged.successfulImageCount++;
+    merged.provider=uniq((merged.provider?merged.provider.split(' + '):[]).concat(data.provider||[])).join(' + ');
+    merged.model=uniq((merged.model?merged.model.split(' + '):[]).concat(data.model||[])).join(' + ');
+  }
+  function addScanFailure(merged,imageIndex,file,error){
+    var message=String(error&&error.message?error.message:error||'Unknown scan error');
+    merged.failedImageCount++;
+    merged.review.push({imageIndex:imageIndex,cardIndex:0,text:(file&&file.name)||('Screenshot '+imageIndex),candidates:[],confidence:0,reason:message,kind:'scan-error',quantity:1,status:'review'});
+  }
+  async function responseData(response){
+    var data=null,raw='';
+    if(response&&typeof response.text==='function'){
+      raw=await response.text();
+      try{data=JSON.parse(raw)}catch(_){data=null}
+    }else if(response&&typeof response.json==='function'){
+      try{data=await response.json()}catch(_){data=null}
+    }
+    if(!data)data={error:raw||'The scanner returned an unreadable response.'};
+    if(!response||response.ok===false){
+      var detail=typeof data.error==='string'?data.error:JSON.stringify(data.error||data);
+      throw new Error('HTTP '+Number(response&&response.status||0)+(detail?' · '+detail:''));
+    }
+    return data;
+  }
+  async function scanOne(file,imageIndex){
+    var image=await fileToSmallData(file);
+    var response=await fetch('/api/scan',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({images:[image],gloveNames:gloveList().map(function(g){return g.n}),customSerials:customList(),multiple:false,fast:true,strictColors:true,noAutoTimeout:true})
+    });
+    return responseData(response);
+  }
+  async function scanOffline(files,out,status,started){
+    if(typeof w.mbzScannerLoadTesseract!=='function'||typeof w.scanInventoryText!=='function')throw new Error('Offline OCR is unavailable. Open this page through the local app server for AI vision.');
+    live(out,'Offline scanner starting…','This downloaded file has no /api/scan server, so it will use private in-browser OCR instead.',0);
+    await w.mbzScannerLoadTesseract();
+    var blocks=[],failed=0;
+    for(var i=0;i<files.length;i++){
+      if(status)status.textContent='Offline OCR · screenshot '+(i+1)+' of '+files.length+'…';
+      live(out,'Reading screenshots locally…','Screenshot '+(i+1)+' of '+files.length+'.',Math.floor((Date.now()-started)/1000));
+      try{
+        var result=await w.Tesseract.recognize(files[i],'eng',{logger:function(){}});
+        blocks.push(String(result&&result.data&&result.data.text||''));
+      }catch(_){failed++}
+    }
+    if(!blocks.length)throw new Error('None of the selected screenshots could be read offline.');
+    var box=byId('inv-ocr-text');if(box)box.value=blocks.join('\n\n');
+    w.scanInventoryText();
+    var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
+    if(status)status.textContent='Offline scan done in '+elapsed+'s · '+blocks.length+'/'+files.length+' screenshots read'+(failed?' · '+failed+' failed':'')+'.';
   }
 
   w.scanInventoryImage=async function(){
     var input=byId('inv-img'),files=input&&input.files?Array.from(input.files):[],out=byId('inv-results'),status=byId('inv-progress');
     if(!files.length){if(status)status.textContent='Choose one or more screenshots first.';return}
-    var chosen=files.slice(0,4),started=Date.now(),timer=null;
+    if(scanRunning){if(status)status.textContent='A screenshot scan is already running.';return}
+    var chosen=files.slice(0,MAX_SCAN_IMAGES),started=Date.now(),merged=newMerged(chosen.length);
+    scanRunning=true;setScanButtons(true);
     try{
-      live(out,'Preparing screenshots…','Preserving readable detail across every inventory row.',0);
-      var images=[];
-      for(var i=0;i<chosen.length;i++){
-        if(status)status.textContent='Preparing image '+(i+1)+' of '+chosen.length+'…';
-        live(out,'Preparing screenshots…','Preparing image '+(i+1)+' of '+chosen.length+'.',Math.floor((Date.now()-started)/1000));
-        images.push(await fileToSmallData(chosen[i]));
+      if(location.protocol==='file:'){
+        await scanOffline(chosen,out,status,started);
+        return;
       }
-      timer=setInterval(function(){
-        var sec=Math.floor((Date.now()-started)/1000);
-        var line=sec<5?'Counting every visible card slot first…':sec<12?'Reading every row, duplicate, tag, and serial…':'Verifying the result did not stop early or miss lower rows…';
-        if(status)status.textContent=line+' '+sec+'s';
-        live(out,'AI scan running…',line,sec);
-      },1000);
-
-      var response=await fetch('/api/scan',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({images:images,gloveNames:gloveList().map(function(g){return g.n}),customSerials:customList(),multiple:true,fast:true,strictColors:true,noAutoTimeout:true})
-      });
-      var data=await response.json().catch(function(){return{error:'The scanner returned an unreadable response.'}});
-      if(!response.ok)throw new Error(typeof data.error==='string'?data.error:JSON.stringify(data.error||data));
-      var replace=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
-      var counts=saveConfirmed(data,replace),elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
+      live(out,'Preparing multi-screenshot scan…','Each screenshot will be scanned separately so one failure cannot cancel the others.',0);
+      for(var i=0;i<chosen.length;i++){
+        var imageNumber=i+1,elapsedNow=Math.floor((Date.now()-started)/1000);
+        if(status)status.textContent='Scanning screenshot '+imageNumber+' of '+chosen.length+'…';
+        live(out,'AI scan running…','Screenshot '+imageNumber+' of '+chosen.length+' · '+merged.successfulImageCount+' complete · '+merged.failedImageCount+' failed.',elapsedNow);
+        try{
+          var data=await scanOne(chosen[i],imageNumber);
+          mergeScanResult(merged,data,imageNumber);
+        }catch(error){
+          addScanFailure(merged,imageNumber,chosen[i],error);
+        }
+      }
+      var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
+      var replaceRequested=!byId('inv-add-mode')||!byId('inv-add-mode').checked;
+      var partial=merged.failedImageCount>0;
+      merged.partialPreserved=partial&&replaceRequested;
+      merged.notes='Processed '+merged.successfulImageCount+' of '+chosen.length+' screenshots independently.';
+      var counts=merged.successfulImageCount?saveConfirmed(merged,replaceRequested&&!partial):{};
+      var unifiedReview=collectReview(merged);
       try{
-        localStorage.setItem('mbz_inventory_last_scan_v182',JSON.stringify({
-          at:Date.now(),
-          cardCount:Number(data.cardCount||data.detectionCount||0),
-          expectedCardCount:Number(data.expectedCardCount||data.cardCount||data.detectionCount||0),
-          gloveCount:Number(data.gloveCount||0),
-          reviewCount:Number((data.review||[]).length||0),
-          coloredConfirmed:Number((data.colored||[]).filter(function(x){return x&&x.status==='confirmed'}).length||0),
-          coloredReview:Number((data.colored||[]).filter(function(x){return x&&x.status!=='confirmed'}).length||0)
-        }));
+        localStorage.setItem('mbz_inventory_last_scan_v190',JSON.stringify({at:Date.now(),selectedImageCount:chosen.length,successfulImageCount:merged.successfulImageCount,failedImageCount:merged.failedImageCount,cardCount:merged.cardCount,expectedCardCount:merged.expectedCardCount,gloveCount:merged.gloveCount,reviewCount:unifiedReview.length}));
       }catch(_){}
-      if(byId('inv-ocr-text'))byId('inv-ocr-text').value=JSON.stringify(data,null,2);
-      render(data,counts,elapsed);
-      if(status)status.textContent='Done in '+elapsed+'s — '+Number(data.cardCount||data.detectionCount||0)+' card slots, '+Number(data.gloveCount||0)+' gloves counted, '+Number((data.review||[]).length)+' need review.';
+      if(byId('inv-ocr-text'))byId('inv-ocr-text').value=JSON.stringify(merged,null,2);
+      render(merged,counts,elapsed);
+      if(status)status.textContent='Done in '+elapsed+'s · '+merged.successfulImageCount+'/'+chosen.length+' screenshots · '+merged.cardCount+' card slots · '+unifiedReview.length+' need review.'+(files.length>chosen.length?' First '+chosen.length+' of '+files.length+' selected screenshots were scanned.':'');
     }catch(e){
       var elapsed=Math.max(1,Math.round((Date.now()-started)/1000));
       var message=String(e&&e.message?e.message:e);
-      if(out)out.innerHTML='<div class="ai-answer"><strong>AI scan failed after '+elapsed+'s.</strong><br>'+esc(message)+'<div class="ai-note">This version does not stop the scan automatically. A failure here came from the provider, network, or hosting service.</div></div>';
-      if(status)status.textContent='Scan failed after '+elapsed+'s.';
+      if(out)out.innerHTML='<div class="ai-answer"><strong>Scanner stopped after '+elapsed+'s.</strong><br>'+esc(message)+'<div class="ai-note">When this HTML is opened directly, the scanner uses offline OCR. For full AI vision, run the site through its local or hosted server.</div></div>';
+      if(status)status.textContent='Scan stopped after '+elapsed+'s.';
     }finally{
-      if(timer)clearInterval(timer);
+      scanRunning=false;setScanButtons(false);
     }
   };
 
   function boot(){
-    d.documentElement.setAttribute('data-scanner-version','1.9.0-colored-variants-count-separately');
+    d.documentElement.setAttribute('data-scanner-version','V190-multi-image-partial-recovery-unified-review');
     try{d.title='MadeByZebra — Value List · Version 1.9.0'}catch(_){}
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -24102,12 +24221,12 @@ html,body{max-width:100%;overflow-x:hidden!important}
         <div class="mbz-v187-scan-grid">
           <label class="mbz-v187-drop" id="mbz-v187-drop" for="inv-img">
             <input id="inv-img" type="file" accept="image/*" multiple onchange="invPreview(event)">
-            <div class="mbz-v187-drop-empty"><span class="mbz-v187-upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg></span><div class="mbz-v187-drop-title">Drop inventory screenshots here</div><div class="mbz-v187-drop-sub">or click to browse · up to 6 images</div></div>
+            <div class="mbz-v187-drop-empty"><span class="mbz-v187-upload-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4"/><path d="m7 9 5-5 5 5"/><path d="M20 15v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4"/></svg></span><div class="mbz-v187-drop-title">Drop inventory screenshots here</div><div class="mbz-v187-drop-sub">or click to browse · up to 8 images</div></div>
             <img id="inv-preview" class="inv-preview" alt="Selected inventory screenshot">
           </label>
           <div class="mbz-v187-scan-controls">
             <div class="mbz-v187-file-meta"><strong>Inventory status</strong><span class="inv-stat" id="inv-owned-stat">No scan yet</span></div>
-            <button class="sbtn mbz-v187-scan-primary" onclick="scanInventoryImage()">Scan selected screenshots</button>
+            <button id="mbz-v190-scan-button" class="sbtn mbz-v187-scan-primary" onclick="scanInventoryImage()">Scan selected screenshots</button>
             <div class="mbz-v187-scan-secondary"><button class="sbtn" onclick="showOwnedFromScanner()">View owned</button><button class="sbtn" onclick="showMissingFromOwned()">View missing</button></div>
             <div class="mbz-v187-mode"><div class="mbz-v187-mode-copy"><strong>Add to current inventory</strong><span>Keep existing saved gloves</span></div><label class="mbz-v187-switch"><input type="checkbox" id="inv-add-mode" aria-label="Add results to existing inventory"><span aria-hidden="true"></span></label></div>
             <div id="inv-progress" class="inv-progress mbz-v187-progress">Choose screenshots to begin.</div>
@@ -24198,6 +24317,12 @@ html,body{max-width:100%;overflow-x:hidden!important}
     {icon:'↑',name:'Inventory scanner',old:'Busy upload layout',nv:'Clean guided scanner',reason:'Added a clearer drop zone, compact controls, privacy status, and review flow.'},
     {icon:'→',name:'AI profile block',old:'Z avatar tile',nv:'Text-only identity',reason:'Removed the profile picture requested in the latest design pass.'}
   ]};
+  var scannerUpdate={date:'V190',title:'Reliable Multi-Screenshot Scanner',badge:'major',changes:[
+    {icon:'↑',name:'Multiple screenshots',old:'One oversized all-or-nothing request',nv:'Up to 8 isolated scans',reason:'Each screenshot is processed independently, preventing one failed page from canceling the rest.'},
+    {icon:'↑',name:'Partial recovery',old:'Any error lost the whole scan',nv:'Successful pages are kept',reason:'Failed screenshots are clearly flagged in the review queue while successful results remain available.'},
+    {icon:'→',name:'Needs Review',old:'Color checks above and other reviews below',nv:'One grouped review queue',reason:'Merged and deduplicated every uncertain color, serial, and glove name by screenshot and card.'},
+    {icon:'↑',name:'Downloaded HTML',old:'Missing /api/scan caused a hard failure',nv:'Offline OCR fallback',reason:'Direct file downloads use local browser OCR; full AI vision remains available through the hosted or local app server.'}
+  ]};
   var performanceUpdate={date:'V186',title:'Framerate + Interaction Performance',badge:'major',changes:[
     {icon:'↑',name:'Pointer effects',old:'Multiple mouse loops',nv:'One requestAnimationFrame path',reason:'Consolidated interactive lighting and tilt work into a single frame-synced update.'},
     {icon:'↑',name:'Rendering load',old:'Overlapping legacy animations',nv:'Reduced animation stack',reason:'Disabled expensive duplicate scenes and trimmed blur-heavy effects.'},
@@ -24215,12 +24340,12 @@ html,body{max-width:100%;overflow-x:hidden!important}
       for(var i=CHANGELOG.length-1;i>=0;i--){
         var item=CHANGELOG[i]||{};
         var oldAudit=item.date==='Aug 8, 2026'&&(item.title==='Official Sheet Sync'||item.title==='Complete Official Sheet Audit');
-        var managedRelease=(item.date==='V187'&&item.title==='AI Chatbox + Cleaner Scanner')||(item.date==='V186'&&item.title==='Framerate + Interaction Performance')||(item.date==='V185'&&item.title==='Refined 3D Depth System');
+        var managedRelease=(item.date==='V190'&&item.title==='Reliable Multi-Screenshot Scanner')||(item.date==='V187'&&item.title==='AI Chatbox + Cleaner Scanner')||(item.date==='V186'&&item.title==='Framerate + Interaction Performance')||(item.date==='V185'&&item.title==='Refined 3D Depth System');
         var managedLeaderboard=item.date==='Aug 8, 2026'&&item.title==='New Top 100 Collection Leaderboard';
         if(oldAudit||managedRelease||managedLeaderboard)CHANGELOG.splice(i,1);
       }
-      CHANGELOG.unshift(leaderboardUpdate,sheetAudit,interfaceUpdate,performanceUpdate,depthUpdate);
-      document.documentElement.setAttribute('data-updates-log-version','v189');
+      CHANGELOG.unshift(leaderboardUpdate,sheetAudit,scannerUpdate,interfaceUpdate,performanceUpdate,depthUpdate);
+      document.documentElement.setAttribute('data-updates-log-version','v190');
     }catch(_){ }
   }
   installUpdates();
